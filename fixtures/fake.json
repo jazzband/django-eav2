@@ -1,0 +1,101 @@
+[
+    {
+        "pk": 1, 
+        "model": "greav.clinic", 
+        "fields": {
+            "name": "Ruhiira HC III"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "greav.household", 
+        "fields": {
+            "location": "Uganda"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "greav.patient", 
+        "fields": {
+            "dob": null, 
+            "gender": "F", 
+            "first_name": "Jane", 
+            "last_name": "Smith", 
+            "household": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "greav.patient", 
+        "fields": {
+            "dob": null, 
+            "gender": "M", 
+            "first_name": "John", 
+            "last_name": "Doe", 
+            "household": 1
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "greav.householdencounter", 
+        "fields": {
+            "household": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "greav.patientencounter", 
+        "fields": {
+            "patient": 2
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "greav.clinicreport", 
+        "fields": {
+            "clinic": 1
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "greav.patientencounter", 
+        "fields": {
+            "patient": 2
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "greav.householdencounter", 
+        "fields": {
+            "household": 1
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "greav.clinicreport", 
+        "fields": {
+            "clinic": 1
+        }
+    }, 
+    {
+        "pk": "f1a3c11e-14db-4d80-ae92-96f37ce40c3c", 
+        "model": "greav.concept", 
+        "fields": {
+            "name": "Weight (kg)"
+        }
+    }, 
+    {
+        "pk": "93eba226-54a9-4702-846a-b8b26e9b0b0a", 
+        "model": "greav.concept", 
+        "fields": {
+            "name": "Has bednet"
+        }
+    }, 
+    {
+        "pk": "46654489-254d-4552-91e1-50b638df1571", 
+        "model": "greav.concept", 
+        "fields": {
+            "name": "OPD Attendance"
+        }
+    }
+]
