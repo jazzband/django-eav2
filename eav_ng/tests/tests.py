@@ -1,16 +1,10 @@
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
-
-Replace these with more appropriate tests for your application.
-"""
-
 from datetime import datetime
 
 from django.test import TestCase
 from django.conf import settings
+
 from ..models import *
-from ..utils import EavRegistry, EavAdmin
+from ..utils import EavRegistry, EavConfig
 from .models import Patient
 
 
@@ -141,7 +135,7 @@ class EavBasicTests(TestCase):
     def test_eavregistry_accept_a_settings_class_with_get_queryset(self):
         EavRegistry.unregister(Patient)
 
-        class PatientEav(EavAdmin):
+        class PatientEav(EavConfig):
 
             def get_eav_attributes(self):
                 return EavAttribute.objects.all()

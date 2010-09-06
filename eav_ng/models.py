@@ -11,7 +11,7 @@ class EavEntity(object):
 
     def __init__(self, instance):
         self.model = instance
-    '''
+
     def get_current_eav_attributes(self):
         try:
             if self._attributes_cache is not None:
@@ -29,7 +29,7 @@ class EavEntity(object):
     @classmethod
     def get_eav_attributes(cls):
         return EavAttribute.objects.all()
-    '''
+
 
 
 class EavAttribute(models.Model):

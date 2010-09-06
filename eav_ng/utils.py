@@ -1,9 +1,8 @@
 from django.db.models.signals import post_init
-from eav_ng.managers import EntityManager
-from eav_ng.models import EavEntity, EavAttribute
+from .managers import EntityManager
+from .models import EavEntity, EavAttribute
 
-class EavAdmin(object):
-
+class EavConfig(object):
     @classmethod
     def get_eav_attributes(cls):
         """
@@ -33,7 +32,7 @@ class EavRegistry(object):
 
 
     @staticmethod
-    def register(model_cls, admin_cls=EavAdmin, eav_proxy_field='eav',
+    def register(model_cls, admin_cls=EavConfig, eav_proxy_field='eav',
                  eav_manager_field='objects'):
         """
             Inject eav features into the given model and attach a signal 
