@@ -65,7 +65,6 @@ class EavAttribute(models.Model):
     labels = models.ManyToManyField(EavAttributeLabel,
                                     verbose_name=_(u"labels"))
 
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
@@ -74,9 +73,11 @@ class EavAttribute(models.Model):
         self.labels.get_or_create(name=label)
 
     def remove_label(self, label):
-        #TODO 
-        self.labels.get_or_create(name=label)
-        
+        try:
+            label_obj = EavAttributeLabel.objects.get(name=label)
+        except EavAttributeLabel.DoesNotExist:
+            return
+        self.labels.remove(label_obj)
 
     def get_value_for_entity(self, entity):
         '''
