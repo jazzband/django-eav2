@@ -24,7 +24,7 @@ class EavBasicTests(TestCase):
                                                 
         self.entity = Patient.objects.create(name="Doe")
 
-        self.value = EavValue.objects.create(object=self.entity,
+        self.value = EavValue.objects.create(entity=self.entity,
                                              attribute=self.attribute,
                                              value_text='Denver')
 
@@ -47,7 +47,7 @@ class EavBasicTests(TestCase):
 
 
     def test_value_creation(self):
-        EavValue.objects.create(object=self.entity,
+        EavValue.objects.create(entity=self.entity,
                                 attribute=self.attribute,
                                 value_float=1.2)
 
@@ -63,7 +63,7 @@ class EavBasicTests(TestCase):
         _text = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
                                             name='Text', slug='text',
                                             help_text='The text')
-        val = EavValue.objects.create(object=self.entity,
+        val = EavValue.objects.create(entity=self.entity,
                                        attribute = _text)
         value = "Test text"
         val.value = value
@@ -73,7 +73,7 @@ class EavBasicTests(TestCase):
         _float = EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
                                              name='Float', slug='float',
                                              help_text='The float')
-        val = EavValue.objects.create(object=self.entity,
+        val = EavValue.objects.create(entity=self.entity,
                                        attribute = _float)
         value = 1.22
         val.value = value
@@ -84,7 +84,7 @@ class EavBasicTests(TestCase):
         _int = EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
                                            name='Int', slug='int',
                                            help_text='The int')
-        val = EavValue.objects.create(object=self.entity,
+        val = EavValue.objects.create(entity=self.entity,
                                        attribute = _int)
         value = 7
         val.value = value
@@ -94,7 +94,7 @@ class EavBasicTests(TestCase):
         _date = EavAttribute.objects.create(datatype=EavAttribute.TYPE_DATE,
                                             name='Date', slug='date',
                                             help_text='The date')
-        val = EavValue.objects.create(object=self.entity,
+        val = EavValue.objects.create(entity=self.entity,
                                        attribute = _date)
         value = datetime.now()
         val.value = value
@@ -104,7 +104,7 @@ class EavBasicTests(TestCase):
         _bool = EavAttribute.objects.create(datatype=EavAttribute.TYPE_BOOLEAN,
                                             name='Bool', slug='bool',
                                             help_text='The bool')
-        val = EavValue.objects.create(object=self.entity,
+        val = EavValue.objects.create(entity=self.entity,
                                        attribute = _bool)
         value = False
         val.value = value
