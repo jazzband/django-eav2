@@ -72,6 +72,10 @@ class EavAttribute(models.Model):
 
     def add_label(self, label):
         self.labels.get_or_create(name=label)
+
+    def remove_label(self, label):
+        
+        self.labels.get_or_create(name=label)
         
 
     def get_value_for_entity(self, entity):
@@ -151,7 +155,7 @@ class EavEntity(object):
 
     def __getattr__(self, name):
         if not name.startswith('_'):
-            if slug in self.get_all_attribute_slugs():
+            for slug in self.get_all_attribute_slugs():
                 attribute = self.get_attribute_by_slug(name)
                 value = attribute.get_value_for_entity(self.model)
                 return value.value if value else None
