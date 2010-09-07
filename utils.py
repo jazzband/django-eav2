@@ -3,6 +3,10 @@ from .managers import EntityManager
 from .models import EavEntity, EavAttribute
 
 class EavConfig(object):
+
+    proxy_field_name = 'eav'
+    manager_field_name ='objects'
+
     @classmethod
     def get_eav_attributes(cls):
         """
@@ -16,7 +20,7 @@ class EavRegistry(object):
     """
         Tools to add eav features to models
     """
-    field_cache = {}
+    cache = {}
 
     @staticmethod
     def attach(sender, *args, **kwargs):
@@ -25,39 +29,36 @@ class EavRegistry(object):
         """
         instance = kwargs['instance']
         cls = instance.__class__
+        admin_cls = EavRegistry.cache[cls.__name__]['admin_cls']
 
-        proxy_name = EavRegistry.field_cache[cls.__name__]['proxy']
-
-        setattr(instance, proxy_name, EavEntity(instance))
+        setattr(instance, admin_cls.proxy_field_name, EavEntity(instance))
 
 
     @staticmethod
-    def register(model_cls, admin_cls=EavConfig, eav_proxy_field='eav',
-                 eav_manager_field='objects'):
+    def register(model_cls, admin_cls=EavConfig):
         """
             Inject eav features into the given model and attach a signal 
             listener to it for setup.
         """
-        if model_cls.__name__ in EavRegistry.field_cache:
+        if model_cls.__name__ in EavRegistry.cache:
             return
 
         post_init.connect(EavRegistry.attach, sender=model_cls)
         pre_save.connect(EavEntity.pre_save_handler, sender=model_cls)
-        EavRegistry.field_cache[model_cls.__name__] = {
-                                                   'proxy': eav_proxy_field,
-                                                   'mgr': eav_manager_field}
+        EavRegistry.cache[model_cls.__name__] = { 'admin_cls': 
+                                                        admin_cls } 
 
-        if hasattr(model_cls, eav_manager_field):
-            mgr = getattr(model_cls, eav_manager_field)
-            EavRegistry.field_cache[model_cls.__name__]['old_mgr'] = mgr
+        if hasattr(model_cls, admin_cls.manager_field_name):
+            mgr = getattr(model_cls, admin_cls.manager_field_name)
+            EavRegistry.cache[model_cls.__name__]['old_mgr'] = mgr
 
-        setattr(model_cls, eav_proxy_field, EavEntity)
+        setattr(model_cls, admin_cls.proxy_field_name, EavEntity)
 
-        setattr(getattr(model_cls, eav_proxy_field),
+        setattr(getattr(model_cls, admin_cls.proxy_field_name),
                         'get_eav_attributes', admin_cls.get_eav_attributes)
 
         mgr = EntityManager()
-        mgr.contribute_to_class(model_cls, eav_manager_field)
+        mgr.contribute_to_class(model_cls, admin_cls.manager_field_name)
 
 
     @staticmethod
@@ -66,27 +67,28 @@ class EavRegistry(object):
             Inject eav features into the given model and attach a signal 
             listener to it for setup.
         """
-        if not model_cls.__name__ in EavRegistry.field_cache:
+        if not model_cls.__name__ in EavRegistry.cache:
             return
 
-        cache = EavRegistry.field_cache[model_cls.__name__]
+        cache = EavRegistry.cache[model_cls.__name__]
+        admin_cls = cache['admin_cls']
+        
         post_init.disconnect(EavRegistry.attach, sender=model_cls)
         pre_save.disconnect(EavEntity.pre_save_handler, sender=model_cls)
-        proxy_name = cache['proxy']
-        mgr_name = cache['mgr']
-
+        
         try:
-            delattr(model_cls, mgr_name)
+            delattr(model_cls, admin_cls.manager_field_name)
         except AttributeError:
             pass
 
         if 'old_mgr' in cache:
-            cache['old_mgr'].contribute_to_class(model_cls, mgr_name)
+            cache['old_mgr'].contribute_to_class(model_cls, 
+                                                admin_cls.manager_field_name)
 
         try:
-            delattr(model_cls, proxy_name)
+            delattr(model_cls, admin_cls.proxy_field_name)
         except AttributeError:
             pass
 
-        EavRegistry.field_cache.pop(model_cls.__name__)
+        EavRegistry.cache.pop(model_cls.__name__)
 

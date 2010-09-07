@@ -9,6 +9,10 @@ from .models import Patient
 
 class EavBasicTests(TestCase):
 
+    """
+        Testing basics such as registration, printing and object creation
+    """
+
 
     def setUp(self):
     
@@ -141,4 +145,27 @@ class EavBasicTests(TestCase):
         p = Patient()
 
         EavRegistry.unregister(Patient)
+        
+    
+    def test_eavregistry_accept_a_settings_class_with_field_names(self):
+        
+        p = Patient()
+        registered_manager = Patient.objects        
+        EavRegistry.unregister(Patient)
 
+        class PatientEav(EavConfig):
+
+            proxy_field_name = 'my_eav'
+            manager_field_name ='my_objects'
+
+        EavRegistry.register(Patient, PatientEav)
+        
+        p2 = Patient()
+        self.assertEqual(type(p.eav), type(p2.my_eav))
+        self.assertEqual(type(registered_manager), type(Patient.my_objects))
+                         
+        bak_registered_manager = Patient.objects 
+
+        EavRegistry.unregister(Patient)
+        
+        self.assertEqual(type(Patient.objects), type(bak_registered_manager))
