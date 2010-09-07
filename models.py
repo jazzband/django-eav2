@@ -90,8 +90,11 @@ class EavAttribute(models.Model):
         '''
         ct = ContentType.objects.get_for_model(entity)
         qs = self.eavvalue_set.filter(content_type=ct, object_id=entity.pk)
-        if qs.count():
+        if qs.count() == 1:
             return qs[0]
+        raise AttributeError(u"You should have one and only one value"\
+                             u"for the attribute %s and the entity %s. Found "\
+                             u"%s" % (self, entity, qs.count()))
 
     def save_value(self, entity, value):
         self._save_single_value(entity, value)

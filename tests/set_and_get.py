@@ -32,6 +32,11 @@ class EavSetterAndGetterTests(TestCase):
     def tearDown(self):
         EavRegistry.unregister(Patient)
         
+        
+    def test_get_value_to_entity(self):
+        self.assertEqual(self.attribute.get_value_for_entity(self.patient), 
+                         self.value)
+        
 
     def test_you_can_assign_a_value_to_an_unsaved_object(self):
         
@@ -51,6 +56,35 @@ class EavSetterAndGetterTests(TestCase):
         
         self.assertEqual(patient.eav.city, 'Paris')
         self.assertEqual(EavValue.objects.filter(value_text='Paris').count(), 1)
+        
+        
+    def test_you_can_create_several_type_of_attributes(self):
+    
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
+                                    name='text', slug='text')
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
+                                    name='float', slug='float')
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
+                                    name='int', slug='int')
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_DATE,
+                                    name='date', slug='date')   
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_BOOLEAN,
+                                    name='bool', slug='bool')    
+                                 
+        now = datetime.today()   
+        self.patient.eav.text = 'a'   
+        self.patient.eav.float = 1.0 
+        self.patient.eav.int = 1 
+        self.patient.eav.date = now
+        self.patient.eav.bool = True
+        
+        self.patient.save()
+        
+        patient = Patient.objects.get(pk=self.patient.pk)
+        self.assertEqual(self.patient.eav.float, 1.0)
+        self.assertEqual(self.patient.eav.int, 1)
+        self.assertEqual(self.patient.eav.date, now)
+        self.assertEqual(self.patient.eav.bool, True)
         
         
     def test_assign_a_value_that_is_not_an_eav_attribute_does_nothing(self):
@@ -75,3 +109,7 @@ class EavSetterAndGetterTests(TestCase):
                         'Country')
         self.assertEqual(EavAttribute.objects.filter(labels__name='c').count(),
                          2)
+                         
+        self.attribute.remove_label('a')
+        self.assertFalse(EavAttribute.objects.filter(labels__name='a').count())
+        self.attribute.remove_label('a')
