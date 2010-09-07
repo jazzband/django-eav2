@@ -25,6 +25,10 @@ class EavRegistry(object):
     cache = {}
 
     @staticmethod
+    def get_config_cls_for_model(model_cls):
+        return EavRegistry.cache[model_cls.__name__]['config_cls']
+
+    @staticmethod
     def attach(sender, *args, **kwargs):
         """
             Attache EAV toolkit to an instance after init.
