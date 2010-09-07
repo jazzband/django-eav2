@@ -137,6 +137,7 @@ class EavBasicTests(TestCase):
 
         class PatientEav(EavConfig):
 
+            @classmethod
             def get_eav_attributes(self):
                 return EavAttribute.objects.all()
 

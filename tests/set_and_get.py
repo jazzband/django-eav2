@@ -56,6 +56,14 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(patient.eav.city, 'Paris')
         
 
+    def test_save_value(self):
+        # TODO: update test_save_value when multiple values are out
+        
+        # save value
+        self.attribute.save_value(self.patient, 'Paris')
+        self.assertEqual(self.patient.eav.city, 'Paris')
+        
+
     def test_you_can_assign_a_value_to_an_unsaved_object(self):
         
         patient = Patient()
@@ -139,3 +147,38 @@ class EavSetterAndGetterTests(TestCase):
         # remove a label that is not attach does nothing
         self.attribute.remove_label('a')
         self.attribute.remove_label('x')
+        
+        
+    def test_can_filter_attribute_availability_for_entity(self):
+    
+        attribute = EavAttribute.objects\
+                                .create(datatype=EavAttribute.TYPE_TEXT,
+                                       name='Country', slug='country')
+    
+        self.patient.eav.city = 'Paris'
+        self.patient.save()
+        self.assertEqual(Patient.objects.get(pk=self.patient.pk).eav.city,
+                         'Paris')
+    
+        EavRegistry.unregister(Patient)
+
+        class PatientEav(EavConfig):
+
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='country')
+                
+        EavRegistry.register(Patient, PatientEav)
+        
+        p = Patient.objects.create(name='Patrick')
+        p.eav.city = 'Paris'
+        p.eav.country = 'USA'
+        p.save()
+        p = Patient.objects.get(pk=self.patient.pk)
+        
+        self.assertFalse(p.eav.city)
+        self.assertEqual(p.eav.country, 'USA')
+        
+        p = Patient()
+
+        

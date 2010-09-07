@@ -102,6 +102,11 @@ class EavAttribute(models.Model):
                              u"%s" % (self, entity, qs.count()))
 
     def save_value(self, entity, value):
+        """
+            Save any value for an entity, calling the appropriate method
+            according to the type of the value.
+            Value should not be an EavValue but a normal value
+        """
         self._save_single_value(entity, value)
 
     def _save_single_value(self, entity, value=None, attribute=None):
@@ -201,7 +206,7 @@ class EavEntity(object):
         except AttributeError:
             pass
 
-        self._attributes_cache = self.get_eav_attributes().select_related()
+        self._attributes_cache = self.__class__.get_eav_attributes().select_related()
         self._attributes_cache_dict = dict((s.slug, s) for s in self._attributes_cache)
         return self._attributes_cache
 
