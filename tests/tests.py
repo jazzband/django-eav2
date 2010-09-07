@@ -24,7 +24,6 @@ class EavBasicTests(TestCase):
                                              attribute=self.attribute,
                                              value_text='Denver')
 
-
     def tearDown(self):
         EavRegistry.unregister(Patient)
 

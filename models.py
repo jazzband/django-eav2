@@ -12,6 +12,9 @@ class EavAttributeLabel(models.Model):
     name = models.CharField(_(u"name"), db_index=True,
                             unique=True, max_length=100)
 
+    def __unicode__(self):
+        return self.name
+
 
 class EavAttribute(models.Model):
     '''
@@ -68,7 +71,7 @@ class EavAttribute(models.Model):
         super(EavAttribute, self).save(*args, **kwargs)
 
     def add_label(self, label):
-        pass
+        self.labels.get_or_create(name=label)
         
 
     def get_value_for_entity(self, entity):
@@ -136,7 +139,6 @@ class EavValue(models.Model):
         setattr(self, 'value_%s' % self.attribute.datatype, new_value)
 
     value = property(_get_value, _set_value)
-
 
     def __unicode__(self):
         return u"%s - %s: \"%s\"" % (self.object, self.attribute.name, self.value)
