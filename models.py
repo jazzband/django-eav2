@@ -1,9 +1,14 @@
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-from django.utils.translation import ugettext_lazy as _
 
 from .fields import UuidField
+
+
+class EavAttributeLabel(models.Model):
+    name = models.CharField(_(u"name"), db_index=True,
+                            unique=True, max_length=100)
 
 
 class EavAttribute(models.Model):
@@ -47,7 +52,10 @@ class EavAttribute(models.Model):
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
-    uuid = UuidField(auto=True)
+    uuid = UuidField(_(u"UUID"), auto=True)
+
+    labels = models.ManyToManyField(EavAttributeLabel,
+                                    verbose_name=_(u"labels"))
 
     def get_value_for_entity(self, entity):
         '''
