@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from .fields import UuidField, EavSlugField
+from .fields import EavSlugField
 
 
 class EavAttributeLabel(models.Model):
@@ -60,12 +60,12 @@ class EavAttribute(models.Model):
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
-    uuid = UuidField(verbose_name=_(u"UUID"), auto=True, db_index=True)
-
     labels = models.ManyToManyField(EavAttributeLabel,
                                     verbose_name=_(u"labels"))
 
     def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = EavSlugField.create_slug_from_name(self.name)
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
 
