@@ -70,7 +70,8 @@ class EavAttribute(models.Model):
         super(EavAttribute, self).save(*args, **kwargs)
 
     def add_label(self, label):
-        self.labels.get_or_create(name=label)
+        label, created = EavAttributeLabel.objects.get_or_create(name=label)
+        label.eavattribute_set.add(self)
 
     def remove_label(self, label):
         try:
