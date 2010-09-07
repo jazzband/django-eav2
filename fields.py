@@ -2,7 +2,7 @@ import uuid
 import re
 
 from django.db import models
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
 class EavSlugField(models.SlugField):
@@ -26,4 +26,6 @@ class EavSlugField(models.SlugField):
         name = re.sub('\s+', '_', name)
 
         # Remove non alphanumeric characters
-        name = re.sub('[^\w]', '', name)
+        return re.sub('[^\w]', '', name)
+        
+        

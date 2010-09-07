@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -21,7 +22,7 @@ class EavAttribute(models.Model):
     The A model in E-A-V. This holds the 'concepts' along with the data type
     something like:
 
-    >>> EavAttribute.objects.create(name='Height', datatype='float', slug='height')
+    >>> EavAttribute.objects.create(name='Height', datatype='float')
     <EavAttribute: Height (Float)>
 
     >>> EavAttribute.objects.create(name='Color', datatype='text', slug='color')
@@ -59,6 +60,10 @@ class EavAttribute(models.Model):
 
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
+
+    created = models.DateTimeField(_(u"created"), default=datetime.now)
+
+    modified = models.DateTimeField(_(u"modified"), auto_now=True)
 
     labels = models.ManyToManyField(EavAttributeLabel,
                                     verbose_name=_(u"labels"))
@@ -136,6 +141,13 @@ class EavValue(models.Model):
     #value_object = generic.GenericForeignKey()
 
     attribute = models.ForeignKey(EavAttribute)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(EavValue, self).save(*args, **kwargs)
+
+    def clean(self):
+        pass
 
     def _blank(self):
         self.value_text = self.value_float = self.value_int = self.value_date = None
