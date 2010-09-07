@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -59,6 +60,10 @@ class EavAttribute(models.Model):
 
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
+
+    created = models.DateTimeField(default=datetime.now)
+
+    modified = models.DateTimeField(auto_now=True)
 
     labels = models.ManyToManyField(EavAttributeLabel,
                                     verbose_name=_(u"labels"))
