@@ -37,6 +37,7 @@ class EavAttribute(models.Model):
     TYPE_INT = 'int'
     TYPE_DATE = 'date'
     TYPE_BOOLEAN = 'bool'
+    TYPE_OBJECT = 'object'
     #TYPE_MANY = 'many'
 
     DATATYPE_CHOICES = (
@@ -45,6 +46,7 @@ class EavAttribute(models.Model):
         (TYPE_INT, _(u"Integer")),
         (TYPE_DATE, _(u"Date")),
         (TYPE_BOOLEAN, _(u"True / False")),
+        (TYPE_OBJECT, _(u"Python Object")),
         #(TYPE_MANY,    _('multiple choices')),
     )
 
@@ -159,8 +161,7 @@ class EavValue(models.Model):
         unique_together = ('entity_ct', 'entity_id', 'attribute',
                            'value_text', 'value_float', 'value_date',
                            'value_bool')
-
-    entity_ct = models.ForeignKey(ContentType)
+    entity_ct = models.ForeignKey(ContentType, related_name='value_entities')
     entity_id = models.IntegerField()
     entity = generic.GenericForeignKey(ct_field='entity_ct', fk_field='entity_id')
 
@@ -169,7 +170,11 @@ class EavValue(models.Model):
     value_int = models.IntegerField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
     value_bool = models.BooleanField(default=False)
-    #value_object = generic.GenericForeignKey()
+    generic_value_ct = models.ForeignKey(ContentType, blank=True, null=True,
+                                         related_name='value_values')
+    generic_value_id = models.IntegerField(blank=True, null=True)
+    value_object = generic.GenericForeignKey(ct_field='generic_value_ct',
+                                             fk_field='generic_value_id')
 
     attribute = models.ForeignKey(EavAttribute)
 
