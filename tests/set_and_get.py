@@ -36,6 +36,24 @@ class EavSetterAndGetterTests(TestCase):
     def test_get_value_to_entity(self):
         self.assertEqual(self.attribute.get_value_for_entity(self.patient), 
                          self.value)
+                         
+                         
+    def test_save_single_value(self):
+        patient = Patient.objects.create(name="x")
+        attr = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
+                                            name='a', slug='a')
+        # does nothing
+        attr._save_single_value(patient)
+        
+        # save value
+        attr._save_single_value(patient, 'b')
+        patient = Patient.objects.get(name="x")
+        self.assertEqual(patient.eav.a, 'b')
+        
+        # save value on another attribute
+        attr._save_single_value(patient, 'Paris', self.attribute)
+        patient = Patient.objects.get(name="x")
+        self.assertEqual(patient.eav.city, 'Paris')
         
 
     def test_you_can_assign_a_value_to_an_unsaved_object(self):
@@ -99,17 +117,25 @@ class EavSetterAndGetterTests(TestCase):
         attribute = EavAttribute.objects\
                                .create(datatype=EavAttribute.TYPE_TEXT,
                                        name='Country', slug='country')
+                                       
+        # add labels
         self.attribute.add_label('a')
         self.attribute.add_label('c')
         attribute.add_label('b')
         attribute.add_label('c')
+        
         self.assertEqual(EavAttribute.objects.get(labels__name='a').name, 
                         'City')
         self.assertEqual(EavAttribute.objects.get(labels__name='b').name, 
                         'Country')
+                        
+        # cross labels
         self.assertEqual(EavAttribute.objects.filter(labels__name='c').count(),
                          2)
-                         
+            
+        # remove labels             
         self.attribute.remove_label('a')
         self.assertFalse(EavAttribute.objects.filter(labels__name='a').count())
+        # remove a label that is not attach does nothing
         self.attribute.remove_label('a')
+        self.attribute.remove_label('x')

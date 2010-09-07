@@ -105,6 +105,14 @@ class EavAttribute(models.Model):
         self._save_single_value(entity, value)
 
     def _save_single_value(self, entity, value=None, attribute=None):
+        """
+            Save a a value of type that doesn't need special joining like
+            int, float, text, date, etc.
+        
+            Value should not be an EavValue object but a normal value.
+            Use attribute if you want to use something else than the current
+            one
+        """
         ct = ContentType.objects.get_for_model(entity)
         attribute = attribute or self
         try:
