@@ -1,11 +1,13 @@
 from django.db.models.signals import post_init, post_save
+from django.contrib.contenttypes import generic
 from .managers import EntityManager
-from .models import EavEntity, EavAttribute
+from .models import EavEntity, EavAttribute, EavValue
 
 class EavConfig(object):
 
     proxy_field_name = 'eav'
     manager_field_name ='objects'
+    generic_relation_field_name = 'eav_values'
 
     @classmethod
     def get_eav_attributes(cls):
@@ -60,6 +62,13 @@ class EavRegistry(object):
         mgr = EntityManager()
         mgr.contribute_to_class(model_cls, config_cls.manager_field_name)
 
+        gr_name = config_cls.generic_relation_field_name
+        generic_relation = generic.GenericRelation(EavValue,
+                                                object_id_field='entity_id',
+                                                content_type_field='entity_ct')
+        generic_relation.contribute_to_class(model_cls, gr_name)
+
+
 
     @staticmethod
     def unregister(model_cls):
@@ -78,6 +87,11 @@ class EavRegistry(object):
         
         try:
             delattr(model_cls, config_cls.manager_field_name)
+        except AttributeError:
+            pass
+
+        try:
+            delattr(model_cls, config_cls.generic_relation_field_name)
         except AttributeError:
             pass
 
