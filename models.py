@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
@@ -71,8 +72,13 @@ class EavAttribute(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = EavSlugField.create_slug_from_name(self.name)
+        if self.pk and \
+           self.datatype != EavAttribute.objects.get(pk=self.pk).datatype:
+            raise ValidationError(_(u"You cannot change the datatype of an "
+                                    u"existing attribute."))
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
+
 
     def add_label(self, label):
         label, created = EavAttributeLabel.objects.get_or_create(name=label)
@@ -143,11 +149,11 @@ class EavValue(models.Model):
         self.full_clean()
         super(EavValue, self).save(*args, **kwargs)
 
-    def clean(self):
-        pass
-
     def _blank(self):
-        self.value_text = self.value_float = self.value_int = self.value_date = None
+        self.value_bool = False
+        for field in self._meta.fields:
+            if field.name.startswith('value_') and field.null == True:
+                setattr(self, field.name, None)
 
     def _get_value(self):
         return getattr(self, 'value_%s' % self.attribute.datatype)
