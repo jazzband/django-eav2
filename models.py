@@ -139,6 +139,22 @@ class EavAttribute(models.Model):
 
 
 class EavValue(models.Model):
+    '''
+    The V model in E-A-V. This holds the 'value' for an attribute and an
+    entity:
+
+    >>> from django.db import models
+    >>> from django.contrib.auth.models import User
+    >>> from .utils import EavRegistry
+    >>> EavRegistry.register(User)
+    >>> u = User.objects.create(username='crazy_dev_user')
+    >>> a = EavAttribute.objects.create(name='Favorite Drink', datatype='text',
+    ... slug='fav_drink')
+    >>> EavValue.objects.create(entity=u, attribute=a, value_text='red bull')
+    <EavValue: crazy_dev_user - Favorite Drink: "red bull">
+
+    '''
+
     class Meta:
         unique_together = ('entity_ct', 'entity_id', 'attribute',
                            'value_text', 'value_float', 'value_date',
