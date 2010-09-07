@@ -74,7 +74,7 @@ class EavAttribute(models.Model):
         self.labels.get_or_create(name=label)
 
     def remove_label(self, label):
-        
+        #TODO 
         self.labels.get_or_create(name=label)
         
 
@@ -204,5 +204,5 @@ class EavEntity(object):
         return self.get_values().__iter__()
 
     @staticmethod
-    def pre_save_handler(sender, *args, **kwargs):
+    def save_handler(sender, *args, **kwargs):
         kwargs['instance'].eav.save()

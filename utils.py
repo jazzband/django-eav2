@@ -1,4 +1,4 @@
-from django.db.models.signals import post_init, pre_save
+from django.db.models.signals import post_init, post_save
 from .managers import EntityManager
 from .models import EavEntity, EavAttribute
 
@@ -44,7 +44,7 @@ class EavRegistry(object):
             return
 
         post_init.connect(EavRegistry.attach, sender=model_cls)
-        pre_save.connect(EavEntity.pre_save_handler, sender=model_cls)
+        post_save.connect(EavEntity.save_handler, sender=model_cls)
         EavRegistry.cache[model_cls.__name__] = { 'admin_cls': 
                                                         admin_cls } 
 
@@ -74,7 +74,7 @@ class EavRegistry(object):
         admin_cls = cache['admin_cls']
         
         post_init.disconnect(EavRegistry.attach, sender=model_cls)
-        pre_save.disconnect(EavEntity.pre_save_handler, sender=model_cls)
+        post_save.disconnect(EavEntity.save_handler, sender=model_cls)
         
         try:
             delattr(model_cls, admin_cls.manager_field_name)
