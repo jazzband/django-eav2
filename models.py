@@ -3,17 +3,19 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 
+from .fields import UuidField
+
 
 class EavAttribute(models.Model):
     '''
     The A model in E-A-V. This holds the 'concepts' along with the data type
     something like:
-    >>> EavAttribute.objects.create(name='height', datatype='float')
-    <EavAttribute: height (float)>
 
-    or 
+    >>> EavAttribute.objects.create(name='height', datatype='float')
+    <EavAttribute: height (Float)>
 
     >>> EavAttribute.objects.create(name='color', datatype='text')
+    <EavAttribute: color (Text)>
     '''
     class Meta:
         ordering = ['name']
@@ -26,24 +28,26 @@ class EavAttribute(models.Model):
     #TYPE_MANY = 'many'
 
     DATATYPE_CHOICES = (
-        (TYPE_TEXT, _("Text")),
-        (TYPE_FLOAT, _("Float")),
-        (TYPE_INT, _("Integer")),
-        (TYPE_DATE, _("Date")),
-        (TYPE_BOOLEAN, _("True / False")),
+        (TYPE_TEXT, _(u"Text")),
+        (TYPE_FLOAT, _(u"Float")),
+        (TYPE_INT, _(u"Integer")),
+        (TYPE_DATE, _(u"Date")),
+        (TYPE_BOOLEAN, _(u"True / False")),
         #(TYPE_MANY,    _('multiple choices')),
     )
 
     #TODO Force name to lowercase? Don't allow spaces in name
     name = models.CharField(_(u"name"), max_length=100,
-                            help_text=_(u"user-friendly attribute name"))
+                            help_text=_(u"User-friendly attribute name"))
 
     help_text = models.CharField(_(u"help text"), max_length=250,
                                  blank=True, null=True,
-                                 help_text=_(u"Short description for user"))
+                                 help_text=_(u"Short description"))
 
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
+
+    uuid = UuidField(auto=True)
 
     def get_value_for_entity(self, entity):
         '''
@@ -103,11 +107,11 @@ class EavValue(models.Model):
         self.value_text = self.value_float = self.value_int = self.value_date = None
 
     def _get_value(self):
-        return getattr(self, "value_%s" % self.attribute.datatype)
+        return getattr(self, 'value_%s' % self.attribute.datatype)
 
     def _set_value(self, new_value):
         self._blank()
-        setattr(self, "value_%s" % self.attribute.datatype, new_value)
+        setattr(self, 'value_%s' % self.attribute.datatype, new_value)
 
     value = property(_get_value, _set_value)
 
@@ -127,8 +131,9 @@ class EavEntity(object):
                 attribute = self.get_attribute_by_name(name)
                 value = attribute.get_value_for_entity(self.model)
                 return value.value if value else None
-        raise AttributeError('%s EAV does not have attribute named "%s".' %
-                             (self.model._meta.object_name, name))
+        raise AttributeError(_(u"%s EAV does not have attribute " \
+                               u"named \"%s\".") % \
+                               (self.model._meta.object_name, name))
 
     def save(self):
         for attribute in self.get_all_attributes():
