@@ -2,11 +2,12 @@ import re
 from datetime import datetime
 
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from .fields import EavSlugField
+from .fields import EavSlugField, EavDatatypeField
 
 
 class EavAttributeLabel(models.Model):
@@ -58,7 +59,7 @@ class EavAttribute(models.Model):
                                  blank=True, null=True,
                                  help_text=_(u"Short description"))
 
-    datatype = models.CharField(_(u"data type"), max_length=6,
+    datatype = EavDatatypeField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
     created = models.DateTimeField(_(u"created"), default=datetime.now)
@@ -73,6 +74,7 @@ class EavAttribute(models.Model):
             self.slug = EavSlugField.create_slug_from_name(self.name)
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
+
 
     def add_label(self, label):
         label, created = EavAttributeLabel.objects.get_or_create(name=label)
@@ -159,11 +161,11 @@ class EavValue(models.Model):
         self.full_clean()
         super(EavValue, self).save(*args, **kwargs)
 
-    def clean(self):
-        pass
-
     def _blank(self):
-        self.value_text = self.value_float = self.value_int = self.value_date = None
+        self.value_bool = False
+        for field in self._meta.fields:
+            if field.name.startswith('value_') and field.null == True:
+                setattr(self, field.name, None)
 
     def _get_value(self):
         return getattr(self, 'value_%s' % self.attribute.datatype)

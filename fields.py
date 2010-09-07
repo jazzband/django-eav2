@@ -5,6 +5,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
 
+
 class EavSlugField(models.SlugField):
         
     def validate(self, value, instance):
@@ -14,6 +15,7 @@ class EavSlugField(models.SlugField):
             raise ValidationError(_(u"Must be all lower case, "\
                                     u"not start with a number, and contain "\
                                     u"only letters, numbers, or underscores."))
+
 
     @staticmethod
     def create_slug_from_name(name):
@@ -27,5 +29,14 @@ class EavSlugField(models.SlugField):
 
         # Remove non alphanumeric characters
         return re.sub('[^\w]', '', name)
-        
-        
+
+
+class EavDatatypeField(models.SlugField):
+
+    def validate(self, value, instance):
+        from .models import EavAttribute
+        if not instance.pk:
+            return
+        if value != EavAttribute.objects.get(pk=instance.pk).datatype:
+            raise ValidationError(_(u"You cannot change the datatype of an "
+                                    u"existing attribute."))
