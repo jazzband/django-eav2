@@ -1,7 +1,18 @@
 import uuid
+import re
 
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
+from django.core.exceptions import ValidationError
+
+class EavSlugField(models.SlugField):
+    def validate(self, value, instance):
+        super(EavSlugField, self).validate(value, instance)
+        slug_regex = r'[a-z]+[a-z0-9_]*'
+        if not re.match(slug_regex, value):
+            raise ValidationError(_(u"Must be all lower case, "\
+                                    u"not start with a number, and contain "\
+                                    u"only letters, numbers, or underscores."))
 
 
 class UuidField(models.CharField):
@@ -13,7 +24,8 @@ class UuidField(models.CharField):
     '''
     __metaclass__ = models.SubfieldBase
  
-    def __init__(self, version=4, node=None, clock_seq=None, namespace=None, auto=False, name=None, *args, **kwargs):
+    def __init__(self, version=4, node=None, clock_seq=None,
+                 namespace=None, auto=False, name=None, *args, **kwargs):
         self.auto = auto
         self.version = version
         # Set this as a fixed value, we store UUIDs in text.
@@ -36,7 +48,7 @@ class UuidField(models.CharField):
             args = (self.namespace, self.name)
         else:
             args = ()
-        return getattr(uuid, 'uuid%s' % (self.version,))(*args)
+        return getattr(uuid, 'uuid%s' % self.version)(*args)
  
     def db_type(self):
         return 'char'

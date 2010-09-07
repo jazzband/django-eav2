@@ -16,8 +16,8 @@ class EavBasicTests(TestCase):
         EavRegistry.register(Patient)
 
         self.attribute = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
-                                                name='City',
-                                                help_text='The City')
+                                                name='City', help_text='The City', slug='city')
+                                                
         self.entity = Patient.objects.create(name="Doe")
 
         self.value = EavValue.objects.create(object=self.entity,
@@ -31,7 +31,7 @@ class EavBasicTests(TestCase):
 
     def test_can_create_attribute(self):
         EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
-                                    name='My text test',
+                                    name='My text test', slug='test',
                                     help_text='My help text')
 
     def test_attribute_unicode(self):
@@ -58,7 +58,7 @@ class EavBasicTests(TestCase):
 
     def test_value_types(self):
         _text = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
-                                            name='Text',
+                                            name='Text', slug='text',
                                             help_text='The text')
         val = EavValue.objects.create(object=self.entity,
                                        attribute = _text)
@@ -68,7 +68,7 @@ class EavBasicTests(TestCase):
         self.assertEqual(val.value, value)              
 
         _float = EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
-                                             name='Float',
+                                             name='Float', slug='float',
                                              help_text='The float')
         val = EavValue.objects.create(object=self.entity,
                                        attribute = _float)
@@ -79,7 +79,7 @@ class EavBasicTests(TestCase):
 
 
         _int = EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
-                                           name='Int',
+                                           name='Int', slug='int',
                                            help_text='The int')
         val = EavValue.objects.create(object=self.entity,
                                        attribute = _int)
@@ -89,7 +89,7 @@ class EavBasicTests(TestCase):
         self.assertEqual(val.value, value)
 
         _date = EavAttribute.objects.create(datatype=EavAttribute.TYPE_DATE,
-                                            name='Date',
+                                            name='Date', slug='date',
                                             help_text='The date')
         val = EavValue.objects.create(object=self.entity,
                                        attribute = _date)
@@ -99,7 +99,7 @@ class EavBasicTests(TestCase):
         self.assertEqual(val.value, value)
 
         _bool = EavAttribute.objects.create(datatype=EavAttribute.TYPE_BOOLEAN,
-                                            name='Bool',
+                                            name='Bool', slug='bool',
                                             help_text='The bool')
         val = EavValue.objects.create(object=self.entity,
                                        attribute = _bool)
@@ -120,7 +120,6 @@ class EavBasicTests(TestCase):
 
 
     def test_eavregistry_ataches_and_detaches_eav_attribute(self):
-        from ..utils import EavRegistry
         EavRegistry.unregister(Patient)
         p = Patient()
         self.assertFalse(hasattr(p, 'eav'))

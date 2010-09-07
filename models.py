@@ -1,9 +1,11 @@
+import re
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from .fields import UuidField
+from .fields import UuidField, EavSlugField
 
 
 class EavAttributeLabel(models.Model):
@@ -16,11 +18,11 @@ class EavAttribute(models.Model):
     The A model in E-A-V. This holds the 'concepts' along with the data type
     something like:
 
-    >>> EavAttribute.objects.create(name='height', datatype='float')
-    <EavAttribute: height (Float)>
+    >>> EavAttribute.objects.create(name='Height', datatype='float', slug='height')
+    <EavAttribute: Height (Float)>
 
-    >>> EavAttribute.objects.create(name='color', datatype='text')
-    <EavAttribute: color (Text)>
+    >>> EavAttribute.objects.create(name='Color', datatype='text', slug='color')
+    <EavAttribute: Color (Text)>
     '''
     class Meta:
         ordering = ['name']
@@ -41,21 +43,33 @@ class EavAttribute(models.Model):
         #(TYPE_MANY,    _('multiple choices')),
     )
 
-    #TODO Force name to lowercase? Don't allow spaces in name
+    slug = EavSlugField(_(u"slug"), max_length=50, db_index=True,
+                          help_text=_(u"Short unique attribute label"),
+                          unique=True)
+
     name = models.CharField(_(u"name"), max_length=100,
                             help_text=_(u"User-friendly attribute name"))
 
-    help_text = models.CharField(_(u"help text"), max_length=250,
+    help_text = models.CharField(_(u"help text"), max_length=256,
                                  blank=True, null=True,
                                  help_text=_(u"Short description"))
 
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
-    uuid = UuidField(_(u"UUID"), auto=True)
+    uuid = UuidField(verbose_name=_(u"UUID"), auto=True, db_index=True)
 
     labels = models.ManyToManyField(EavAttributeLabel,
                                     verbose_name=_(u"labels"))
+
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(EavAttribute, self).save(*args, **kwargs)
+
+    def add_label(self, label):
+        pass
+        
 
     def get_value_for_entity(self, entity):
         '''
@@ -135,8 +149,8 @@ class EavEntity(object):
 
     def __getattr__(self, name):
         if not name.startswith('_'):
-            if name in self.get_all_attribute_names():
-                attribute = self.get_attribute_by_name(name)
+            if slug in self.get_all_attribute_slugs():
+                attribute = self.get_attribute_by_slug(name)
                 value = attribute.get_value_for_entity(self.model)
                 return value.value if value else None
         raise AttributeError(_(u"%s EAV does not have attribute " \
@@ -145,8 +159,8 @@ class EavEntity(object):
 
     def save(self):
         for attribute in self.get_all_attributes():
-            if hasattr(self, attribute.name):
-                attribute_value = getattr(self, attribute.name)
+            if hasattr(self, attribute.slug):
+                attribute_value = getattr(self, attribute.slug)
                 attribute.save_value(self.model, attribute_value)
 
     def get_all_attributes(self):
@@ -157,22 +171,22 @@ class EavEntity(object):
             pass
 
         self._attributes_cache = self.get_eav_attributes().select_related()
-        self._attributes_cache_dict = dict((s.name, s) for s in self._attributes_cache)
+        self._attributes_cache_dict = dict((s.slug, s) for s in self._attributes_cache)
         return self._attributes_cache
 
     def get_values(self):
         return EavValue.objects.filter(content_type=self.ct,
                                        object_id=self.model.pk).select_related()
 
-    def get_all_attribute_names(self):
+    def get_all_attribute_slugs(self):
         if not hasattr(self, '_attributes_cache_dict'):
             self.get_all_attributes()
         return self._attributes_cache_dict.keys()
 
-    def get_attribute_by_name(self, name):
+    def get_attribute_by_slug(self, slug):
         if not hasattr(self, '_attributes_cache_dict'):
             self.get_all_attributes()
-        return self._attributes_cache_dict[name]
+        return self._attributes_cache_dict[slug]
 
     def get_attribute_by_id(self, attribute_id):
         for attr in self.get_all_attributes():
