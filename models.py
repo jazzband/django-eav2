@@ -96,7 +96,7 @@ class EavAttribute(models.Model):
         doesn't exist.
         '''
         ct = ContentType.objects.get_for_model(entity)
-        qs = self.eavvalue_set.filter(content_type=ct, object_id=entity.pk)
+        qs = self.eavvalue_set.filter(entity_ct=ct, entity_id=entity.pk)
         if qs.count() == 1:
             return qs[0]
         raise AttributeError(u"You should have one and only one value"\
@@ -123,12 +123,12 @@ class EavAttribute(models.Model):
         ct = ContentType.objects.get_for_model(entity)
         attribute = attribute or self
         try:
-            eavvalue = self.eavvalue_set.get(content_type=ct,
-                                             object_id=entity.pk,
+            eavvalue = self.eavvalue_set.get(entity_ct=ct,
+                                             entity_id=entity.pk,
                                              attribute=attribute)
         except EavValue.DoesNotExist:
-            eavvalue = self.eavvalue_set.model(content_type=ct,
-                                               object_id=entity.pk,
+            eavvalue = self.eavvalue_set.model(entity_ct=ct,
+                                               entity_id=entity.pk,
                                                attribute=attribute)
         if value != eavvalue.value:
             eavvalue.value = value
@@ -140,13 +140,13 @@ class EavAttribute(models.Model):
 
 class EavValue(models.Model):
     class Meta:
-        unique_together = ('content_type', 'object_id', 'attribute',
+        unique_together = ('entity_ct', 'entity_id', 'attribute',
                            'value_text', 'value_float', 'value_date',
                            'value_bool')
 
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.IntegerField()
-    object = generic.GenericForeignKey()
+    entity_ct = models.ForeignKey(ContentType)
+    entity_id = models.IntegerField()
+    entity = generic.GenericForeignKey(ct_field='entity_ct', fk_field='entity_id')
 
     value_text = models.TextField(blank=True, null=True)
     value_float = models.FloatField(blank=True, null=True)
@@ -177,7 +177,7 @@ class EavValue(models.Model):
     value = property(_get_value, _set_value)
 
     def __unicode__(self):
-        return u"%s - %s: \"%s\"" % (self.object, self.attribute.name, self.value)
+        return u"%s - %s: \"%s\"" % (self.entity, self.attribute.name, self.value)
 
 
 class EavEntity(object):
@@ -213,8 +213,8 @@ class EavEntity(object):
         return self._attributes_cache
 
     def get_values(self):
-        return EavValue.objects.filter(content_type=self.ct,
-                                       object_id=self.model.pk).select_related()
+        return EavValue.objects.filter(entity_ct=self.ct,
+                                       entity_id=self.model.pk).select_related()
 
     def get_all_attribute_slugs(self):
         if not hasattr(self, '_attributes_cache_dict'):

@@ -25,7 +25,7 @@ class EavSetterAndGetterTests(TestCase):
                                                 
         self.patient = Patient.objects.create(name="Doe")
 
-        self.value = EavValue.objects.create(object=self.patient,
+        self.value = EavValue.objects.create(entity=self.patient,
                                              attribute=self.attribute,
                                              value_text='Denver')
 

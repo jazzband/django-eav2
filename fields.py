@@ -16,7 +16,6 @@ class EavSlugField(models.SlugField):
                                     u"not start with a number, and contain "\
                                     u"only letters, numbers, or underscores."))
 
-
     @staticmethod
     def create_slug_from_name(name):
         '''
@@ -34,6 +33,7 @@ class EavSlugField(models.SlugField):
 class EavDatatypeField(models.SlugField):
 
     def validate(self, value, instance):
+        super(EavDatatypeField, self).validate(value, instance)
         from .models import EavAttribute
         if not instance.pk:
             return
