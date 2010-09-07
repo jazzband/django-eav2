@@ -1,1 +1,1 @@
-from tests import *
+from basics import *
