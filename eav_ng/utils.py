@@ -1,4 +1,4 @@
-from django.db.models.signals import post_init
+from django.db.models.signals import post_init, pre_save
 from .managers import EntityManager
 from .models import EavEntity, EavAttribute
 
@@ -42,6 +42,7 @@ class EavRegistry(object):
             return
 
         post_init.connect(EavRegistry.attach, sender=model_cls)
+        pre_save.connect(EavEntity.pre_save_handler, sender=model_cls)
         EavRegistry.field_cache[model_cls.__name__] = {
                                                    'proxy': eav_proxy_field,
                                                    'mgr': eav_manager_field}
@@ -70,6 +71,7 @@ class EavRegistry(object):
 
         cache = EavRegistry.field_cache[model_cls.__name__]
         post_init.disconnect(EavRegistry.attach, sender=model_cls)
+        pre_save.disconnect(EavEntity.pre_save_handler, sender=model_cls)
         proxy_name = cache['proxy']
         mgr_name = cache['mgr']
 

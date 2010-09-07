@@ -4,38 +4,17 @@ from django.contrib.contenttypes import generic
 from django.utils.translation import ugettext_lazy as _
 
 
-class EavEntity(object):
-    """
-    Should be inherited by any model you want to have EAV attributes
-    """
-
-    def __init__(self, instance):
-        self.model = instance
-
-    def get_current_eav_attributes(self):
-        try:
-            if self._attributes_cache is not None:
-                return self._attributes_cache
-        except AttributeError:
-            pass
-        
-        all_attributes = self.get_eav_attributes().select_related()
-        self._attributes_cache = self.get_schemata_for_instance(all_schemata) #continue here
-        self._schemata_cache_dict = dict((s.name, s) for s in self._schemata_cache)
-        print 'locals', locals()
-        print 'Starting get_schemata'
-        return self._schemata_cache
-
-    @classmethod
-    def get_eav_attributes(cls):
-        return EavAttribute.objects.all()
-
-
-
 class EavAttribute(models.Model):
-    """
+    '''
+    The A model in E-A-V. This holds the 'concepts' along with the data type
+    something like:
+    >>> EavAttribute.objects.create(name='height', datatype='float')
+    <EavAttribute: height (float)>
 
-    """
+    or 
+
+    >>> EavAttribute.objects.create(name='color', datatype='text')
+    '''
     class Meta:
         ordering = ['name']
 
@@ -45,7 +24,6 @@ class EavAttribute(models.Model):
     TYPE_DATE = 'date'
     TYPE_BOOLEAN = 'bool'
     #TYPE_MANY = 'many'
-    #TYPE_RANGE = 'range'
 
     DATATYPE_CHOICES = (
         (TYPE_TEXT, _("Text")),
@@ -54,9 +32,9 @@ class EavAttribute(models.Model):
         (TYPE_DATE, _("Date")),
         (TYPE_BOOLEAN, _("True / False")),
         #(TYPE_MANY,    _('multiple choices')),
-        #(TYPE_RANGE,   _('numeric range')),
     )
 
+    #TODO Force name to lowercase? Don't allow spaces in name
     name = models.CharField(_(u"name"), max_length=100,
                             help_text=_(u"user-friendly attribute name"))
 
@@ -67,6 +45,36 @@ class EavAttribute(models.Model):
     datatype = models.CharField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
+    def get_value_for_entity(self, entity):
+        '''
+        Passed any object that may be used as an 'entity' object (is linked
+        to through the generic relation from some EaveValue object. Returns
+        an EavValue object that has a foreignkey to self (attribute) and
+        to the entity. Returns nothing if a matching EavValue object
+        doesn't exist.
+        '''
+        ct = ContentType.objects.get_for_model(entity)
+        qs = self.eavvalue_set.filter(content_type=ct, object_id=entity.pk)
+        if qs.count():
+            return qs[0]
+
+    def save_value(self, entity, value):
+        self._save_single_value(entity, value)
+
+    def _save_single_value(self, entity, value=None, attribute=None):
+        ct = ContentType.objects.get_for_model(entity)
+        attribute = attribute or self
+        try:
+            eavvalue = self.eavvalue_set.get(content_type=ct,
+                                             object_id=entity.pk,
+                                             attribute=attribute)
+        except EavValue.DoesNotExist:
+            eavvalue = self.eavvalue_set.model(content_type=ct,
+                                               object_id=entity.pk,
+                                               attribute=attribute)
+        if value != eavvalue.value:
+            eavvalue.value = value
+            eavvalue.save()
 
     def __unicode__(self):
         return u"%s (%s)" % (self.name, self.get_datatype_display())
@@ -87,19 +95,81 @@ class EavValue(models.Model):
     value_int = models.IntegerField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
     value_bool = models.BooleanField(default=False)
-    #value_range_min = FloatField(blank=True, null=True)
-    #value_range_max = FloatField(blank=True, null=True)
+    #value_object = generic.GenericForeignKey()
 
     attribute = models.ForeignKey(EavAttribute)
+
+    def _blank(self):
+        self.value_text = self.value_float = self.value_int = self.value_date = None
 
     def _get_value(self):
         return getattr(self, "value_%s" % self.attribute.datatype)
 
     def _set_value(self, new_value):
+        self._blank()
         setattr(self, "value_%s" % self.attribute.datatype, new_value)
 
     value = property(_get_value, _set_value)
 
+
     def __unicode__(self):
         return u"%s - %s: \"%s\"" % (self.object, self.attribute.name, self.value)
 
+
+class EavEntity(object):
+    def __init__(self, instance):
+        self.model = instance
+        self.ct = ContentType.objects.get_for_model(instance)
+
+    def __getattr__(self, name):
+        if not name.startswith('_'):
+            if name in self.get_all_attribute_names():
+                attribute = self.get_attribute_by_name(name)
+                value = attribute.get_value_for_entity(self.model)
+                return value.value if value else None
+        raise AttributeError('%s EAV does not have attribute named "%s".' %
+                             (self.model._meta.object_name, name))
+
+    def save(self):
+        for attribute in self.get_all_attributes():
+            if hasattr(self, attribute.name):
+                attribute_value = getattr(self, attribute.name)
+                attribute.save_value(self.model, attribute_value)
+
+    def get_all_attributes(self):
+        try:
+            if self._attributes_cache is not None:
+                return self._attributes_cache
+        except AttributeError:
+            pass
+
+        self._attributes_cache = self.get_eav_attributes().select_related()
+        self._attributes_cache_dict = dict((s.name, s) for s in self._attributes_cache)
+        return self._attributes_cache
+
+    def get_values(self):
+        return EavValue.objects.filter(content_type=self.ct,
+                                       object_id=self.model.pk).select_related()
+
+    def get_all_attribute_names(self):
+        if not hasattr(self, '_attributes_cache_dict'):
+            self.get_all_attributes()
+        return self._attributes_cache_dict.keys()
+
+    def get_attribute_by_name(self, name):
+        if not hasattr(self, '_attributes_cache_dict'):
+            self.get_all_attributes()
+        return self._attributes_cache_dict[name]
+
+    def get_attribute_by_id(self, attribute_id):
+        for attr in self.get_all_attributes():
+            if attr.pk == attribute_id:
+                return attr
+
+    def __iter__(self):
+        "Iterates over non-empty EAV attributes. Normal fields are not included."
+        return self.get_values().__iter__()
+
+    @staticmethod
+    def pre_save_handler(sender, *args, **kwargs):
+        kwargs['instance'].eav.save()
