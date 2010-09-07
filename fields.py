@@ -26,6 +26,6 @@ class EavSlugField(models.SlugField):
         name = re.sub('\s+', '_', name)
 
         # Remove non alphanumeric characters
-        name = re.sub('[^\w]', '', name)
-
+        return re.sub('[^\w]', '', name)
+        
         
