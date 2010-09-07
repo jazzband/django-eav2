@@ -30,14 +30,13 @@ class EavSlugField(models.SlugField):
         # Remove non alphanumeric characters
         return re.sub('[^\w]', '', name)
 
-'''
+
 class EavDatatypeField(models.SlugField):
-    """
+
     def validate(self, value, instance):
+        from .models import EavAttribute
         if not instance.pk:
             return
-        if value != EavAttribute.objects.get(instance.pk).datatype:
+        if value != EavAttribute.objects.get(pk=instance.pk).datatype:
             raise ValidationError(_(u"You cannot change the datatype of an "
                                     u"existing attribute."))
-    """
-'''

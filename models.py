@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
-from .fields import EavSlugField
+from .fields import EavSlugField, EavDatatypeField
 
 
 class EavAttributeLabel(models.Model):
@@ -59,7 +59,7 @@ class EavAttribute(models.Model):
                                  blank=True, null=True,
                                  help_text=_(u"Short description"))
 
-    datatype = models.CharField(_(u"data type"), max_length=6,
+    datatype = EavDatatypeField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
     created = models.DateTimeField(_(u"created"), default=datetime.now)
@@ -72,10 +72,6 @@ class EavAttribute(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = EavSlugField.create_slug_from_name(self.name)
-        if self.pk and \
-           self.datatype != EavAttribute.objects.get(pk=self.pk).datatype:
-            raise ValidationError(_(u"You cannot change the datatype of an "
-                                    u"existing attribute."))
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
 
