@@ -17,8 +17,6 @@ class EavConfig(EavEntity):
              By default, all attributes apply to an entity,
              unless otherwise specified.
         """
-        print 'Generic'
-        print cls
         return EavAttribute.objects.all()
         
 
@@ -89,7 +87,6 @@ class EavRegistry(object):
         EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
                                       'model_cls': model_cls } 
 
-        print config_cls
         if hasattr(model_cls, config_cls.manager_field_name):
             mgr = getattr(model_cls, config_cls.manager_field_name)
             EavRegistry.cache[cls_id]['old_mgr'] = mgr

@@ -87,6 +87,8 @@ class EavSetterAndGetterTests(TestCase):
         
     def test_you_can_create_several_type_of_attributes(self):
     
+        self.patient = Patient(name='test')
+    
         EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
                                     name='text', slug='text')
         EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
@@ -97,6 +99,8 @@ class EavSetterAndGetterTests(TestCase):
                                     name='date', slug='date')   
         EavAttribute.objects.create(datatype=EavAttribute.TYPE_BOOLEAN,
                                     name='bool', slug='bool')    
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_OBJECT,
+                                    name='object', slug='object')   
                                  
         now = datetime.today()   
         self.patient.eav.text = 'a'   
@@ -104,6 +108,7 @@ class EavSetterAndGetterTests(TestCase):
         self.patient.eav.int = 1 
         self.patient.eav.date = now
         self.patient.eav.bool = True
+        self.patient.eav.object = User.objects.create(username='Bob')
         
         self.patient.save()
         
@@ -112,6 +117,8 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(self.patient.eav.int, 1)
         self.assertEqual(self.patient.eav.date, now)
         self.assertEqual(self.patient.eav.bool, True)
+        self.assertEqual(self.patient.eav.object, 
+                         User.objects.get(username='Bob'))
         
         
     def test_assign_a_value_that_is_not_an_eav_attribute_does_nothing(self):
@@ -119,6 +126,11 @@ class EavSetterAndGetterTests(TestCase):
         self.patient.eav.no_an_attribute = 'Woot'
         self.patient.save()
         self.assertFalse(EavValue.objects.filter(value_text='Paris').count())
+      
+          
+    def test_get_a_value_that_does_not_exists_returns_none(self):
+    
+        self.assertEqual(self.patient.eav.impossible_value, None) 
         
         
     def test_attributes_can_be_labelled(self):
@@ -210,6 +222,7 @@ class EavSetterAndGetterTests(TestCase):
 
     def test_can_have_differente_attribute_filter(self):
     
+    
         attribute = EavAttribute.objects\
                                 .create(datatype=EavAttribute.TYPE_TEXT,
                                        name='Country', slug='country')
@@ -251,4 +264,63 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(u.eav.city, 'Paris')
 
 
+    def test_can_have_a_subclass_for_config_class(self):
+    
+        attribute = EavAttribute.objects\
+                                .create(datatype=EavAttribute.TYPE_TEXT,
+                                       name='Country', slug='country')
+    
+        EavRegistry.unregister(Patient)
+
+        class PatientEav(EavConfig):
+
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='country')
+               
+        class SubPatientEav(PatientEav):       
         
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='country')
+                
+        EavRegistry.register(Patient, SubPatientEav)
+        
+        
+        self.patient.eav.city = 'Paris'
+        self.patient.eav.country = 'USA'
+        self.patient.save()
+        
+        p = Patient.objects.get(pk=self.patient.pk)
+        
+        self.assertFalse(p.eav.city)
+        self.assertEqual(p.eav.country, 'USA')
+
+        
+    def test_blank_set_all_value_field_with_a_null_default_to_none(self):
+        self.value._blank()
+        self.assertEqual(self.value.value_text, None)
+        self.assertEqual(self.value.value_int, None)
+        self.assertEqual(self.value.value_float, None)
+        self.assertEqual(self.value.value_date, None)
+        self.assertEqual(self.value.value_object, None)
+        
+    def test_blank_set_all_value_field_with_a_default_to_default(self):
+        self.value._blank()
+        self.assertEqual(self.value.value_bool, False)
+        
+    
+    def test_get_value_on_eavvalue_return_python_object(self):
+        self.assertEqual(self.value._get_value(), 'Denver')
+        self.assertEqual(self.value.value, self.value._get_value())
+        
+    def test_set_value_store_the_python_object_and_blank_other_fields(self):
+        
+        self.value._set_value('Bamako')
+        self.assertEqual(self.value.value, 'Bamako')
+        self.assertEqual(self.value.value_text, 'Bamako')
+        self.assertEqual(self.value.value_int, None)
+        self.assertEqual(self.value.value_float, None)
+        self.assertEqual(self.value.value_date, None)
+        self.assertEqual(self.value.value_bool, False)
+        self.assertEqual(self.value.value_object, None)

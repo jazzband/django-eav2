@@ -55,9 +55,6 @@ class EavBasicTests(TestCase):
         self.assertEqual(unicode(self.value), "Doe - City: \"Denver\"")
 
 
-    def test_value_unicode(self):
-        self.assertEqual(unicode(self.value), "Doe - City: \"Denver\"")
-
 
     def test_value_types(self):
         _text = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,

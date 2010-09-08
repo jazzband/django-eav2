@@ -106,7 +106,6 @@ class EavAttribute(models.Model):
         '''
         ct = ContentType.objects.get_for_model(entity)
         qs = self.eavvalue_set.filter(entity_ct=ct, entity_id=entity.pk)
-        print entity
         count = qs.count()
         if count > 1:
             raise AttributeError(u"You should have one and only one value "\
@@ -126,6 +125,7 @@ class EavAttribute(models.Model):
         """
         self._save_single_value(entity, value)
 
+
     def _save_single_value(self, entity, value=None, attribute=None):
         """
             Save a a value of type that doesn't need special joining like
@@ -135,7 +135,6 @@ class EavAttribute(models.Model):
             Use attribute if you want to use something else than the current
             one
         """
-        print "save_value()"
         ct = ContentType.objects.get_for_model(entity)
         attribute = attribute or self
         try:
@@ -146,12 +145,10 @@ class EavAttribute(models.Model):
             eavvalue = self.eavvalue_set.model(entity_ct=ct,
                                                entity_id=entity.pk,
                                                attribute=attribute)
-        print "value", value
-        print "eavvalue.value", eavvalue.value
         if value != eavvalue.value:
-            print value
             eavvalue.value = value
             eavvalue.save()
+
 
     def __unicode__(self):
         return u"%s (%s)" % (self.name, self.get_datatype_display())
@@ -194,18 +191,28 @@ class EavValue(models.Model):
 
     attribute = models.ForeignKey(EavAttribute)
 
+
     def save(self, *args, **kwargs):
         self.full_clean()
         super(EavValue, self).save(*args, **kwargs)
 
+
     def _blank(self):
+        """
+            Set all the field to none
+        """
         self.value_bool = False
         for field in self._meta.fields:
             if field.name.startswith('value_') and field.null == True:
                 setattr(self, field.name, None)
 
+
     def _get_value(self):
+        """
+            Get returns the Python object hold by this EavValue object.
+        """
         return getattr(self, 'value_%s' % self.attribute.datatype)
+
 
     def _set_value(self, new_value):
         self._blank()
@@ -227,20 +234,10 @@ class EavEntity(object):
 
     # TODO: memoize
     def __getattr__(self, name):
-    
-        print self, name
-    
-        print "__getattr__"
-    
         if not name.startswith('_'):
             attribute = self.get_attribute_by_slug(name)
-            print attribute
-            print "if attribute"
             if attribute:
-                print attribute
                 value = attribute.get_value_for_entity(self.model)
-                print value
-                print "if value"
                 if value:
                     return attribute.get_value_for_entity(self.model).value
             return None
