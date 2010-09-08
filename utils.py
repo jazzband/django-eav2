@@ -1,6 +1,6 @@
-from django.db.models.signals import post_init, post_save
+from django.db.models.signals import post_init, post_save, post_delete
 from .managers import EntityManager
-from .models import EavEntity, EavAttribute
+from .models import EavEntity, EavAttribute, get_unique_class_identifier
 
 class EavConfig(object):
 
@@ -27,38 +27,53 @@ class EavRegistry(object):
         """
             Attache EAV toolkit to an instance after init.
         """
+        cls_id = get_unique_class_identifier(sender)
         instance = kwargs['instance']
-        cls = instance.__class__
-        admin_cls = EavRegistry.cache[cls.__name__]['admin_cls']
+        config_cls = EavRegistry.cache[cls_id]['config_cls']
 
-        setattr(instance, admin_cls.proxy_field_name, EavEntity(instance))
+        setattr(instance, config_cls.proxy_field_name, EavEntity(instance))
 
 
     @staticmethod
-    def register(model_cls, admin_cls=EavConfig):
+    def update_attribute_cache(sender, *args, **kwargs):
+        """
+            Update the attribute cache for all the models every time we
+            create an attribute.
+        """
+        for cache in EavRegistry.cache.itervalues():
+            EavEntity.update_attr_cache_for_model(cache['model_cls'])
+
+
+    @staticmethod
+    def register(model_cls, config_cls=EavConfig):
         """
             Inject eav features into the given model and attach a signal 
             listener to it for setup.
         """
-        if model_cls.__name__ in EavRegistry.cache:
+        
+        cls_id = get_unique_class_identifier(model_cls)
+        
+        if cls_id in EavRegistry.cache:
             return
-
+        
         post_init.connect(EavRegistry.attach, sender=model_cls)
         post_save.connect(EavEntity.save_handler, sender=model_cls)
-        EavRegistry.cache[model_cls.__name__] = { 'admin_cls': 
-                                                        admin_cls } 
+        EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
+                                                  'model_cls': model_cls } 
 
-        if hasattr(model_cls, admin_cls.manager_field_name):
-            mgr = getattr(model_cls, admin_cls.manager_field_name)
-            EavRegistry.cache[model_cls.__name__]['old_mgr'] = mgr
+        if hasattr(model_cls, config_cls.manager_field_name):
+            mgr = getattr(model_cls, config_cls.manager_field_name)
+            EavRegistry.cache[cls_id]['old_mgr'] = mgr
 
-        setattr(model_cls, admin_cls.proxy_field_name, EavEntity)
+        setattr(model_cls, config_cls.proxy_field_name, EavEntity)
 
-        setattr(getattr(model_cls, admin_cls.proxy_field_name),
-                        'get_eav_attributes', admin_cls.get_eav_attributes)
+        setattr(getattr(model_cls, config_cls.proxy_field_name),
+                        'get_eav_attributes', config_cls.get_eav_attributes)
 
         mgr = EntityManager()
-        mgr.contribute_to_class(model_cls, admin_cls.manager_field_name)
+        mgr.contribute_to_class(model_cls, config_cls.manager_field_name)
+        
+        EavEntity.update_attr_cache_for_model(model_cls)
 
 
     @staticmethod
@@ -67,28 +82,37 @@ class EavRegistry(object):
             Inject eav features into the given model and attach a signal 
             listener to it for setup.
         """
-        if not model_cls.__name__ in EavRegistry.cache:
+        cls_id = get_unique_class_identifier(model_cls)
+        
+        if not cls_id in EavRegistry.cache:
             return
 
-        cache = EavRegistry.cache[model_cls.__name__]
-        admin_cls = cache['admin_cls']
-        
+        cache = EavRegistry.cache[cls_id]
+        config_cls = cache['config_cls']
         post_init.disconnect(EavRegistry.attach, sender=model_cls)
         post_save.disconnect(EavEntity.save_handler, sender=model_cls)
         
         try:
-            delattr(model_cls, admin_cls.manager_field_name)
+            delattr(model_cls, config_cls.manager_field_name)
         except AttributeError:
             pass
 
         if 'old_mgr' in cache:
             cache['old_mgr'].contribute_to_class(model_cls, 
-                                                admin_cls.manager_field_name)
+                                                config_cls.manager_field_name)
 
         try:
-            delattr(model_cls, admin_cls.proxy_field_name)
+            delattr(model_cls, config_cls.proxy_field_name)
         except AttributeError:
             pass
 
-        EavRegistry.cache.pop(model_cls.__name__)
-
+        EavEntity.flush_attr_cache_for_model(model_cls)
+        EavRegistry.cache.pop(cls_id)
+        
+        
+     # todo : test cache
+     # todo : tst unique identitfier  
+     # todo:  test update attribute cache on attribute creation
+     
+post_save.connect(EavRegistry.update_attribute_cache, sender=EavAttribute)
+post_delete.connect(EavRegistry.update_attribute_cache, sender=EavAttribute)

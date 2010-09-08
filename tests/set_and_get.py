@@ -150,15 +150,13 @@ class EavSetterAndGetterTests(TestCase):
         
         
     def test_can_filter_attribute_availability_for_entity(self):
-    
         attribute = EavAttribute.objects\
                                 .create(datatype=EavAttribute.TYPE_TEXT,
                                        name='Country', slug='country')
-    
-        self.patient.eav.city = 'Paris'
+        self.patient.eav.city = 'Tunis'
         self.patient.save()
         self.assertEqual(Patient.objects.get(pk=self.patient.pk).eav.city,
-                         'Paris')
+                         'Tunis')
     
         EavRegistry.unregister(Patient)
 
@@ -174,11 +172,13 @@ class EavSetterAndGetterTests(TestCase):
         p.eav.city = 'Paris'
         p.eav.country = 'USA'
         p.save()
-        p = Patient.objects.get(pk=self.patient.pk)
+        p = Patient.objects.get(pk=p.pk)
         
         self.assertFalse(p.eav.city)
         self.assertEqual(p.eav.country, 'USA')
         
         p = Patient()
 
+
+    # todo: test multiple children
         

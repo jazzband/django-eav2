@@ -124,7 +124,9 @@ class EavBasicTests(TestCase):
 
     def test_eavregistry_ataches_and_detaches_eav_attribute(self):
         EavRegistry.unregister(Patient)
+        print "hello"
         p = Patient()
+        print "hello"
         self.assertFalse(hasattr(p, 'eav'))
 
         EavRegistry.register(Patient)

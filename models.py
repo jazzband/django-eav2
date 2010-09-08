@@ -1,3 +1,4 @@
+import inspect
 import re
 from datetime import datetime
 
@@ -8,6 +9,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
 from .fields import EavSlugField, EavDatatypeField
+
+def get_unique_class_identifier(cls):
+    """
+        Return a unique identifier for a class
+    """
+    return '.'.join((inspect.getfile(cls), cls.__name__))
 
 
 class EavAttributeLabel(models.Model):
@@ -89,6 +96,7 @@ class EavAttribute(models.Model):
             return
         self.labels.remove(label_obj)
 
+
     def get_value_for_entity(self, entity):
         '''
         Passed any object that may be used as an 'entity' object (is linked
@@ -99,12 +107,17 @@ class EavAttribute(models.Model):
         '''
         ct = ContentType.objects.get_for_model(entity)
         qs = self.eavvalue_set.filter(entity_ct=ct, entity_id=entity.pk)
-        if qs.count() == 1:
-            return qs[0]
-        raise AttributeError(u"You should have one and only one value"\
+        count = qs.count()
+        if count > 1:
+            raise AttributeError(u"You should have one and only one value "\
                              u"for the attribute %s and the entity %s. Found "\
                              u"%s" % (self, entity, qs.count()))
-
+        if count:
+            return qs[0]
+            
+        return None
+         
+         
     def save_value(self, entity, value):
         """
             Save any value for an entity, calling the appropriate method
@@ -157,10 +170,11 @@ class EavValue(models.Model):
 
     '''
 
-    class Meta:
-        unique_together = ('entity_ct', 'entity_id', 'attribute',
-                           'value_text', 'value_float', 'value_date',
-                           'value_bool')
+    #class Meta:
+        # we can't a TextField on mysql with a unique constraint
+        #unique_together = ('entity_ct', 'entity_id', 'attribute',
+        #                   'value_text', 'value_float', 'value_date',
+        #                   'value_bool')
     entity_ct = models.ForeignKey(ContentType, related_name='value_entities')
     entity_id = models.IntegerField()
     entity = generic.GenericForeignKey(ct_field='entity_ct', fk_field='entity_id')
@@ -202,19 +216,82 @@ class EavValue(models.Model):
 
 
 class EavEntity(object):
+
+    _cache = {}
+
     def __init__(self, instance):
         self.model = instance
         self.ct = ContentType.objects.get_for_model(instance)
 
+    # TODO: memoize
     def __getattr__(self, name):
+    
         if not name.startswith('_'):
             for slug in self.get_all_attribute_slugs():
                 attribute = self.get_attribute_by_slug(name)
-                value = attribute.get_value_for_entity(self.model)
-                return value.value if value else None
+                if attribute:
+                    value = attribute.get_value_for_entity(self.model)
+                    if value:
+                        return attribute.get_value_for_entity(self.model).value
+            return None
+             
         raise AttributeError(_(u"%s EAV does not have attribute " \
                                u"named \"%s\".") % \
                                (self.model._meta.object_name, name))
+
+
+    @classmethod   
+    def get_attr_cache_for_model(cls, model_cls):
+        """
+            Return the attribute cache for this model
+        """
+        return cls._cache.setdefault(get_unique_class_identifier(cls), {})
+
+
+    @classmethod
+    def update_attr_cache_for_model(cls, model_cls):
+        """
+            Create or update the attributes cache for this entity class.
+        """
+        cache = cls.get_attr_cache_for_model(model_cls) 
+        cache['attributes'] = cls.get_eav_attributes().select_related()
+        cache['slug_mapping'] = dict((s.slug, s) for s in cache['attributes'])
+        return cache
+        
+        
+    @classmethod
+    def flush_attr_cache_for_model(cls, model_cls):
+        """
+            Flush the attributes cache for this entity class
+        """
+        cache = cls.get_attr_cache_for_model(model_cls)
+        cache.clear()
+        return cache
+        
+
+    def update_attr_cache(self):
+        """
+            Create or update the attributes cache for the entity class linked
+            to the current instance.
+        """
+        return self.__class__.update_attr_cache_for_model(self.model.__class__)
+        
+        
+    def flush_attr_cache(self):
+        """
+            Flush the attributes cache for the entity class linked
+            to the current instance.
+        """
+        return self.__class__.flush_attr_cache_for_model(self.model.__class__)
+        
+        
+    def get_attr_cache(self):
+        """
+            Return the attribute cache for the entity class linked
+            to the current instance.
+        """
+        return self.__class__.get_attr_cache_for_model(self.model.__class__)
+
 
     def save(self):
         for attribute in self.get_all_attributes():
@@ -223,39 +300,62 @@ class EavEntity(object):
                 attribute.save_value(self.model, attribute_value)
 
     def get_all_attributes(self):
-        try:
-            if self._attributes_cache is not None:
-                return self._attributes_cache
-        except AttributeError:
-            pass
-
-        self._attributes_cache = self.__class__.get_eav_attributes().select_related()
-        self._attributes_cache_dict = dict((s.slug, s) for s in self._attributes_cache)
-        return self._attributes_cache
+        """
+            Return the current cache or if it doesn't exists, update it
+            and returns it.
+        """
+        
+        cache = self.get_attr_cache()
+        if not cache:
+            cache = self.update_attr_cache()
+        return cache['attributes'] 
 
     def get_values(self):
         return EavValue.objects.filter(entity_ct=self.ct,
                                        entity_id=self.model.pk).select_related()
 
     def get_all_attribute_slugs(self):
-        if not hasattr(self, '_attributes_cache_dict'):
-            self.get_all_attributes()
-        return self._attributes_cache_dict.keys()
+        """
+            Returns all attributes slugs for the entity 
+            class linked to the current instance.
+        """
+        cache = self.get_attr_cache()
+        if not cache:
+            cache = self.update_attr_cache()
+        
+        return cache['slug_mapping'] 
 
     def get_attribute_by_slug(self, slug):
-        if not hasattr(self, '_attributes_cache_dict'):
-            self.get_all_attributes()
-        return self._attributes_cache_dict[slug]
+        """
+            Returns an attribute object knowing the slug for the entity 
+            class linked to the current instance.
+        """
+        return self.get_all_attribute_slugs().get(slug, None)
 
     def get_attribute_by_id(self, attribute_id):
+        """
+            Returns an attribute object knowing the pk for the entity 
+            class linked to the current instance.
+        """
         for attr in self.get_all_attributes():
             if attr.pk == attribute_id:
                 return attr
 
     def __iter__(self):
         "Iterates over non-empty EAV attributes. Normal fields are not included."
-        return self.get_values().__iter__()
+        return iter(self.get_values())
 
     @staticmethod
     def save_handler(sender, *args, **kwargs):
         kwargs['instance'].eav.save()
+        
+# TODO: remove that, it's just for testing with nose        
+        
+class Patient(models.Model):
+    class Meta:
+        app_label = 'eav_ng'
+
+    name = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.name
