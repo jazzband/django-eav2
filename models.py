@@ -197,6 +197,7 @@ class EavValue(models.Model):
         super(EavValue, self).save(*args, **kwargs)
 
 
+    # todo: do it in a faster way (one update)
     def _blank(self):
         """
             Set all the field to none
@@ -232,19 +233,19 @@ class EavEntity(object):
         self.model = instance
         self.ct = ContentType.objects.get_for_model(instance)
 
+
     # TODO: memoize
     def __getattr__(self, name):
+    
         if not name.startswith('_'):
             attribute = self.get_attribute_by_slug(name)
             if attribute:
-                value = attribute.get_value_for_entity(self.model)
-                if value:
-                    return attribute.get_value_for_entity(self.model).value
+                value_obj = attribute.get_value_for_entity(self.model)
+                if value_obj:
+                    return value_obj.value
             return None
              
-        raise AttributeError(_(u"%s EAV does not have attribute " \
-                               u"named \"%s\".") % \
-                               (self.model._meta.object_name, name))
+        return object.__getattr__(self, name)
 
 
     @classmethod   
@@ -337,8 +338,6 @@ class EavEntity(object):
 
         return cache['attributes'] 
         
-      
-
 
     def get_values(self):
         return EavValue.objects.filter(entity_ct=self.ct,
@@ -355,6 +354,7 @@ class EavEntity(object):
             cache = EavEntity.update_attr_cache_for_model(model_cls)
 
         return cache['slug_mapping']
+
 
     def get_all_attribute_slugs(self):
         """
@@ -381,18 +381,10 @@ class EavEntity(object):
         return self.__class__.get_attribute_by_slug_for_model(m_cls, slug)
 
 
-    def get_attribute_by_id(self, attribute_id):
-        """
-            Returns an attribute object knowing the pk for the entity 
-            class linked to the current instance.
-        """
-        for attr in self.get_all_attributes():
-            if attr.pk == attribute_id:
-                return attr
-
-
     def __iter__(self):
-        "Iterates over non-empty EAV attributes. Normal fields are not included."
+        """
+            Iterates over non-empty EAV attributes. Normal fields are not included.
+        """
         return iter(self.get_values())
 
 

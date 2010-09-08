@@ -9,11 +9,17 @@ from django.core.exceptions import ValidationError
 class EavSlugField(models.SlugField):
         
     def validate(self, value, instance):
+        """
+            Slugs are used to convert the Python attribute name to a database
+            lookup and vice versa. We need it to be a valid Python identifier.
+            We don't want it to start with a '_', underscore will be used
+            var variables we don't want to be saved in db.
+        """
         super(EavSlugField, self).validate(value, instance)
-        slug_regex = r'[a-z]+[a-z0-9_]*'
+        slug_regex = r'[a-z][a-z0-9_]*'
         if not re.match(slug_regex, value):
             raise ValidationError(_(u"Must be all lower case, "\
-                                    u"not start with a number, and contain "\
+                                    u"starts with a letter, and contain "\
                                     u"only letters, numbers, or underscores."))
 
     @staticmethod
@@ -24,15 +30,22 @@ class EavSlugField(models.SlugField):
         name = name.strip().lower()
 
         # Change spaces to underscores
-        name = re.sub('\s+', '_', name)
+        name = '_'.join(name.split())
 
         # Remove non alphanumeric characters
         return re.sub('[^\w]', '', name)
 
 
 class EavDatatypeField(models.SlugField):
+    """
+        This holds checks for the attributes datatypes.
+    """
 
     def validate(self, value, instance):
+        """
+            We don't want them to be able to change the attribute type
+            once it have been created.
+        """
         super(EavDatatypeField, self).validate(value, instance)
         from .models import EavAttribute
         if not instance.pk:
