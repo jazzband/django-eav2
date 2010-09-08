@@ -1,11 +1,14 @@
+from django.contrib.contenttypes import generic
 from django.db.models.signals import post_init, post_save, post_delete
 from .managers import EntityManager
-from .models import EavEntity, EavAttribute, get_unique_class_identifier
+from .models import (EavEntity, EavAttribute, EavValue, 
+                     get_unique_class_identifier)
 
 class EavConfig(object):
 
     proxy_field_name = 'eav'
     manager_field_name ='objects'
+    generic_relation_field_name = 'eav_values'
 
     @classmethod
     def get_eav_attributes(cls):
@@ -22,14 +25,24 @@ class EavRegistry(object):
     """
     cache = {}
 
+
+    @staticmethod
+    def get_config_cls_for_model(model_cls):
+        """
+            Returns the configuration class for the given
+            model
+        """
+        cls_id = get_unique_class_identifier(model_cls)
+        return EavRegistry.cache[cls_id]['config_cls']
+
+
     @staticmethod
     def attach(sender, *args, **kwargs):
         """
             Attache EAV toolkit to an instance after init.
         """
-        cls_id = get_unique_class_identifier(sender)
         instance = kwargs['instance']
-        config_cls = EavRegistry.cache[cls_id]['config_cls']
+        config_cls = EavRegistry.get_config_cls_for_model(sender)
 
         setattr(instance, config_cls.proxy_field_name, EavEntity(instance))
 
@@ -59,7 +72,7 @@ class EavRegistry(object):
         post_init.connect(EavRegistry.attach, sender=model_cls)
         post_save.connect(EavEntity.save_handler, sender=model_cls)
         EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
-                                                  'model_cls': model_cls } 
+                                      'model_cls': model_cls } 
 
         if hasattr(model_cls, config_cls.manager_field_name):
             mgr = getattr(model_cls, config_cls.manager_field_name)
@@ -74,6 +87,12 @@ class EavRegistry(object):
         mgr.contribute_to_class(model_cls, config_cls.manager_field_name)
         
         EavEntity.update_attr_cache_for_model(model_cls)
+
+        gr_name = config_cls.generic_relation_field_name
+        generic_relation = generic.GenericRelation(EavValue,
+                                                   object_id_field='entity_id',
+                                                   content_type_field='entity_ct')
+        generic_relation.contribute_to_class(model_cls, gr_name)
 
 
     @staticmethod
@@ -94,6 +113,11 @@ class EavRegistry(object):
         
         try:
             delattr(model_cls, config_cls.manager_field_name)
+        except AttributeError:
+            pass
+
+        try:
+            delattr(model_cls, config_cls.generic_relation_field_name)
         except AttributeError:
             pass
 
