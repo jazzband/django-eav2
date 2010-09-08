@@ -233,7 +233,7 @@ class EavSetterAndGetterTests(TestCase):
         self.patient.save()
         self.assertEqual(Patient.objects.get(pk=self.patient.pk).eav.city,
                          'Tunis')
-    
+
         EavRegistry.unregister(Patient)
         EavRegistry.register(Patient, self.PatientEav)
         

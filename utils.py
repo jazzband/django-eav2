@@ -34,7 +34,9 @@ class EavRegistry(object):
             model
         """
         cls_id = get_unique_class_identifier(model_cls)
-        return EavRegistry.cache[cls_id]['config_cls']
+
+        if cls_id in EavRegistry.cache:
+            return EavRegistry.cache[cls_id]['config_cls']
 
 
     @staticmethod
