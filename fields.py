@@ -30,7 +30,7 @@ class EavSlugField(models.SlugField):
         return re.sub('[^\w]', '', name)
 
 
-class EavDatatypeField(models.SlugField):
+class EavDatatypeField(models.CharField):
 
     def validate(self, value, instance):
         super(EavDatatypeField, self).validate(value, instance)
