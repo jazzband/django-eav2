@@ -106,6 +106,7 @@ class EavAttribute(models.Model):
         '''
         ct = ContentType.objects.get_for_model(entity)
         qs = self.eavvalue_set.filter(entity_ct=ct, entity_id=entity.pk)
+        print entity
         count = qs.count()
         if count > 1:
             raise AttributeError(u"You should have one and only one value "\
@@ -134,6 +135,7 @@ class EavAttribute(models.Model):
             Use attribute if you want to use something else than the current
             one
         """
+        print "save_value()"
         ct = ContentType.objects.get_for_model(entity)
         attribute = attribute or self
         try:
@@ -144,7 +146,10 @@ class EavAttribute(models.Model):
             eavvalue = self.eavvalue_set.model(entity_ct=ct,
                                                entity_id=entity.pk,
                                                attribute=attribute)
+        print "value", value
+        print "eavvalue.value", eavvalue.value
         if value != eavvalue.value:
+            print value
             eavvalue.value = value
             eavvalue.save()
 
@@ -223,13 +228,21 @@ class EavEntity(object):
     # TODO: memoize
     def __getattr__(self, name):
     
+        print self, name
+    
+        print "__getattr__"
+    
         if not name.startswith('_'):
-            for slug in self.get_all_attribute_slugs():
-                attribute = self.get_attribute_by_slug(name)
-                if attribute:
-                    value = attribute.get_value_for_entity(self.model)
-                    if value:
-                        return attribute.get_value_for_entity(self.model).value
+            attribute = self.get_attribute_by_slug(name)
+            print attribute
+            print "if attribute"
+            if attribute:
+                print attribute
+                value = attribute.get_value_for_entity(self.model)
+                print value
+                print "if value"
+                if value:
+                    return attribute.get_value_for_entity(self.model).value
             return None
              
         raise AttributeError(_(u"%s EAV does not have attribute " \
@@ -238,11 +251,21 @@ class EavEntity(object):
 
 
     @classmethod   
+    def get_eav_attributes_for_model(cls, model_cls):
+        """
+            Return the attributes for this model
+        """
+        from .utils import EavRegistry
+        config_cls = EavRegistry.get_config_cls_for_model(model_cls)
+        return config_cls.get_eav_attributes()
+
+
+    @classmethod   
     def get_attr_cache_for_model(cls, model_cls):
         """
             Return the attribute cache for this model
         """
-        return cls._cache.setdefault(get_unique_class_identifier(cls), {})
+        return cls._cache.setdefault(get_unique_class_identifier(model_cls), {})
 
 
     @classmethod
@@ -251,7 +274,8 @@ class EavEntity(object):
             Create or update the attributes cache for this entity class.
         """
         cache = cls.get_attr_cache_for_model(model_cls) 
-        cache['attributes'] = cls.get_eav_attributes().select_related()
+        cache['attributes'] = cls.get_eav_attributes_for_model(model_cls)\
+                                 .select_related()
         cache['slug_mapping'] = dict((s.slug, s) for s in cache['attributes'])
         return cache
 
@@ -264,6 +288,13 @@ class EavEntity(object):
         cache = cls.get_attr_cache_for_model(model_cls)
         cache.clear()
         return cache
+        
+        
+    def get_eav_attributes(self):
+        """
+            Return the attributes for this model
+        """
+        return self.__class__.get_eav_attributes_for_model(self.model.__class__)
         
 
     def update_attr_cache(self):
@@ -291,10 +322,11 @@ class EavEntity(object):
 
 
     def save(self):
-        for attribute in self.get_all_attributes():
+        for attribute in self.get_eav_attributes():
             if hasattr(self, attribute.slug):
                 attribute_value = getattr(self, attribute.slug)
                 attribute.save_value(self.model, attribute_value)
+
 
     @classmethod
     def get_all_attributes_for_model(cls, model_cls):
@@ -308,9 +340,7 @@ class EavEntity(object):
 
         return cache['attributes'] 
         
-    def get_all_attributes(self):
-        m_cls = self.__class__
-        return self.__class__.get_all_attributes_for_model(m_cls)
+      
 
 
     def get_values(self):
@@ -346,8 +376,8 @@ class EavEntity(object):
         cache = cls.get_attr_cache_for_model(model_cls)
         if not cache:
             cache = EavEntity.update_attr_cache_for_model(model_cls)
-        if slug in cache['slug_mapping']:
-            return cache['slug_mapping'][slug]
+        return cache['slug_mapping'].get(slug, None)
+
 
     def get_attribute_by_slug(self, slug):
         m_cls = self.model.__class__
@@ -363,9 +393,11 @@ class EavEntity(object):
             if attr.pk == attribute_id:
                 return attr
 
+
     def __iter__(self):
         "Iterates over non-empty EAV attributes. Normal fields are not included."
         return iter(self.get_values())
+
 
     @staticmethod
     def save_handler(sender, *args, **kwargs):

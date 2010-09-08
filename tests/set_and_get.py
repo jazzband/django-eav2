@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from ..models import *
 from ..utils import EavRegistry, EavConfig
@@ -147,6 +148,35 @@ class EavSetterAndGetterTests(TestCase):
         # remove a label that is not attach does nothing
         self.attribute.remove_label('a')
         self.attribute.remove_label('x')
+
+
+    def test_attributes_are_filtered_according_to_config_class(self):
+        attribute = EavAttribute.objects\
+                                .create(datatype=EavAttribute.TYPE_TEXT,
+                                       name='Country', slug='country')
+    
+        EavRegistry.unregister(Patient)
+
+        class PatientEav(EavConfig):
+
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='country')
+                
+        class UserEav(EavConfig):
+
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='city')
+                
+        EavRegistry.register(Patient, PatientEav)
+        EavRegistry.register(User, UserEav)
+
+        self.assertEqual(list(Patient.eav.get_eav_attributes()),
+                         list(EavAttribute.objects.filter(slug='country')))
+                        
+        self.assertEqual(list(User.eav.get_eav_attributes()),
+                         list(EavAttribute.objects.filter(slug='city')))
         
         
     def test_can_filter_attribute_availability_for_entity(self):
@@ -177,8 +207,48 @@ class EavSetterAndGetterTests(TestCase):
         self.assertFalse(p.eav.city, 'Paris')
         self.assertEqual(p.eav.country, 'USA')
         
-        p = Patient()
+
+    def test_can_have_differente_attribute_filter(self):
+    
+        attribute = EavAttribute.objects\
+                                .create(datatype=EavAttribute.TYPE_TEXT,
+                                       name='Country', slug='country')
+    
+        EavRegistry.unregister(Patient)
+
+        class PatientEav(EavConfig):
+
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='country')
+                
+        class UserEav(EavConfig):
+
+            @classmethod
+            def get_eav_attributes(cls):
+                return EavAttribute.objects.filter(slug='city')
+                
+        EavRegistry.register(Patient, PatientEav)
+        EavRegistry.register(User, UserEav)
+        
+        p = Patient.objects.create(name='Patrick')
+        u = User.objects.create(username='John')
+        
+        p.eav.city = 'Paris'
+        p.eav.country = 'USA'
+        p.save()
+        u.eav.city = 'Paris'
+        u.eav.country = 'USA'
+        u.save()
+        
+        p = Patient.objects.get(pk=p.pk)
+        u = User.objects.get(pk=u.pk)
+        
+        self.assertFalse(p.eav.city)
+        self.assertEqual(p.eav.country, 'USA')
+
+        self.assertFalse(u.eav.country)
+        self.assertEqual(u.eav.city, 'Paris')
 
 
-    # todo: test multiple children
         
