@@ -111,7 +111,7 @@ class EavRegistry(object):
         generic_relation = generic.GenericRelation(EavValue,
                                                    object_id_field='entity_id',
                                                    content_type_field='entity_ct',
-                                                   related_name=model_cls._meta.verbose_name_plural)
+                                                   related_name=model_cls.__name__)
         generic_relation.contribute_to_class(model_cls, gr_name)
 
 
@@ -138,6 +138,7 @@ class EavRegistry(object):
 
         try:
             delattr(model_cls, config_cls.generic_relation_field_name)
+            #delattr(EavValue, config_cls.generic_relation_field_name)
         except AttributeError:
             pass
 
