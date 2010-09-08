@@ -5,7 +5,7 @@ from .managers import EntityManager
 from .models import (EavEntity, EavAttribute, EavValue, 
                      get_unique_class_identifier)
 
-class EavConfig(object):
+class EavConfig(EavEntity):
 
     proxy_field_name = 'eav'
     manager_field_name ='objects'
@@ -59,6 +59,17 @@ class EavRegistry(object):
         for cache in EavRegistry.cache.itervalues():
             EavEntity.update_attr_cache_for_model(cache['model_cls'])
 
+    
+    @staticmethod
+    def wrap_config_class(model_cls, config_cls):
+        """
+            Check if the config class is EavConfig, and create a subclass if
+            it is
+        """
+        if config_cls is EavConfig:
+            return type("%sConfig" % model_cls.__name__, (EavConfig,), {})
+        return config_cls
+
 
     @staticmethod
     def register(model_cls, config_cls=EavConfig):
@@ -72,6 +83,7 @@ class EavRegistry(object):
         if cls_id in EavRegistry.cache:
             return
         
+        config_cls = EavRegistry.wrap_config_class(model_cls, config_cls)
         post_init.connect(EavRegistry.attach, sender=model_cls)
         post_save.connect(EavEntity.save_handler, sender=model_cls)
         EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
@@ -81,8 +93,8 @@ class EavRegistry(object):
             mgr = getattr(model_cls, config_cls.manager_field_name)
             EavRegistry.cache[cls_id]['old_mgr'] = mgr
 
-        setattr(model_cls, config_cls.proxy_field_name, EavEntity)
-
+        setattr(model_cls, config_cls.proxy_field_name, config_cls)
+        
         setattr(getattr(model_cls, config_cls.proxy_field_name),
                         'get_eav_attributes', config_cls.get_eav_attributes)
 
