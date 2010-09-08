@@ -173,8 +173,8 @@ class EavSetterAndGetterTests(TestCase):
         p.eav.country = 'USA'
         p.save()
         p = Patient.objects.get(pk=p.pk)
-        
-        self.assertFalse(p.eav.city)
+
+        self.assertFalse(p.eav.city, 'Paris')
         self.assertEqual(p.eav.country, 'USA')
         
         p = Patient()

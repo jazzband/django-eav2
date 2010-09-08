@@ -1,4 +1,7 @@
+import re
+
 from django.db import models
+from .models import EavEntity
 
 class EntityManager(models.Manager):
     def filter(self, *args, **kwargs):
@@ -9,11 +12,9 @@ class EntityManager(models.Manager):
         return qs
 
     def _filter_by_lookup(self, qs, lookup, value):
-        eav_entity = self._get_eav_entity()
-        slugs = eav_entity.get_all_attribute_slugs()
-        cache = eav_entity.get_attr_cache()
+        slugs = EavEntity.get_all_attribute_slugs_for_model(self.model)
         fields = self.model._meta.get_all_field_names()
-        attributes = eav_entity.get_all_attributes()
+        attributes = EavEntity.get_all_attributes_for_model(self.model)
 
         config_cls = self._get_config_cls()
         eav_prefix = config_cls.proxy_field_name
@@ -22,14 +23,14 @@ class EntityManager(models.Manager):
         if not lookup.startswith("%s__" % eav_prefix):
             return {lookup: value}
 
-        lookup = lookup.lstrip("%s__" % eav_prefix)        
+        lookup = re.sub(r'^%s__' % eav_prefix, '', lookup)
 
         # Sublookup will be None if there is no __ in the lookup
         name, sublookup = (lookup.split('__', 1) + [None])[:2]
 
         if name in slugs:
             # EAV attribute (Attr instance linked to entity)
-            attribute = eav_entity.get_attribute_by_slug(name)
+            attribute = EavEntity.get_attribute_by_slug_for_model(self.model , name)
             return self._filter_by_simple_schema(qs, lookup, sublookup, value, attribute)
         else:
             raise NameError('Cannot filter items by attributes: unknown '
@@ -51,8 +52,3 @@ class EntityManager(models.Manager):
     def _get_config_cls(self):
         from .utils import EavRegistry
         return EavRegistry.get_config_cls_for_model(self.model)
-
-    def _get_eav_entity(self):
-        cls = self._get_config_cls()
-        eav_entity_name = cls.proxy_field_name
-        return getattr(self.model, eav_entity_name)

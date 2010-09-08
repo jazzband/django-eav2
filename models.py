@@ -83,7 +83,11 @@ class EavAttribute(models.Model):
             self.slug = EavSlugField.create_slug_from_name(self.name)
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
+        EavEntity.update_all_caches()
 
+    def delete(self, *args, **kwargs):
+        EavEntity.update_all_caches()
+        super(EavAttribute, self).delete(*args, **kwargs)
 
     def add_label(self, label):
         label, created = EavAttributeLabel.objects.get_or_create(name=label)
@@ -170,11 +174,6 @@ class EavValue(models.Model):
 
     '''
 
-    #class Meta:
-        # we can't a TextField on mysql with a unique constraint
-        #unique_together = ('entity_ct', 'entity_id', 'attribute',
-        #                   'value_text', 'value_float', 'value_date',
-        #                   'value_bool')
     entity_ct = models.ForeignKey(ContentType, related_name='value_entities')
     entity_id = models.IntegerField()
     entity = generic.GenericForeignKey(ct_field='entity_ct', fk_field='entity_id')
@@ -189,6 +188,9 @@ class EavValue(models.Model):
     generic_value_id = models.IntegerField(blank=True, null=True)
     value_object = generic.GenericForeignKey(ct_field='generic_value_ct',
                                              fk_field='generic_value_id')
+
+    created = models.DateTimeField(_(u"created"), default=datetime.now)
+    modified = models.DateTimeField(_(u"modified"), auto_now=True)
 
     attribute = models.ForeignKey(EavAttribute)
 
@@ -258,7 +260,15 @@ class EavEntity(object):
         cache['slug_mapping'] = dict((s.slug, s) for s in cache['attributes'])
         return cache
         
-        
+    @classmethod
+    def update_all_caches(cls):
+        """
+            Update all caches of registered entities.
+        """
+        from .utils import EavRegistry
+        for entity in EavRegistry.cache.itervalues(): 
+            cls.update_attr_cache_for_model(entity['model_cls'])
+
     @classmethod
     def flush_attr_cache_for_model(cls, model_cls):
         """
@@ -299,38 +309,63 @@ class EavEntity(object):
                 attribute_value = getattr(self, attribute.slug)
                 attribute.save_value(self.model, attribute_value)
 
-    def get_all_attributes(self):
+    @classmethod
+    def get_all_attributes_for_model(cls, model_cls):
         """
             Return the current cache or if it doesn't exists, update it
             and returns it.
         """
-        
-        cache = self.get_attr_cache()
+        cache = cls.get_attr_cache_for_model(model_cls)
         if not cache:
-            cache = self.update_attr_cache()
+            cache = EavEntity.update_attr_cache_for_model(model_cls)
+
         return cache['attributes'] 
+        
+    def get_all_attributes(self):
+        m_cls = self.__class__
+        return self.__class__.get_all_attributes_for_model(m_cls)
+
 
     def get_values(self):
         return EavValue.objects.filter(entity_ct=self.ct,
                                        entity_id=self.model.pk).select_related()
+
+    @classmethod
+    def get_all_attribute_slugs_for_model(cls, model_cls):
+        """
+            Returns all attributes slugs for the entity 
+            class linked to the passed model.
+        """
+        cache = cls.get_attr_cache_for_model(model_cls)
+        if not cache:
+            cache = EavEntity.update_attr_cache_for_model(model_cls)
+
+        return cache['slug_mapping']
 
     def get_all_attribute_slugs(self):
         """
             Returns all attributes slugs for the entity 
             class linked to the current instance.
         """
-        cache = self.get_attr_cache()
+        m_cls = self.model.__class__
+        return self.__class__.get_all_attribute_slugs_for_model(m_cls)
+
+    @classmethod
+    def get_attribute_by_slug_for_model(cls, model_cls, slug):
+        """
+            Returns all attributes slugs for the entity 
+            class linked to the passed model.
+        """
+        cache = cls.get_attr_cache_for_model(model_cls)
         if not cache:
-            cache = self.update_attr_cache()
-        
-        return cache['slug_mapping'] 
+            cache = EavEntity.update_attr_cache_for_model(model_cls)
+        if slug in cache['slug_mapping']:
+            return cache['slug_mapping'][slug]
 
     def get_attribute_by_slug(self, slug):
-        """
-            Returns an attribute object knowing the slug for the entity 
-            class linked to the current instance.
-        """
-        return self.get_all_attribute_slugs().get(slug, None)
+        m_cls = self.model.__class__
+        return self.__class__.get_attribute_by_slug_for_model(m_cls, slug)
+
 
     def get_attribute_by_id(self, attribute_id):
         """
