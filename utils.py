@@ -1,4 +1,5 @@
 from django.contrib.contenttypes import generic
+from django.db.utils import DatabaseError
 from django.db.models.signals import post_init, post_save, post_delete
 from .managers import EntityManager
 from .models import (EavEntity, EavAttribute, EavValue, 
@@ -86,7 +87,11 @@ class EavRegistry(object):
         mgr = EntityManager()
         mgr.contribute_to_class(model_cls, config_cls.manager_field_name)
         
-        EavEntity.update_attr_cache_for_model(model_cls)
+        
+        try:
+            EavEntity.update_attr_cache_for_model(model_cls)
+        except DatabaseError:
+            pass
 
         gr_name = config_cls.generic_relation_field_name
         generic_relation = generic.GenericRelation(EavValue,

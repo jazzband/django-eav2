@@ -83,11 +83,6 @@ class EavAttribute(models.Model):
             self.slug = EavSlugField.create_slug_from_name(self.name)
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
-        EavEntity.update_all_caches()
-
-    def delete(self, *args, **kwargs):
-        EavEntity.update_all_caches()
-        super(EavAttribute, self).delete(*args, **kwargs)
 
     def add_label(self, label):
         label, created = EavAttributeLabel.objects.get_or_create(name=label)
@@ -259,15 +254,7 @@ class EavEntity(object):
         cache['attributes'] = cls.get_eav_attributes().select_related()
         cache['slug_mapping'] = dict((s.slug, s) for s in cache['attributes'])
         return cache
-        
-    @classmethod
-    def update_all_caches(cls):
-        """
-            Update all caches of registered entities.
-        """
-        from .utils import EavRegistry
-        for entity in EavRegistry.cache.itervalues(): 
-            cls.update_attr_cache_for_model(entity['model_cls'])
+
 
     @classmethod
     def flush_attr_cache_for_model(cls, model_cls):
