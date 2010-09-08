@@ -138,6 +138,7 @@ class EavRegistry(object):
 
         try:
             delattr(model_cls, config_cls.generic_relation_field_name)
+            #delattr(EavValue, config_cls.generic_relation_field_name)
         except AttributeError:
             pass
 
