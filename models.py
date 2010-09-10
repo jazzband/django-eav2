@@ -26,6 +26,23 @@ class EavAttributeLabel(models.Model):
         return self.name
 
 
+class EnumValue(models.Model):
+    value = models.CharField(_(u"value"), db_index=True,
+                             unique=True, max_length=50)
+
+    def __unicode__(self):
+        return self.value
+
+
+class EnumGroup(models.Model):
+    name = models.CharField(_(u"name"), unique=True, max_length=100)
+
+    enums = models.ManyToManyField(EnumValue, verbose_name=_(u"enum group"))
+
+    def __unicode__(self):
+        return self.name
+
+
 class EavAttribute(models.Model):
     '''
     The A model in E-A-V. This holds the 'concepts' along with the data type
@@ -46,7 +63,7 @@ class EavAttribute(models.Model):
     TYPE_DATE = 'date'
     TYPE_BOOLEAN = 'bool'
     TYPE_OBJECT = 'object'
-    #TYPE_MANY = 'many'
+    TYPE_ENUM = 'enum'
 
     DATATYPE_CHOICES = (
         (TYPE_TEXT, _(u"Text")),
@@ -55,7 +72,7 @@ class EavAttribute(models.Model):
         (TYPE_DATE, _(u"Date")),
         (TYPE_BOOLEAN, _(u"True / False")),
         (TYPE_OBJECT, _(u"Python Object")),
-        #(TYPE_MANY,    _('multiple choices')),
+        (TYPE_ENUM,    _(u"Multiple Choice")),
     )
 
     slug = EavSlugField(_(u"slug"), max_length=50, db_index=True,
@@ -65,9 +82,13 @@ class EavAttribute(models.Model):
     name = models.CharField(_(u"name"), max_length=100,
                             help_text=_(u"User-friendly attribute name"))
 
-    help_text = models.CharField(_(u"help text"), max_length=256,
-                                 blank=True, null=True,
-                                 help_text=_(u"Short description"))
+    description = models.CharField(_(u"description"), max_length=256,
+                                     blank=True, null=True,
+                                     help_text=_(u"Short description"))
+
+    @property
+    def help_text(self):
+        return self.description
 
     datatype = EavDatatypeField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
@@ -78,6 +99,7 @@ class EavAttribute(models.Model):
 
     labels = models.ManyToManyField(EavAttributeLabel,
                                     verbose_name=_(u"labels"))
+
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -181,6 +203,7 @@ class EavValue(models.Model):
     value_int = models.IntegerField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
     value_bool = models.NullBooleanField(blank=True, null=True)
+    value_enum = models.ForeignKey(EnumValue, blank=True, null=True)
 
     generic_value_id = models.IntegerField(blank=True, null=True)
     generic_value_ct = models.ForeignKey(ContentType, blank=True, null=True,
@@ -205,7 +228,6 @@ class EavValue(models.Model):
         for field in self._meta.fields:
             if field.name.startswith('value_') and field.null == True:
                 setattr(self, field.name, None)
-        self.value_bool = False
 
 
     def _get_value(self):
