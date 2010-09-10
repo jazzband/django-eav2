@@ -32,13 +32,14 @@ class EavBasicTests(TestCase):
         EavRegistry.unregister(Patient)
 
 
+    def test_attribute_unicode(self):
+        self.assertEqual(unicode(self.attribute), "City (Text)")
+
+
     def test_can_create_attribute(self):
         EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
                                     name='My text test', slug='test',
                                     help_text='My help text')
-
-    def test_attribute_unicode(self):
-        self.assertEqual(unicode(self.attribute), "City (Text)")
 
 
     def test_can_eaventity_children_give_you_all_attributes_by_default(self):

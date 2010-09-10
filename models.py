@@ -180,9 +180,10 @@ class EavValue(models.Model):
     value_int = models.IntegerField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
     value_bool = models.BooleanField(default=False)
+    
+    generic_value_id = models.IntegerField(blank=True, null=True)
     generic_value_ct = models.ForeignKey(ContentType, blank=True, null=True,
                                          related_name='value_values')
-    generic_value_id = models.IntegerField(blank=True, null=True)
     value_object = generic.GenericForeignKey(ct_field='generic_value_ct',
                                              fk_field='generic_value_id')
 
@@ -202,10 +203,10 @@ class EavValue(models.Model):
         """
             Set all the field to none
         """
-        self.value_bool = False
         for field in self._meta.fields:
             if field.name.startswith('value_') and field.null == True:
                 setattr(self, field.name, None)
+        self.value_bool = False
 
 
     def _get_value(self):
@@ -392,13 +393,4 @@ class EavEntity(object):
     def save_handler(sender, *args, **kwargs):
         kwargs['instance'].eav.save()
         
-# TODO: remove that, it's just for testing with nose        
-        
-class Patient(models.Model):
-    class Meta:
-        app_label = 'eav_ng'
 
-    name = models.CharField(max_length=20)
-
-    def __unicode__(self):
-        return self.name

@@ -1,6 +1,5 @@
 from django.db import models
 
-from ..utils import EavRegistry
 
 class Patient(models.Model):
     class Meta:
@@ -10,3 +9,4 @@ class Patient(models.Model):
 
     def __unicode__(self):
         return self.name
+        
