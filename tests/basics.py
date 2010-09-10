@@ -121,14 +121,18 @@ class EavBasicTests(TestCase):
 
 
     def test_eavregistry_ataches_and_detaches_eav_attribute(self):
+        
+        self.assertTrue(self.entity.eav)
+        self.assertTrue(self.entity.eav_values)
+        self.assertTrue(self.value.entity)
+        # todo : should we have self.value.patient herer ?
+       
         EavRegistry.unregister(Patient)
         p = Patient()
         self.assertFalse(hasattr(p, 'eav'))
-
-        EavRegistry.register(Patient)
-        p2 = Patient()
-        self.assertTrue(p2.eav)
-
+        self.assertFalse(hasattr(p, 'eav'))
+        self.assertFalse(hasattr(p, 'eav_values'))
+        
 
     def test_eavregistry_accept_a_settings_class_with_get_queryset(self):
         EavRegistry.unregister(Patient)
@@ -148,20 +152,31 @@ class EavBasicTests(TestCase):
     
     def test_eavregistry_accept_a_settings_class_with_field_names(self):
         
-        p = Patient()
-        registered_manager = Patient.objects        
+        p = Patient.objects.create(name='Renaud')
+        registered_manager = Patient.objects   
+        registered_eav_value = p.eav_values
         EavRegistry.unregister(Patient)
 
         class PatientEav(EavConfig):
 
             proxy_field_name = 'my_eav'
             manager_field_name ='my_objects'
+            generic_relation_field_name = 'my_eav_values'
+            generic_relation_field_related_name = "patient"
 
         EavRegistry.register(Patient, PatientEav)
         
-        p2 = Patient()
+        p2 = Patient.objects.create(name='Henry')
         self.assertEqual(type(p.eav), type(p2.my_eav))
+        self.assertEqual(registered_eav_value.__class__.__name__, 
+                         p2.my_eav_values.__class__.__name__ )
         self.assertEqual(type(registered_manager), type(Patient.my_objects))
+                         
+        p2.my_eav.city = "Mbrarare"
+        p2.save()
+        value = EavValue.objects.get(value_text='Mbrarare')
+        name = PatientEav.generic_relation_field_related_name
+        self.assertTrue(value, name)
                          
         bak_registered_manager = Patient.objects 
 
