@@ -55,10 +55,9 @@ class EntityManager(models.Manager):
         qs = self.get_query_set().exclude(*args)
         cls = self.model
         for lookup, value in kwargs.items():
-            lookups = self._filter_by_lookup(qs, lookup, value)
             updated_lookup, extra_filters = expand_filter_string(cls, lookup)
             extra_filters.update({updated_lookup: value})
-            qs = qs.exclude(**lookups)
+            qs = qs.exclude(**extra_filters)
         return qs
     '''
     def aggregate(self, *args, **kwargs):
