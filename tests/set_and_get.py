@@ -306,10 +306,7 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(self.value.value_float, None)
         self.assertEqual(self.value.value_date, None)
         self.assertEqual(self.value.value_object, None)
-        
-    def test_blank_set_all_value_field_with_a_default_to_default(self):
-        self.value._blank()
-        self.assertEqual(self.value.value_bool, False)
+        self.assertEqual(self.value.value_bool, None)
         
     
     def test_get_value_on_eavvalue_return_python_object(self):
@@ -325,7 +322,7 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(self.value.value_int, None)
         self.assertEqual(self.value.value_float, None)
         self.assertEqual(self.value.value_date, None)
-        self.assertEqual(self.value.value_bool, False)
+        self.assertEqual(self.value.value_bool, None)
         self.assertEqual(self.value.value_object, None)
         
         
