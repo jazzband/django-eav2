@@ -179,8 +179,8 @@ class EavValue(models.Model):
     value_float = models.FloatField(blank=True, null=True)
     value_int = models.IntegerField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
-    value_bool = models.BooleanField(default=False)
-    
+    value_bool = models.NullBooleanField(blank=True, null=True)
+
     generic_value_id = models.IntegerField(blank=True, null=True)
     generic_value_ct = models.ForeignKey(ContentType, blank=True, null=True,
                                          related_name='value_values')
@@ -192,11 +192,9 @@ class EavValue(models.Model):
 
     attribute = models.ForeignKey(EavAttribute)
 
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super(EavValue, self).save(*args, **kwargs)
-
 
     # todo: do it in a faster way (one update)
     def _blank(self):
