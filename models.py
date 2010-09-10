@@ -10,6 +10,7 @@ from django.contrib.contenttypes import generic
 
 from .fields import EavSlugField, EavDatatypeField
 
+
 def get_unique_class_identifier(cls):
     """
         Return a unique identifier for a class
@@ -388,6 +389,7 @@ class EavEntity(object):
         return iter(self.get_values())
 
 
+    # todo: cache all changed value in EAV and check against existing attribtue
     @staticmethod
     def save_handler(sender, *args, **kwargs):
         from .utils import EavRegistry
