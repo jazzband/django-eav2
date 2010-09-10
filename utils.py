@@ -123,12 +123,12 @@ class EavRegistry(object):
             pass
 
         # todo: make that overridable
-        # attache the generic relation to the model
+        # attach the generic relation to the model
         if config_cls.generic_relation_field_related_name:
             rel_name = config_cls.generic_relation_field_related_name
         else:
             rel_name = model_cls.__name__
-        gr_name = config_cls.generic_relation_field_name
+        gr_name = config_cls.generic_relation_field_name.lower()
         generic_relation = generic.GenericRelation(EavValue,
                                                    object_id_field='entity_id',
                                                    content_type_field='entity_ct',

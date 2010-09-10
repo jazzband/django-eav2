@@ -288,7 +288,7 @@ class EavEntity(object):
         cache.clear()
         return cache
         
-        
+    
     def get_eav_attributes(self):
         """
             Return the attributes for this model
@@ -365,6 +365,7 @@ class EavEntity(object):
         m_cls = self.model.__class__
         return self.__class__.get_all_attribute_slugs_for_model(m_cls)
 
+
     @classmethod
     def get_attribute_by_slug_for_model(cls, model_cls, slug):
         """
@@ -391,6 +392,9 @@ class EavEntity(object):
 
     @staticmethod
     def save_handler(sender, *args, **kwargs):
-        kwargs['instance'].eav.save()
+        from .utils import EavRegistry
+        config_cls = EavRegistry.get_config_cls_for_model(sender)
+        instance_eav = getattr(kwargs['instance'], config_cls.proxy_field_name)
+        instance_eav.save()
         
 
