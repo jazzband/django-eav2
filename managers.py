@@ -103,8 +103,12 @@ class EntityManager(models.Manager):
         return qs
 
     def exclude(self, *args, **kwargs):
-        qs = self.get_query_set().exclude(*args)
         cls = self.model
+        for arg in args:
+            if isinstance(arg, Q):
+                # modify Q objects in-place (warning: recursion ahead)
+                expand_q_filters(arg, cls)
+        qs = self.get_query_set().exclude(*args)
         for lookup, value in kwargs.items():
             lookups = self._filter_by_lookup(qs, lookup, value)
             updated_lookup, extra_filters = expand_filter_string(cls, lookup)
