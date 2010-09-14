@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 #from django.db.models import Aggregate
 from .models import EavAttribute
 
@@ -63,10 +64,38 @@ def expand_filter_string(q_str, root_cls):
     # query work, for passing up to the super call to filter()
     return '__'.join(filter_tokens), extra_filters
 
+def expand_q_filters(q, root_cls):
+    new_children = []
+    for qi in q.children:
+        if type(qi) is tuple:
+            # this child is a leaf node: in Q this is a 2-tuple of:
+            # (filter parameter, value)
+            expanded_string, extra_filters = expand_filter_string(qi[0], root_cls)
+            extra_filters.update({expanded_string: qi[1]})
+            if q.connector == 'OR':
+                # if it's an or, we now have additional filters that need
+                # to be ANDed together, so we have to make a sub-Q child
+                # in place of the original tuple
+                new_children.append(Q(**extra_filters))
+            else:
+                # otherwise, we can just append all the new filters, they're
+                # ANDed together anyway
+                for k,v in extra_filters.items():
+                    new_children.append((k,v))
+        else:
+            # this child is another Q node: recursify!
+            new_children.append(expand_q_filters(qi, root_cls))
+    q.children = new_children
+    return q
+
 class EntityManager(models.Manager):
     def filter(self, *args, **kwargs):
-        qs = self.get_query_set().filter(*args)
         cls = self.model
+        for arg in args:
+            if isinstance(arg, Q):
+                # modify Q objects in-place (warning: recursion ahead)
+                expand_q_filters(arg, cls)
+        qs = self.get_query_set().filter(*args)
         for lookup, value in kwargs.items():
             updated_lookup, extra_filters = expand_filter_string(lookup, cls)
             extra_filters.update({updated_lookup: value})
