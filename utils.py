@@ -76,7 +76,7 @@ class EavRegistry(object):
 
 
     @staticmethod
-    def register(model_cls, config_cls=EavConfig):
+    def register(model_cls, config_cls=EavConfig, manager_only=False):
         """
             Inject eav features into the given model and attach a signal 
             listener to it for setup.
@@ -89,14 +89,16 @@ class EavRegistry(object):
         
         config_cls = EavRegistry.wrap_config_class(model_cls, config_cls)
         
-        # we want to call attach and save handler on instance creation and
-        # saving
-        post_init.connect(EavRegistry.attach, sender=model_cls)
-        post_save.connect(EavEntity.save_handler, sender=model_cls)
+        if not manager_only:
+            # we want to call attach and save handler on instance creation and
+            # saving            
+            post_init.connect(EavRegistry.attach, sender=model_cls)
+            post_save.connect(EavEntity.save_handler, sender=model_cls)
         
         # todo: rename cache in data
         EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
-                                      'model_cls': model_cls } 
+                                      'model_cls': model_cls,
+                                      'manager_only': manager_only } 
 
         # save the old manager if the attribute name conflict with the new
         # one
@@ -104,43 +106,44 @@ class EavRegistry(object):
             mgr = getattr(model_cls, config_cls.manager_field_name)
             EavRegistry.cache[cls_id]['old_mgr'] = mgr
 
-        # set add the config_cls as an attribute of the model
-        # it will allow to perform some operation directly from this model
-        setattr(model_cls, config_cls.proxy_field_name, config_cls)
-        
-        # todo : not useful anymore ?
-        setattr(getattr(model_cls, config_cls.proxy_field_name),
-                        'get_eav_attributes', config_cls.get_eav_attributes)
+        if not manager_only:
+            # set add the config_cls as an attribute of the model
+            # it will allow to perform some operation directly from this model
+            setattr(model_cls, config_cls.proxy_field_name, config_cls)
+            
+            # todo : not useful anymore ?
+            setattr(getattr(model_cls, config_cls.proxy_field_name),
+                            'get_eav_attributes', config_cls.get_eav_attributes)
 
         # attache the new manager to the model
         mgr = EntityManager()
         mgr.contribute_to_class(model_cls, config_cls.manager_field_name)
         
-        # todo: see with david how to change that
-        try:
-            EavEntity.update_attr_cache_for_model(model_cls)
-        except DatabaseError:
-            pass
+        if not manager_only:
+            # todo: see with david how to change that
+            try:
+                EavEntity.update_attr_cache_for_model(model_cls)
+            except DatabaseError:
+                pass
 
-        # todo: make that overridable
-        # attach the generic relation to the model
-        if config_cls.generic_relation_field_related_name:
-            rel_name = config_cls.generic_relation_field_related_name
-        else:
-            rel_name = model_cls.__name__
-        gr_name = config_cls.generic_relation_field_name.lower()
-        generic_relation = generic.GenericRelation(EavValue,
-                                                   object_id_field='entity_id',
-                                                   content_type_field='entity_ct',
-                                                   related_name=rel_name)
-        generic_relation.contribute_to_class(model_cls, gr_name)
-
+            # todo: make that overridable
+            # attach the generic relation to the model
+            if config_cls.generic_relation_field_related_name:
+                rel_name = config_cls.generic_relation_field_related_name
+            else:
+                rel_name = model_cls.__name__
+            gr_name = config_cls.generic_relation_field_name.lower()
+            generic_relation = generic.GenericRelation(EavValue,
+                                                       object_id_field='entity_id',
+                                                       content_type_field='entity_ct',
+                                                       related_name=rel_name)
+            generic_relation.contribute_to_class(model_cls, gr_name)
 
     @staticmethod
     def unregister(model_cls):
         """
-            Inject eav features into the given model and attach a signal 
-            listener to it for setup.
+            Do the INVERSE of 'Inject eav features into the given model 
+            and attach a signal listener to it for setup.'
         """
         cls_id = get_unique_class_identifier(model_cls)
         
@@ -149,8 +152,10 @@ class EavRegistry(object):
 
         cache = EavRegistry.cache[cls_id]
         config_cls = cache['config_cls']
-        post_init.disconnect(EavRegistry.attach, sender=model_cls)
-        post_save.disconnect(EavEntity.save_handler, sender=model_cls)
+        manager_only = cache['manager_only']
+        if not manager_only:
+            post_init.disconnect(EavRegistry.attach, sender=model_cls)
+            post_save.disconnect(EavEntity.save_handler, sender=model_cls)
         
         try:
             delattr(model_cls, config_cls.manager_field_name)
@@ -168,7 +173,6 @@ class EavRegistry(object):
         except AttributeError:
             pass
         
-
         if 'old_mgr' in cache:
             cache['old_mgr'].contribute_to_class(model_cls, 
                                                 config_cls.manager_field_name)
@@ -178,9 +182,10 @@ class EavRegistry(object):
         except AttributeError:
             pass
 
-        EavEntity.flush_attr_cache_for_model(model_cls)
+        if not manager_only:
+            EavEntity.flush_attr_cache_for_model(model_cls)
+            
         EavRegistry.cache.pop(cls_id)
-        
         
      # todo : test cache
      # todo : tst unique identitfier  
