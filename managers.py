@@ -68,9 +68,7 @@ class EntityManager(models.Manager):
         qs = self.get_query_set().filter(*args)
         cls = self.model
         for lookup, value in kwargs.items():
-            print "In %s" % lookup
             updated_lookup, extra_filters = expand_filter_string(lookup, cls)
-            print "Out %s %s" % (updated_lookup, extra_filters)
             extra_filters.update({updated_lookup: value})
             qs = qs.filter(**extra_filters)
         return qs
