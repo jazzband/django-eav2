@@ -86,6 +86,9 @@ class EavAttribute(models.Model):
                                      blank=True, null=True,
                                      help_text=_(u"Short description"))
 
+    enum_group = models.ForeignKey(EnumGroup, verbose_name=_(u"choice group"),
+                                   blank=True, null=True)
+
     @property
     def help_text(self):
         return self.description
@@ -106,6 +109,11 @@ class EavAttribute(models.Model):
             self.slug = EavSlugField.create_slug_from_name(self.name)
         self.full_clean()
         super(EavAttribute, self).save(*args, **kwargs)
+
+    def clean(self):
+        if self.datatype == self.TYPE_ENUM and not enum_group:
+            raise ValidationError(_(
+                u"You must set the enum_group for TYPE_ENUM attributes"))
 
     def add_label(self, label):
         label, created = EavAttributeLabel.objects.get_or_create(name=label)
@@ -219,6 +227,15 @@ class EavValue(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(EavValue, self).save(*args, **kwargs)
+
+    def clean(self):
+        if self.attribute.datatype == EavAttribute.TYPE_ENUM and \
+           self.value_enum:
+            if self.value_enum not in self.attribute.enumvalues:
+                raise ValidationError(_(u"%(choice)s is not a valid " \
+                                        u"choice for %s(attribute)") % \
+                                        {'choice': self.value_enum,
+                                         'attribute': self.attribute})
 
     # todo: do it in a faster way (one update)
     def _blank(self):
