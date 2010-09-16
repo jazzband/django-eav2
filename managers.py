@@ -110,7 +110,7 @@ class EntityManager(models.Manager):
                 expand_q_filters(arg, cls)
         qs = self.get_query_set().exclude(*args)
         for lookup, value in kwargs.items():
-            updated_lookup, extra_filters = expand_filter_string(cls, lookup)
+            updated_lookup, extra_filters = expand_filter_string(lookup, cls)
             extra_filters.update({updated_lookup: value})
             qs = qs.exclude(**extra_filters)
         return qs
