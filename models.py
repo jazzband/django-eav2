@@ -222,7 +222,8 @@ class EavValue(models.Model):
     created = models.DateTimeField(_(u"created"), default=datetime.now)
     modified = models.DateTimeField(_(u"modified"), auto_now=True)
 
-    attribute = models.ForeignKey(EavAttribute)
+    attribute = models.ForeignKey(EavAttribute, db_index=True,
+                                  verbose_name=_(u"attribute"))
 
     def save(self, *args, **kwargs):
         self.full_clean()
