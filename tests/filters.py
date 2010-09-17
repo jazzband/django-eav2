@@ -210,6 +210,10 @@ class EavFilterTests(TestCase):
         self.assertEqual(User.eav_objects.filter(Q(eav__height=20) | Q(eav__weight=10) | Q(eav__weight=15)).count(), 2)
 
     def test_broken_eav_filters(self):
+        '''
+        This test demonstrates a few EAV queries that are known to be broken.
+        it currently fails.
+        ''''
         EavRegistry.register(User)
         
         EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
