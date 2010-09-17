@@ -5,16 +5,23 @@ from django.db import models
 from .models import EavAttribute, EavValue
 
 def eav_filter(func):
+    '''
+    Decorator used to wrap filter and exlclude methods.  Passes args through
+    expand_q_filters and kwargs through expand_eav_filter. Returns the
+    called function (filter or exclude) .distinct()
+    '''
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         new_args = []
         for arg in args:
             if isinstance(arg, models.Q):
                 # modify Q objects (warning: recursion ahead)
-                new_args.append(expand_q_filters(arg, self.model))
+                arg = expand_q_filters(arg, self.model)
+            new_args.append(arg)
 
         new_kwargs = {}
         for key, value in kwargs.items():
+            # modify kwargs (warning: recursion ahead)
             new_key, new_value = expand_eav_filter(self.model, key, value)
             new_kwargs.update({new_key: new_value})
 
@@ -23,6 +30,11 @@ def eav_filter(func):
 
 
 def expand_q_filters(q, root_cls):
+    '''
+    Takes a Q object and a model class.
+    Recursivley passes each filter / value in the Q object tree leaf nodes
+    through expand_eav_filter
+    '''
     new_children = []
     for qi in q.children:
         if type(qi) is tuple:
@@ -38,6 +50,17 @@ def expand_q_filters(q, root_cls):
 
 
 def expand_eav_filter(model_cls, key, value):
+    '''
+    Accepts a model class and a key, value.
+    Recurisively replaces any eav filter with a subquery.
+
+    For example:
+        key = 'eav__height'
+        value = 5
+    Would return:
+        key = 'eav_values__in'
+        value = EavValues.objects.filter(value_int=5, attribute__slug='height')
+    '''
     from .utils import EavRegistry
     fields = key.split('__')
 

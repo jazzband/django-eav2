@@ -161,10 +161,81 @@ class EavFilterTests(TestCase):
 
         self.assertEqual(User.objects.exclude(eav__city='Paris').count(), 2)
 
-        #TODO Exclude and EAV Q objects are broken!
-        #self.assertEqual(User.objects.exclude(Q(eav__city='Paris')).count(), 2)
-
         self.assertEqual(User.objects.filter(Q(eav__city='Paris') & \
                                              Q(username='Bob')).count(), 1)
 
         self.assertEqual(User.objects.filter(Q(eav__city='Paris', username='Jack')).count(), 0)
+
+    def test_you_can_filter_entity_by_q_objects_with_lookups(self):
+        class UserEav(EavConfig):
+            manager_field_name = 'eav_objects'
+        EavRegistry.register(User, UserEav)
+        
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
+                                    name='Height')
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
+                                    name='Weight')
+        u = User.objects.create(username='Bob')
+        u.eav.height = 10
+        u.eav.weight = 20
+        u.save()
+        u = User.objects.create(username='Jack')
+        u.eav.height = 20
+        u.eav.weight = 10
+        u.save()
+        u = User.objects.create(username='Fred')
+        u.eav.height = 15
+        u.eav.weight = 15
+        u.save()
+        '''
+        This is what we have now:
+
+        Username    Hieght      Weight
+        --------    ------      ------
+        Bob          10          20           
+        Jack         20          10
+        Fred         15          15
+        '''
+
+        self.assertEqual(User.eav_objects.filter(eav__height__gt=12).count(), 2)
+        self.assertEqual(User.eav_objects.filter(Q(eav__height__gt=12)).count(), 2)
+        self.assertEqual(User.eav_objects.filter(eav__height__gte=20).count(), 1)
+        self.assertEqual(User.eav_objects.filter(Q(eav__height__gte=20)).count(), 1)
+
+        self.assertEqual(User.eav_objects.filter(Q(eav__height__gte=20) & Q(username='Fred')).count(), 0)
+        self.assertEqual(User.eav_objects.filter(Q(eav__height=15) & Q(username='Fred')).count(), 1)
+
+        self.assertEqual(User.eav_objects.filter(eav__height=20, eav__weight=10).count(), 1)
+
+        self.assertEqual(User.eav_objects.filter(Q(eav__height=20) | Q(eav__weight=10) | Q(eav__weight=15)).count(), 2)
+
+    def test_broken_eav_filters(self):
+        EavRegistry.register(User)
+        
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
+                                    name='Height')
+        EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
+                                    name='Weight')
+        u = User.objects.create(username='Bob')
+        u.eav.height = 10
+        u.eav.weight = 20
+        u.eav.city = 'Paris'
+        u.eav.country = 'France'
+        u.save()
+        u = User.objects.create(username='Jack')
+        u.eav.height = 20
+        u.eav.weight = 10
+        u.eav.city = 'New York'
+        u.eav.country = 'Paris'
+        u.save()
+        u = User.objects.create(username='Fred')
+        u.eav.height = 15
+        u.eav.weight = 15
+        u.eav.city = 'Georgetown'
+        u.eav.country = 'Guyana'
+        u.save()
+
+        self.assertEqual(User.objects.exclude(Q(eav__city='Paris')).count(), 2)
+        self.assertEqual(User.objects.filter(Q(eav__height=20) & Q(eav__weight=10)).count(), 1)
+        
+        
