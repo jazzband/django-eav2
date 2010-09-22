@@ -53,9 +53,6 @@ class BaseEntityAdmin(ModelAdmin):
         return super_meth(request, context, **kwargs)
 
 
-
-
-
 class BaseEntityInlineFormSet(BaseInlineFormSet):
     """
     An inline formset that correctly initializes EAV forms.
@@ -99,7 +96,7 @@ class BaseEntityInline(InlineModelAdmin):
 
 class AttributeAdmin(ModelAdmin):
     list_display = ('name', 'slug', 'datatype', 'description')
-    prepopulated_fields = {'name': ('slug',)}
+    prepopulated_fields = {'slug': ('name',)}
 
 admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(Value)

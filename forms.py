@@ -28,22 +28,6 @@ from django.utils.translation import ugettext_lazy as _
 from .utils import EavRegistry
 
 
-__all__ = ['BaseSchemaForm', 'BaseDynamicEntityForm']
-
-
-class BaseSchemaForm(ModelForm):
-
-    '''
-    def clean_name(self):
-        "Avoid name clashes between static and dynamic attributes."
-        name = self.cleaned_data['name']
-        reserved_names = self._meta.model._meta.get_all_field_names()
-        if name not in reserved_names:
-            return name
-        raise ValidationError(_('Attribute name must not clash with reserved names'
-                                ' ("%s")') % '", "'.join(reserved_names))
-    '''
-
 
 class BaseDynamicEntityForm(ModelForm):
     """
@@ -69,15 +53,15 @@ class BaseDynamicEntityForm(ModelForm):
     def __init__(self, data=None, *args, **kwargs):
         super(BaseDynamicEntityForm, self).__init__(data, *args, **kwargs)
         config_cls = EavRegistry.get_config_cls_for_model(self.instance.__class__)
-        self.proxy = getattr(self.instance, config_cls.eav_attr)
+        self.entity = getattr(self.instance, config_cls.eav_attr)
         self._build_dynamic_fields()
 
     def _build_dynamic_fields(self):
         # reset form fields
         self.fields = deepcopy(self.base_fields)
 
-        for attribute in self.proxy.get_eav_attributes():
-            value = getattr(self.proxy, attribute.slug)
+        for attribute in self.entity.get_all_attributes():
+            value = getattr(self.entity, attribute.slug)
 
             defaults = {
                 'label':     attribute.name.capitalize(),
@@ -120,7 +104,7 @@ class BaseDynamicEntityForm(ModelForm):
         instance = super(BaseDynamicEntityForm, self).save(commit=False)
 
         # assign attributes
-        for attribute in self.proxy.get_eav_attributes():
+        for attribute in self.entity.get_all_attributes():
             value = self.cleaned_data.get(attribute.slug)
             if attribute.datatype == attribute.TYPE_ENUM:
                 if value:
@@ -128,7 +112,7 @@ class BaseDynamicEntityForm(ModelForm):
                 else:
                     value = None
 
-            setattr(self.proxy, attribute.slug, value)
+            setattr(self.entity, attribute.slug, value)
 
         # save entity and its attributes
         if commit:

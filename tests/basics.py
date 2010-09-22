@@ -25,8 +25,8 @@ class EavBasicTests(TestCase):
         self.entity = Patient.objects.create(name="Doe")
 
         self.value = Value.objects.create(entity=self.entity,
-                                             attribute=self.attribute,
-                                             value_text='Denver')
+                                          attribute=self.attribute,
+                                          value_text='Denver')
 
     def tearDown(self):
         EavRegistry.unregister(Patient)
@@ -43,14 +43,10 @@ class EavBasicTests(TestCase):
 
 
     def test_can_eaventity_children_give_you_all_attributes_by_default(self):
-        qs = Patient.eav.get_eav_attributes()
+        p = Patient.objects.create(name='bob')
+        qs = p.eav.get_all_attributes()
         self.assertEqual(list(qs), list(Attribute.objects.all()))
 
-
-    def test_value_creation(self):
-        Value.objects.create(entity=self.entity,
-                                attribute=self.attribute,
-                                value_float=1.2)
 
     def test_value_unicode(self):
         self.assertEqual(unicode(self.value), "Doe - City: \"Denver\"")

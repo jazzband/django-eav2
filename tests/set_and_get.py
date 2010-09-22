@@ -16,7 +16,6 @@ class EavSetterAndGetterTests(TestCase):
 
 
     def setUp(self):
-    
         EavRegistry.unregister(Patient)
         EavRegistry.register(Patient)
 
@@ -27,8 +26,9 @@ class EavSetterAndGetterTests(TestCase):
         self.patient = Patient.objects.create(name="Doe")
 
         self.value = Value.objects.create(entity=self.patient,
-                                             attribute=self.attribute,
-                                             value_text='Denver')
+                                          attribute=self.attribute,
+                                          value_text='Denver')
+
                                              
     def tearDown(self):
         EavRegistry.unregister(Patient)
@@ -38,48 +38,36 @@ class EavSetterAndGetterTests(TestCase):
     def additional_attribute_setup(self):
     
         self.country_attr = Attribute.objects\
-                                .create(datatype=Attribute.TYPE_TEXT,
-                                       name='Country', slug='country')
+                                     .create(datatype=Attribute.TYPE_TEXT,
+                                             name='Country', slug='country')
 
         class PatientEav(EavConfig):
 
             @classmethod
-            def get_eav_attributes(cls):
+            def get_attributes(cls):
                 return Attribute.objects.filter(slug='country')
-                
+
         self.PatientEav = PatientEav
-                
+
         class UserEav(EavConfig):
 
             @classmethod
-            def get_eav_attributes(cls):
+            def get_attributes(cls):
                 return Attribute.objects.filter(slug='city')
-        
-        self.UserEav = UserEav
 
-        
-    def test_get_value_to_entity(self):
-        self.assertEqual(self.attribute.get_value_for_entity(self.patient), 
-                         self.value)
+        self.UserEav = UserEav
                          
                          
     def test_save_single_value(self):
         patient = Patient.objects.create(name="x")
         attr = Attribute.objects.create(datatype=Attribute.TYPE_TEXT,
                                             name='a', slug='a')
-        # does nothing
-        attr._save_single_value(patient)
-        
+     
         # save value
-        attr._save_single_value(patient, 'b')
+        attr.save_value(patient, 'b')
         patient = Patient.objects.get(name="x")
         self.assertEqual(patient.eav.a, 'b')
-        
-        # save value on another attribute
-        attr._save_single_value(patient, 'Paris', self.attribute)
-        patient = Patient.objects.get(name="x")
-        self.assertEqual(patient.eav.city, 'Paris')
-        
+
 
     def test_save_value(self):
         # TODO: update test_save_value when multiple values are out
@@ -169,15 +157,7 @@ class EavSetterAndGetterTests(TestCase):
           
     def test_get_a_value_that_does_not_exists(self):
     
-        # return None for non '_' values
-        self.assertEqual(self.patient.eav.impossible_value, None) 
-        
-        # normal behavior for '_' values
-        try:
-            self.patient.eav._impossible_value
-            self.fail()
-        except AttributeError:
-            pass
+        self.assertFalse(hasattr(self.patient.eav, 'impossible_value'))
 
 
     def test_attributes_are_filtered_according_to_config_class(self):
@@ -188,15 +168,18 @@ class EavSetterAndGetterTests(TestCase):
         EavRegistry.register(Patient, self.PatientEav)
         EavRegistry.register(User, self.UserEav)
 
-        self.assertEqual(list(Patient.eav.get_eav_attributes()),
+        p = Patient.objects.create(name='Bob')
+
+        u = User.objects.create(username='hope')
+
+        self.assertEqual(list(p.eav.get_all_attributes()),
                          list(Attribute.objects.filter(slug='country')))
                         
-        self.assertEqual(list(User.eav.get_eav_attributes()),
+        self.assertEqual(list(u.eav.get_all_attributes()),
                          list(Attribute.objects.filter(slug='city')))
         
         
     def test_can_filter_attribute_availability_for_entity(self):
-        
         self.additional_attribute_setup()
         
         self.patient.eav.city = 'Tunis'
@@ -213,7 +196,7 @@ class EavSetterAndGetterTests(TestCase):
         p.save()
         p = Patient.objects.get(pk=p.pk)
 
-        self.assertFalse(p.eav.city, 'Paris')
+        self.assertFalse(hasattr(p.eav, 'city'))
         self.assertEqual(p.eav.country, 'USA')
         
 
@@ -238,10 +221,10 @@ class EavSetterAndGetterTests(TestCase):
         p = Patient.objects.get(pk=p.pk)
         u = User.objects.get(pk=u.pk)
         
-        self.assertFalse(p.eav.city)
+        self.assertFalse(hasattr(p.eav, 'city'))
         self.assertEqual(p.eav.country, 'USA')
 
-        self.assertFalse(u.eav.country)
+        self.assertFalse(hasattr(u.eav, 'country'))
         self.assertEqual(u.eav.city, 'Paris')
 
 
@@ -254,7 +237,7 @@ class EavSetterAndGetterTests(TestCase):
         class SubPatientEav(self.PatientEav):       
         
             @classmethod
-            def get_eav_attributes(cls):
+            def get_attributes(cls):
                 return Attribute.objects.filter(slug='country')
                 
         EavRegistry.register(Patient, SubPatientEav)
@@ -265,7 +248,7 @@ class EavSetterAndGetterTests(TestCase):
         
         p = Patient.objects.get(pk=self.patient.pk)
         
-        self.assertFalse(p.eav.city)
+        self.assertFalse(hasattr(p.eav, 'city'))
         self.assertEqual(p.eav.country, 'USA')
 
         
@@ -296,18 +279,7 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(self.value.value_object, None)
         
         
-    def test_get_eav_attributes(self):
-    
-        self.additional_attribute_setup()
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient, self.PatientEav)
-        
-        assert list(self.PatientEav.get_eav_attributes_for_model(Patient))\
-               == list(Entity.get_eav_attributes_for_model(Patient))\
-               == list(self.patient.eav.get_eav_attributes())\
-               == list(Patient.eav.get_eav_attributes_for_model(Patient))\
-               == list(Attribute.objects.filter(slug='country'))
-               
+            
                
     def test_values(self):
         self.additional_attribute_setup()
@@ -318,33 +290,7 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(list(self.patient.eav.get_values()),
                          list(Value.objects.exclude(value_text='Denver')))
      
-     
-    def test_get_all_attribute_slugs_for_model(self):
-        
-        self.country_attr = Attribute.objects\
-                                .create(datatype=Attribute.TYPE_TEXT,
-                                       name='Street', slug='street')
-                                       
-        self.additional_attribute_setup()
-        
-        class UserEav(EavConfig):
 
-            @classmethod
-            def get_eav_attributes(cls):
-                return Attribute.objects.exclude(slug='city')
-        
-        EavRegistry.register(User, UserEav)
-        
-        u = User.objects.create(username='John')
-        
-        slugs = dict((s.slug, s) for s in Attribute.objects\
-                                                     .exclude(slug='city'))
-                                                      
-        assert slugs\
-               == Entity.get_all_attribute_slugs_for_model(User)\
-               == User.eav.get_all_attribute_slugs_for_model(User)\
-               == u.eav.get_all_attribute_slugs()
-        
         
     def test_iteration(self):
         self.additional_attribute_setup()

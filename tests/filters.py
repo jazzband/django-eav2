@@ -217,9 +217,11 @@ class EavFilterTests(TestCase):
         EavRegistry.register(User)
         
         Attribute.objects.create(datatype=Attribute.TYPE_INT,
-                                    name='Height')
+                                 name='Height')
+
         Attribute.objects.create(datatype=Attribute.TYPE_FLOAT,
-                                    name='Weight')
+                                 name='Weight')
+
         u = User.objects.create(username='Bob')
         u.eav.height = 10
         u.eav.weight = 20

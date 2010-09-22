@@ -34,7 +34,7 @@ class EavConfig(Entity):
     generic_relation_related_name = None
 
     @classmethod
-    def get_eav_attributes(cls):
+    def get_attributes(cls):
         """
              By default, all attributes apply to an entity,
              unless otherwise specified.
@@ -70,18 +70,7 @@ class EavRegistry(object):
         config_cls = EavRegistry.get_config_cls_for_model(sender)
 
         setattr(instance, config_cls.eav_attr, Entity(instance))
-
-
-    @staticmethod
-    def update_attribute_cache(sender, *args, **kwargs):
-        """
-            Update the attribute cache for all the models every time we
-            create an attribute.
-        """
-        for cache in EavRegistry.cache.itervalues():
-            Entity.update_attr_cache_for_model(cache['model_cls'])
-
-    
+   
     @staticmethod
     def wrap_config_class(model_cls, config_cls):
         """
@@ -132,19 +121,13 @@ class EavRegistry(object):
             
             # todo : not useful anymore ?
             setattr(getattr(model_cls, config_cls.eav_attr),
-                            'get_eav_attributes', config_cls.get_eav_attributes)
+                            'get_attributes', config_cls.get_attributes)
 
         # attache the new manager to the model
         mgr = EntityManager()
         mgr.contribute_to_class(model_cls, config_cls.manager_attr)
         
         if not manager_only:
-            # todo: see with david how to change that
-            try:
-                Entity.update_attr_cache_for_model(model_cls)
-            except DatabaseError:
-                pass
-
             # todo: make that overridable
             # attach the generic relation to the model
             if config_cls.generic_relation_related_name:
@@ -200,15 +183,10 @@ class EavRegistry(object):
             delattr(model_cls, config_cls.eav_attr)
         except AttributeError:
             pass
-
-        if not manager_only:
-            Entity.flush_attr_cache_for_model(model_cls)
             
         EavRegistry.cache.pop(cls_id)
         
      # todo : test cache
      # todo : tst unique identitfier  
      # todo:  test update attribute cache on attribute creation
-     
-post_save.connect(EavRegistry.update_attribute_cache, sender=Attribute)
-post_delete.connect(EavRegistry.update_attribute_cache, sender=Attribute)
+

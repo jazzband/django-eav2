@@ -31,9 +31,9 @@ from .fields import EavSlugField, EavDatatypeField
 
 
 def get_unique_class_identifier(cls):
-    """
-        Return a unique identifier for a class
-    """
+    '''
+    Return a unique identifier for a class
+    '''
     return '.'.join((inspect.getfile(cls), cls.__name__))
 
 
@@ -86,12 +86,12 @@ class Attribute(models.Model):
         (TYPE_ENUM,    _(u"Multiple Choice")),
     )
 
+    name = models.CharField(_(u"name"), max_length=100,
+                            help_text=_(u"User-friendly attribute name"))
+
     slug = EavSlugField(_(u"slug"), max_length=50, db_index=True,
                           help_text=_(u"Short unique attribute label"),
                           unique=True)
-
-    name = models.CharField(_(u"name"), max_length=100,
-                            help_text=_(u"User-friendly attribute name"))
 
     description = models.CharField(_(u"description"), max_length=256,
                                      blank=True, null=True,
@@ -133,59 +133,33 @@ class Attribute(models.Model):
             return None
         return self.enum_group.enums.all()
 
+    '''
+    @classmethod
+    def get_for_entity_class(cls, entity_cls):
+        from .utils import EavRegistry
+        config_cls = EavRegistry.get_config_cls_for_model(entity_cls)
+        return config_cls.get_attributes()
+    '''
 
-    def get_value_for_entity(self, entity):
-        '''
-        Passed any object that may be used as an 'entity' object (is linked
-        to through the generic relation from some EaveValue object. Returns
-        an Value object that has a foreignkey to self (attribute) and
-        to the entity. Returns nothing if a matching Value object
-        doesn't exist.
-        '''
-        ct = ContentType.objects.get_for_model(entity)
-        qs = self.value_set.filter(entity_ct=ct, entity_id=entity.pk)
-        count = qs.count()
-        if count > 1:
-            raise AttributeError(u"You should have one and only one value "\
-                             u"for the attribute %s and the entity %s. Found "\
-                             u"%s" % (self, entity, qs.count()))
-        if count:
-            return qs[0]
-            
-        return None
-         
-         
     def save_value(self, entity, value):
-        """
-            Save any value for an entity, calling the appropriate method
-            according to the type of the value.
-            Value should not be an Value but a normal value
-        """
-        self._save_single_value(entity, value)
-
-
-    def _save_single_value(self, entity, value=None, attribute=None):
-        """
-            Save a a value of type that doesn't need special joining like
-            int, float, text, date, etc.
-        
-            Value should not be an Value object but a normal value.
-            Use attribute if you want to use something else than the current
-            one
-        """
         ct = ContentType.objects.get_for_model(entity)
-        attribute = attribute or self
         try:
-            eavvalue = self.value_set.get(entity_ct=ct,
-                                             entity_id=entity.pk,
-                                             attribute=attribute)
+            value_obj = self.value_set.get(entity_ct=ct,
+                                           entity_id=entity.pk,
+                                           attribute=self)
         except Value.DoesNotExist:
-            eavvalue = self.value_set.model(entity_ct=ct,
-                                               entity_id=entity.pk,
-                                               attribute=attribute)
-        if value != eavvalue.value:
-            eavvalue.value = value
-            eavvalue.save()
+            if value == None:
+                return
+            value_obj = Value.objects.create(entity_ct=ct,
+                                             entity_id=entity.pk,
+                                             attribute=self)
+        if value == None:
+            value_obj.delete()
+            return
+
+        if value != value_obj.value:
+            value_obj.value = value
+            value_obj.save()
 
 
     def __unicode__(self):
@@ -208,6 +182,10 @@ class Value(models.Model):
     <Value: crazy_dev_user - Favorite Drink: "red bull">
 
     '''
+
+    class Meta:
+        unique_together = ('entity_ct', 'entity_id', 'attribute')
+
 
     entity_ct = models.ForeignKey(ContentType, related_name='value_entities')
     entity_id = models.IntegerField()
@@ -233,7 +211,6 @@ class Value(models.Model):
     attribute = models.ForeignKey(Attribute, db_index=True,
                                   verbose_name=_(u"attribute"))
 
-    
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -276,174 +253,64 @@ class Value(models.Model):
 
 class Entity(object):
 
-    _cache = {}
-
     def __init__(self, instance):
         self.model = instance
         self.ct = ContentType.objects.get_for_model(instance)
 
 
-    # TODO: memoize
     def __getattr__(self, name):
-    
         if not name.startswith('_'):
-            attribute = self.get_attribute_by_slug(name)
-            if attribute:
-                value_obj = attribute.get_value_for_entity(self.model)
-                if value_obj:
-                    return value_obj.value
-            return None
-             
+            try:
+                attribute = self.get_attribute_by_slug(name)
+            except Attribute.DoesNotExist:
+                raise AttributeError(_(u"%(obj)s has no EAV attribute named " \
+                                       u"'%(attr)s'") % \
+                                     {'obj':self.model, 'attr':name})
+
+            try:
+                return self.get_value_by_attribute(attribute).value
+            except Value.DoesNotExist:
+                return None
         return object.__getattr__(self, name)
 
-
-    @classmethod   
-    def get_eav_attributes_for_model(cls, model_cls):
-        """
-            Return the attributes for this model
-        """
+    def get_all_attributes(self):
+        '''
+        Return all the attributes that are applicable to self.model.
+        '''
         from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(model_cls)
-        return config_cls.get_eav_attributes()
-
-
-    @classmethod   
-    def get_attr_cache_for_model(cls, model_cls):
-        """
-            Return the attribute cache for this model
-        """
-        return cls._cache.setdefault(get_unique_class_identifier(model_cls), {})
-
-
-    @classmethod
-    def update_attr_cache_for_model(cls, model_cls):
-        """
-            Create or update the attributes cache for this entity class.
-        """
-        cache = cls.get_attr_cache_for_model(model_cls) 
-        cache['attributes'] = cls.get_eav_attributes_for_model(model_cls)\
-                                 .select_related()
-        cache['slug_mapping'] = dict((s.slug, s) for s in cache['attributes'])
-        return cache
-
-
-    @classmethod
-    def flush_attr_cache_for_model(cls, model_cls):
-        """
-            Flush the attributes cache for this entity class
-        """
-        cache = cls.get_attr_cache_for_model(model_cls)
-        cache.clear()
-        return cache
-        
-    
-    def get_eav_attributes(self):
-        """
-            Return the attributes for this model
-        """
-        return self.__class__.get_eav_attributes_for_model(self.model.__class__)
-        
-
-    def update_attr_cache(self):
-        """
-            Create or update the attributes cache for the entity class linked
-            to the current instance.
-        """
-        return self.__class__.update_attr_cache_for_model(self.model.__class__)
-        
-        
-    def flush_attr_cache(self):
-        """
-            Flush the attributes cache for the entity class linked
-            to the current instance.
-        """
-        return self.__class__.flush_attr_cache_for_model(self.model.__class__)
-        
-        
-    def get_attr_cache(self):
-        """
-            Return the attribute cache for the entity class linked
-            to the current instance.
-        """
-        return self.__class__.get_attr_cache_for_model(self.model.__class__)
-
+        config_cls = EavRegistry.get_config_cls_for_model(self.model.__class__)
+        return config_cls.get_attributes()
 
     def save(self):
-        for attribute in self.get_eav_attributes():
+        for attribute in self.get_all_attributes():
             if hasattr(self, attribute.slug):
                 attribute_value = getattr(self, attribute.slug)
                 attribute.save_value(self.model, attribute_value)
 
-
-    @classmethod
-    def get_all_attributes_for_model(cls, model_cls):
-        """
-            Return the current cache or if it doesn't exists, update it
-            and returns it.
-        """
-        cache = cls.get_attr_cache_for_model(model_cls)
-        if not cache:
-            cache = Entity.update_attr_cache_for_model(model_cls)
-
-        return cache['attributes'] 
-        
-
     def get_values(self):
+        '''
+        Get all set EAV Value objects for self.model
+        '''
         return Value.objects.filter(entity_ct=self.ct,
-                                       entity_id=self.model.pk).select_related()
-
-    @classmethod
-    def get_all_attribute_slugs_for_model(cls, model_cls):
-        """
-            Returns all attributes slugs for the entity 
-            class linked to the passed model.
-        """
-        cache = cls.get_attr_cache_for_model(model_cls)
-        if not cache:
-            cache = Entity.update_attr_cache_for_model(model_cls)
-
-        return cache['slug_mapping']
+                                    entity_id=self.model.pk).select_related()
 
 
     def get_all_attribute_slugs(self):
-        """
-            Returns all attributes slugs for the entity 
-            class linked to the current instance.
-        """
-        m_cls = self.model.__class__
-        return self.__class__.get_all_attribute_slugs_for_model(m_cls)
-
-
-    @classmethod
-    def get_attribute_by_slug_for_model(cls, model_cls, slug):
-        """
-            Returns all attributes slugs for the entity 
-            class linked to the passed model.
-        """
-        cache = cls.get_attr_cache_for_model(model_cls)
-        if not cache:
-            cache = Entity.update_attr_cache_for_model(model_cls)
-        return cache['slug_mapping'].get(slug, None)
+        return self.get_all_attributes().values_list('slug', Flat=True)
 
 
     def get_attribute_by_slug(self, slug):
-        m_cls = self.model.__class__
-        return self.__class__.get_attribute_by_slug_for_model(m_cls, slug)
+        return self.get_all_attributes().get(slug=slug)
 
+    def get_value_by_attribute(self, attribute):
+        return self.get_values().get(attribute=attribute)
 
     def __iter__(self):
-        """
-            Iterates over non-empty EAV attributes. Normal fields are not included.
-        """
         return iter(self.get_values())
 
-
-    # todo: cache all changed value in EAV and check against existing attribtue
     @staticmethod
     def save_handler(sender, *args, **kwargs):
         from .utils import EavRegistry
         config_cls = EavRegistry.get_config_cls_for_model(sender)
-        instance_eav = getattr(kwargs['instance'], config_cls.eav_attr)
-        instance_eav.save()
-        
-
+        entity = getattr(kwargs['instance'], config_cls.eav_attr)
+        entity.save()
