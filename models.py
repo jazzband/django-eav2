@@ -125,6 +125,11 @@ class Attribute(models.Model):
                 u"You must set the choice group for multiple choice" \
                 u"attributes"))
 
+        if self.datatype != self.TYPE_ENUM and self.enum_group:
+            raise ValidationError(_(
+                u"You can only assign a choice group to multiple choice " \
+                u"attributes"))
+
     def get_choices(self):
         '''
         Returns the avilable choices for enums.
@@ -133,14 +138,6 @@ class Attribute(models.Model):
             return None
         return self.enum_group.enums.all()
 
-    '''
-    @classmethod
-    def get_for_entity_class(cls, entity_cls):
-        from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(entity_cls)
-        return config_cls.get_attributes()
-    '''
-
     def save_value(self, entity, value):
         ct = ContentType.objects.get_for_model(entity)
         try:
@@ -148,12 +145,12 @@ class Attribute(models.Model):
                                            entity_id=entity.pk,
                                            attribute=self)
         except Value.DoesNotExist:
-            if value == None:
+            if value == None or value == '':
                 return
             value_obj = Value.objects.create(entity_ct=ct,
                                              entity_id=entity.pk,
                                              attribute=self)
-        if value == None:
+        if value == None or value == '':
             value_obj.delete()
             return
 

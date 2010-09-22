@@ -20,9 +20,9 @@
 from copy import deepcopy
 
 # django
-from django.forms import BooleanField, CharField, DateField, FloatField, \
+from django.forms import BooleanField, CharField, DateTimeField, FloatField, \
                          IntegerField, ModelForm, ChoiceField, ValidationError
-from django.contrib.admin.widgets import AdminDateWidget, FilteredSelectMultiple    #, RelatedFieldWidgetWrapper
+from django.contrib.admin.widgets import AdminSplitDateTime
 from django.utils.translation import ugettext_lazy as _
 
 from .utils import EavRegistry
@@ -43,13 +43,11 @@ class BaseDynamicEntityForm(ModelForm):
         'text': CharField,
         'float': FloatField,
         'int': IntegerField,
-        'date': DateField,
+        'date': DateTimeField,
         'bool': BooleanField,
-        'enum': ChoiceField,    #RelatedFieldWidgetWrapper(MultipleChoiceField),
+        'enum': ChoiceField,
     }
-    FIELD_EXTRA = {
-        'date': {'widget': AdminDateWidget},
-    }
+
     def __init__(self, data=None, *args, **kwargs):
         super(BaseDynamicEntityForm, self).__init__(data, *args, **kwargs)
         config_cls = EavRegistry.get_config_cls_for_model(self.instance.__class__)
@@ -80,6 +78,10 @@ class BaseDynamicEntityForm(ModelForm):
                 if value:
                     defaults.update({'initial': value.pk})
 
+            elif datatype == attribute.TYPE_DATE:
+                defaults.update({'widget': AdminSplitDateTime})
+            elif datatype == attribute.TYPE_OBJECT:
+                continue
 
             MappedField = self.FIELD_CLASSES[datatype]
             self.fields[attribute.slug] = MappedField(**defaults)

@@ -69,7 +69,7 @@ class EavDatatypeField(models.CharField):
         from .models import Attribute
         if not instance.pk:
             return
-        if value != Attribute.objects.get(pk=instance.pk).datatype:
+        if instance.value_set.count():
             raise ValidationError(_(u"You cannot change the datatype of an "
-                                    u"existing attribute."))
+                                    u"attribute that is already in use."))
 
