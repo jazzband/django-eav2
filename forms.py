@@ -63,7 +63,7 @@ class BaseDynamicEntityForm(ModelForm):
 
             defaults = {
                 'label':     attribute.name.capitalize(),
-                'required':  False,
+                'required':  attribute.required,
                 'help_text': attribute.help_text,
             }
 

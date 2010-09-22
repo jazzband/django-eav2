@@ -19,7 +19,7 @@
 
 from django.contrib.contenttypes import generic
 from django.db.utils import DatabaseError
-from django.db.models.signals import post_init, post_save, post_delete, pre_init
+from django.db.models.signals import pre_init, post_init, pre_save, post_save
 from .managers import EntityManager
 from .models import (Entity, Attribute, Value, 
                      get_unique_class_identifier)
@@ -101,7 +101,8 @@ class EavRegistry(object):
             # we want to call attach and save handler on instance creation and
             # saving            
             post_init.connect(EavRegistry.attach, sender=model_cls)
-            post_save.connect(Entity.save_handler, sender=model_cls)
+            post_save.connect(Entity.post_save_handler, sender=model_cls)
+            pre_save.connect(Entity.pre_save_handler, sender=model_cls)
         
         # todo: rename cache in data
         EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
@@ -157,7 +158,8 @@ class EavRegistry(object):
         manager_only = cache['manager_only']
         if not manager_only:
             post_init.disconnect(EavRegistry.attach, sender=model_cls)
-            post_save.disconnect(Entity.save_handler, sender=model_cls)
+            post_save.disconnect(Entity.post_save_handler, sender=model_cls)
+            pre_save.disconnect(Entity.pre_save_handler, sender=model_cls)
         
         try:
             delattr(model_cls, config_cls.manager_attr)

@@ -21,7 +21,7 @@ import inspect
 import re
 from datetime import datetime
 
-from django.db import models
+from django.db import models, IntegrityError
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
@@ -111,6 +111,8 @@ class Attribute(models.Model):
                                    editable=False)
 
     modified = models.DateTimeField(_(u"modified"), auto_now=True)
+
+    required = models.BooleanField(_(u"required"), default=False)
 
 
     def save(self, *args, **kwargs):
@@ -284,6 +286,13 @@ class Entity(object):
                 attribute_value = getattr(self, attribute.slug)
                 attribute.save_value(self.model, attribute_value)
 
+    def check_all_required(self):
+        for attribute in self.get_all_attributes():
+            if getattr(self, attribute.slug, None) is None and \
+               attribute.required:
+                raise IntegrityError(_(u"%(attr)s EAV field cannot be " \
+                                       u"blank") % {'attr':attribute.slug})
+
     def get_values(self):
         '''
         Get all set EAV Value objects for self.model
@@ -291,10 +300,8 @@ class Entity(object):
         return Value.objects.filter(entity_ct=self.ct,
                                     entity_id=self.model.pk).select_related()
 
-
     def get_all_attribute_slugs(self):
         return self.get_all_attributes().values_list('slug', Flat=True)
-
 
     def get_attribute_by_slug(self, slug):
         return self.get_all_attributes().get(slug=slug)
@@ -306,8 +313,15 @@ class Entity(object):
         return iter(self.get_values())
 
     @staticmethod
-    def save_handler(sender, *args, **kwargs):
+    def post_save_handler(sender, *args, **kwargs):
         from .utils import EavRegistry
         config_cls = EavRegistry.get_config_cls_for_model(sender)
         entity = getattr(kwargs['instance'], config_cls.eav_attr)
         entity.save()
+
+    @staticmethod
+    def pre_save_handler(sender, *args, **kwargs):
+        from .utils import EavRegistry
+        config_cls = EavRegistry.get_config_cls_for_model(sender)
+        entity = getattr(kwargs['instance'], config_cls.eav_attr)
+        entity.check_all_required()
