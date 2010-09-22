@@ -37,14 +37,6 @@ def get_unique_class_identifier(cls):
     return '.'.join((inspect.getfile(cls), cls.__name__))
 
 
-class EavAttributeLabel(models.Model):
-    name = models.CharField(_(u"name"), db_index=True,
-                            unique=True, max_length=100)
-
-    def __unicode__(self):
-        return self.name
-
-
 class EnumValue(models.Model):
     value = models.CharField(_(u"value"), db_index=True,
                              unique=True, max_length=50)
@@ -62,16 +54,16 @@ class EnumGroup(models.Model):
         return self.name
 
 
-class EavAttribute(models.Model):
+class Attribute(models.Model):
     '''
     The A model in E-A-V. This holds the 'concepts' along with the data type
     something like:
 
-    >>> EavAttribute.objects.create(name='Height', datatype='float')
-    <EavAttribute: Height (Float)>
+    >>> Attribute.objects.create(name='Height', datatype='float')
+    <Attribute: Height (Float)>
 
-    >>> EavAttribute.objects.create(name='Color', datatype='text', slug='color')
-    <EavAttribute: Color (Text)>
+    >>> Attribute.objects.create(name='Color', datatype='text', slug='color')
+    <Attribute: Color (Text)>
     '''
     class Meta:
         ordering = ['name']
@@ -115,47 +107,43 @@ class EavAttribute(models.Model):
     datatype = EavDatatypeField(_(u"data type"), max_length=6,
                                 choices=DATATYPE_CHOICES)
 
-    created = models.DateTimeField(_(u"created"), default=datetime.now)
+    created = models.DateTimeField(_(u"created"), default=datetime.now,
+                                   editable=False)
 
     modified = models.DateTimeField(_(u"modified"), auto_now=True)
-
-    labels = models.ManyToManyField(EavAttributeLabel,
-                                    verbose_name=_(u"labels"))
 
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = EavSlugField.create_slug_from_name(self.name)
         self.full_clean()
-        super(EavAttribute, self).save(*args, **kwargs)
+        super(Attribute, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.datatype == self.TYPE_ENUM and not enum_group:
+        if self.datatype == self.TYPE_ENUM and not self.enum_group:
             raise ValidationError(_(
-                u"You must set the enum_group for TYPE_ENUM attributes"))
+                u"You must set the choice group for multiple choice" \
+                u"attributes"))
 
-    def add_label(self, label):
-        label, created = EavAttributeLabel.objects.get_or_create(name=label)
-        label.eavattribute_set.add(self)
-
-    def remove_label(self, label):
-        try:
-            label_obj = EavAttributeLabel.objects.get(name=label)
-        except EavAttributeLabel.DoesNotExist:
-            return
-        self.labels.remove(label_obj)
+    def get_choices(self):
+        '''
+        Returns the avilable choices for enums.
+        '''
+        if not self.datatype == Attribute.TYPE_ENUM:
+            return None
+        return self.enum_group.enums.all()
 
 
     def get_value_for_entity(self, entity):
         '''
         Passed any object that may be used as an 'entity' object (is linked
         to through the generic relation from some EaveValue object. Returns
-        an EavValue object that has a foreignkey to self (attribute) and
-        to the entity. Returns nothing if a matching EavValue object
+        an Value object that has a foreignkey to self (attribute) and
+        to the entity. Returns nothing if a matching Value object
         doesn't exist.
         '''
         ct = ContentType.objects.get_for_model(entity)
-        qs = self.eavvalue_set.filter(entity_ct=ct, entity_id=entity.pk)
+        qs = self.value_set.filter(entity_ct=ct, entity_id=entity.pk)
         count = qs.count()
         if count > 1:
             raise AttributeError(u"You should have one and only one value "\
@@ -171,7 +159,7 @@ class EavAttribute(models.Model):
         """
             Save any value for an entity, calling the appropriate method
             according to the type of the value.
-            Value should not be an EavValue but a normal value
+            Value should not be an Value but a normal value
         """
         self._save_single_value(entity, value)
 
@@ -181,18 +169,18 @@ class EavAttribute(models.Model):
             Save a a value of type that doesn't need special joining like
             int, float, text, date, etc.
         
-            Value should not be an EavValue object but a normal value.
+            Value should not be an Value object but a normal value.
             Use attribute if you want to use something else than the current
             one
         """
         ct = ContentType.objects.get_for_model(entity)
         attribute = attribute or self
         try:
-            eavvalue = self.eavvalue_set.get(entity_ct=ct,
+            eavvalue = self.value_set.get(entity_ct=ct,
                                              entity_id=entity.pk,
                                              attribute=attribute)
-        except EavValue.DoesNotExist:
-            eavvalue = self.eavvalue_set.model(entity_ct=ct,
+        except Value.DoesNotExist:
+            eavvalue = self.value_set.model(entity_ct=ct,
                                                entity_id=entity.pk,
                                                attribute=attribute)
         if value != eavvalue.value:
@@ -204,7 +192,7 @@ class EavAttribute(models.Model):
         return u"%s (%s)" % (self.name, self.get_datatype_display())
 
 
-class EavValue(models.Model):
+class Value(models.Model):
     '''
     The V model in E-A-V. This holds the 'value' for an attribute and an
     entity:
@@ -214,10 +202,10 @@ class EavValue(models.Model):
     >>> from .utils import EavRegistry
     >>> EavRegistry.register(User)
     >>> u = User.objects.create(username='crazy_dev_user')
-    >>> a = EavAttribute.objects.create(name='Favorite Drink', datatype='text',
+    >>> a = Attribute.objects.create(name='Favorite Drink', datatype='text',
     ... slug='fav_drink')
-    >>> EavValue.objects.create(entity=u, attribute=a, value_text='red bull')
-    <EavValue: crazy_dev_user - Favorite Drink: "red bull">
+    >>> Value.objects.create(entity=u, attribute=a, value_text='red bull')
+    <Value: crazy_dev_user - Favorite Drink: "red bull">
 
     '''
 
@@ -230,7 +218,8 @@ class EavValue(models.Model):
     value_int = models.IntegerField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
     value_bool = models.NullBooleanField(blank=True, null=True)
-    value_enum = models.ForeignKey(EnumValue, blank=True, null=True)
+    value_enum = models.ForeignKey(EnumValue, blank=True, null=True,
+                                   related_name='eav_values')
 
     generic_value_id = models.IntegerField(blank=True, null=True)
     generic_value_ct = models.ForeignKey(ContentType, blank=True, null=True,
@@ -241,17 +230,19 @@ class EavValue(models.Model):
     created = models.DateTimeField(_(u"created"), default=datetime.now)
     modified = models.DateTimeField(_(u"modified"), auto_now=True)
 
-    attribute = models.ForeignKey(EavAttribute, db_index=True,
+    attribute = models.ForeignKey(Attribute, db_index=True,
                                   verbose_name=_(u"attribute"))
+
+    
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        super(EavValue, self).save(*args, **kwargs)
+        super(Value, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.attribute.datatype == EavAttribute.TYPE_ENUM and \
+        if self.attribute.datatype == Attribute.TYPE_ENUM and \
            self.value_enum:
-            if self.value_enum not in self.attribute.enumvalues:
+            if self.value_enum not in self.attribute.enum_group.enums.all():
                 raise ValidationError(_(u"%(choice)s is not a valid " \
                                         u"choice for %s(attribute)") % \
                                         {'choice': self.value_enum,
@@ -266,10 +257,9 @@ class EavValue(models.Model):
             if field.name.startswith('value_') and field.null == True:
                 setattr(self, field.name, None)
 
-
     def _get_value(self):
         """
-            Get returns the Python object hold by this EavValue object.
+            Get returns the Python object hold by this Value object.
         """
         return getattr(self, 'value_%s' % self.attribute.datatype)
 
@@ -284,7 +274,7 @@ class EavValue(models.Model):
         return u"%s - %s: \"%s\"" % (self.entity, self.attribute.name, self.value)
 
 
-class EavEntity(object):
+class Entity(object):
 
     _cache = {}
 
@@ -393,13 +383,13 @@ class EavEntity(object):
         """
         cache = cls.get_attr_cache_for_model(model_cls)
         if not cache:
-            cache = EavEntity.update_attr_cache_for_model(model_cls)
+            cache = Entity.update_attr_cache_for_model(model_cls)
 
         return cache['attributes'] 
         
 
     def get_values(self):
-        return EavValue.objects.filter(entity_ct=self.ct,
+        return Value.objects.filter(entity_ct=self.ct,
                                        entity_id=self.model.pk).select_related()
 
     @classmethod
@@ -410,7 +400,7 @@ class EavEntity(object):
         """
         cache = cls.get_attr_cache_for_model(model_cls)
         if not cache:
-            cache = EavEntity.update_attr_cache_for_model(model_cls)
+            cache = Entity.update_attr_cache_for_model(model_cls)
 
         return cache['slug_mapping']
 
@@ -432,7 +422,7 @@ class EavEntity(object):
         """
         cache = cls.get_attr_cache_for_model(model_cls)
         if not cache:
-            cache = EavEntity.update_attr_cache_for_model(model_cls)
+            cache = Entity.update_attr_cache_for_model(model_cls)
         return cache['slug_mapping'].get(slug, None)
 
 
@@ -453,7 +443,7 @@ class EavEntity(object):
     def save_handler(sender, *args, **kwargs):
         from .utils import EavRegistry
         config_cls = EavRegistry.get_config_cls_for_model(sender)
-        instance_eav = getattr(kwargs['instance'], config_cls.proxy_field_name)
+        instance_eav = getattr(kwargs['instance'], config_cls.eav_attr)
         instance_eav.save()
         
 

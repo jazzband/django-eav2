@@ -19,12 +19,12 @@ class EavBasicTests(TestCase):
         EavRegistry.unregister(Patient)
         EavRegistry.register(Patient)
 
-        self.attribute = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
+        self.attribute = Attribute.objects.create(datatype=Attribute.TYPE_TEXT,
                                                 name='City', help_text='The City', slug='city')
                                                 
         self.entity = Patient.objects.create(name="Doe")
 
-        self.value = EavValue.objects.create(entity=self.entity,
+        self.value = Value.objects.create(entity=self.entity,
                                              attribute=self.attribute,
                                              value_text='Denver')
 
@@ -37,18 +37,18 @@ class EavBasicTests(TestCase):
 
 
     def test_can_create_attribute(self):
-        EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
+        Attribute.objects.create(datatype=Attribute.TYPE_TEXT,
                                     name='My text test', slug='test',
                                     help_text='My help text')
 
 
     def test_can_eaventity_children_give_you_all_attributes_by_default(self):
         qs = Patient.eav.get_eav_attributes()
-        self.assertEqual(list(qs), list(EavAttribute.objects.all()))
+        self.assertEqual(list(qs), list(Attribute.objects.all()))
 
 
     def test_value_creation(self):
-        EavValue.objects.create(entity=self.entity,
+        Value.objects.create(entity=self.entity,
                                 attribute=self.attribute,
                                 value_float=1.2)
 
@@ -58,20 +58,20 @@ class EavBasicTests(TestCase):
 
 
     def test_value_types(self):
-        _text = EavAttribute.objects.create(datatype=EavAttribute.TYPE_TEXT,
+        _text = Attribute.objects.create(datatype=Attribute.TYPE_TEXT,
                                             name='Text', slug='text',
                                             help_text='The text')
-        val = EavValue.objects.create(entity=self.entity,
+        val = Value.objects.create(entity=self.entity,
                                        attribute = _text)
         value = "Test text"
         val.value = value
         val.save()
         self.assertEqual(val.value, value)              
 
-        _float = EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
+        _float = Attribute.objects.create(datatype=Attribute.TYPE_FLOAT,
                                              name='Float', slug='float',
                                              help_text='The float')
-        val = EavValue.objects.create(entity=self.entity,
+        val = Value.objects.create(entity=self.entity,
                                        attribute = _float)
         value = 1.22
         val.value = value
@@ -79,30 +79,30 @@ class EavBasicTests(TestCase):
         self.assertEqual(val.value, value)
 
 
-        _int = EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
+        _int = Attribute.objects.create(datatype=Attribute.TYPE_INT,
                                            name='Int', slug='int',
                                            help_text='The int')
-        val = EavValue.objects.create(entity=self.entity,
+        val = Value.objects.create(entity=self.entity,
                                        attribute = _int)
         value = 7
         val.value = value
         val.save()
         self.assertEqual(val.value, value)
 
-        _date = EavAttribute.objects.create(datatype=EavAttribute.TYPE_DATE,
+        _date = Attribute.objects.create(datatype=Attribute.TYPE_DATE,
                                             name='Date', slug='date',
                                             help_text='The date')
-        val = EavValue.objects.create(entity=self.entity,
+        val = Value.objects.create(entity=self.entity,
                                        attribute = _date)
         value = datetime.now()
         val.value = value
         val.save()
         self.assertEqual(val.value, value)
 
-        _bool = EavAttribute.objects.create(datatype=EavAttribute.TYPE_BOOLEAN,
+        _bool = Attribute.objects.create(datatype=Attribute.TYPE_BOOLEAN,
                                             name='Bool', slug='bool',
                                             help_text='The bool')
-        val = EavValue.objects.create(entity=self.entity,
+        val = Value.objects.create(entity=self.entity,
                                        attribute = _bool)
         value = False
         val.value = value
@@ -141,7 +141,7 @@ class EavBasicTests(TestCase):
 
             @classmethod
             def get_eav_attributes(self):
-                return EavAttribute.objects.all()
+                return Attribute.objects.all()
 
         EavRegistry.register(Patient, PatientEav)
         
@@ -159,10 +159,10 @@ class EavBasicTests(TestCase):
 
         class PatientEav(EavConfig):
 
-            proxy_field_name = 'my_eav'
-            manager_field_name ='my_objects'
-            generic_relation_field_name = 'my_eav_values'
-            generic_relation_field_related_name = "patient"
+            eav_attr = 'my_eav'
+            manager_attr ='my_objects'
+            generic_relation_attr  = 'my_eav_values'
+            generic_relation_related_name = "patient"
 
         EavRegistry.register(Patient, PatientEav)
         
@@ -174,8 +174,8 @@ class EavBasicTests(TestCase):
                          
         p2.my_eav.city = "Mbrarare"
         p2.save()
-        value = EavValue.objects.get(value_text='Mbrarare')
-        name = PatientEav.generic_relation_field_related_name
+        value = Value.objects.get(value_text='Mbrarare')
+        name = PatientEav.generic_relation_related_name
         self.assertTrue(value, name)
                          
         bak_registered_manager = Patient.objects 

@@ -21,13 +21,13 @@ class EavFilterTests(TestCase):
         EavRegistry.unregister(Patient)
         EavRegistry.register(Patient)
 
-        self.attribute = EavAttribute.objects\
-                                     .create(datatype=EavAttribute.TYPE_TEXT,
+        self.attribute = Attribute.objects\
+                                     .create(datatype=Attribute.TYPE_TEXT,
                                              name='City', slug='city')
                                                 
         self.patient = Patient.objects.create(name="Doe")
 
-        self.value = EavValue.objects.create(entity=self.patient,
+        self.value = Value.objects.create(entity=self.patient,
                                              attribute=self.attribute,
                                              value_text='Denver')
                                              
@@ -38,15 +38,15 @@ class EavFilterTests(TestCase):
 
     def additional_attribute_setup(self):
     
-        self.country_attr = EavAttribute.objects\
-                                .create(datatype=EavAttribute.TYPE_TEXT,
+        self.country_attr = Attribute.objects\
+                                .create(datatype=Attribute.TYPE_TEXT,
                                        name='Country', slug='country')
 
         class PatientEav(EavConfig):
 
             @classmethod
             def get_eav_attributes(cls):
-                return EavAttribute.objects.filter(slug='country')
+                return Attribute.objects.filter(slug='country')
                 
         self.PatientEav = PatientEav
                 
@@ -54,7 +54,7 @@ class EavFilterTests(TestCase):
 
             @classmethod
             def get_eav_attributes(cls):
-                return EavAttribute.objects.all()
+                return Attribute.objects.all()
         
         self.UserEav = UserEav
         EavRegistry.register(User, UserEav)
@@ -71,7 +71,7 @@ class EavFilterTests(TestCase):
     #    self.patient.save()
         
         
-        #print EavEntity.objects.filter(eav__city='Paris')
+        #print Entity.objects.filter(eav__city='Paris')
         
                          
     def test_you_can_filter_entity_by_attribute_values(self):
@@ -168,12 +168,12 @@ class EavFilterTests(TestCase):
 
     def test_you_can_filter_entity_by_q_objects_with_lookups(self):
         class UserEav(EavConfig):
-            manager_field_name = 'eav_objects'
+            manager_attr = 'eav_objects'
         EavRegistry.register(User, UserEav)
         
-        EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
+        Attribute.objects.create(datatype=Attribute.TYPE_INT,
                                     name='Height')
-        EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
+        Attribute.objects.create(datatype=Attribute.TYPE_FLOAT,
                                     name='Weight')
         u = User.objects.create(username='Bob')
         u.eav.height = 10
@@ -213,12 +213,12 @@ class EavFilterTests(TestCase):
         '''
         This test demonstrates a few EAV queries that are known to be broken.
         it currently fails.
-        ''''
+        '''
         EavRegistry.register(User)
         
-        EavAttribute.objects.create(datatype=EavAttribute.TYPE_INT,
+        Attribute.objects.create(datatype=Attribute.TYPE_INT,
                                     name='Height')
-        EavAttribute.objects.create(datatype=EavAttribute.TYPE_FLOAT,
+        Attribute.objects.create(datatype=Attribute.TYPE_FLOAT,
                                     name='Weight')
         u = User.objects.create(username='Bob')
         u.eav.height = 10

@@ -21,7 +21,7 @@ from functools import wraps
 
 from django.db import models
 
-from .models import EavAttribute, EavValue
+from .models import Attribute, Value
 
 def eav_filter(func):
     '''
@@ -78,22 +78,22 @@ def expand_eav_filter(model_cls, key, value):
         value = 5
     Would return:
         key = 'eav_values__in'
-        value = EavValues.objects.filter(value_int=5, attribute__slug='height')
+        value = Values.objects.filter(value_int=5, attribute__slug='height')
     '''
     from .utils import EavRegistry
     fields = key.split('__')
 
     config_cls = EavRegistry.get_config_cls_for_model(model_cls)
     if len(fields) > 1 and config_cls and \
-       fields[0] == config_cls.proxy_field_name:
+       fields[0] == config_cls.eav_attr:
         slug = fields[1]
-        gr_name = config_cls.generic_relation_field_name
-        datatype = EavAttribute.objects.get(slug=slug).datatype
+        gr_name = config_cls.generic_relation_attr
+        datatype = Attribute.objects.get(slug=slug).datatype
 
         lookup = '__%s' % fields[2] if len(fields) > 2 else ''
         kwargs = {'value_%s%s' % (datatype, lookup): value,
                   'attribute__slug': slug}
-        value = EavValue.objects.filter(**kwargs)
+        value = Value.objects.filter(**kwargs)
 
         return '%s__in' % gr_name, value
 

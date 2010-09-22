@@ -66,9 +66,10 @@ class EavDatatypeField(models.CharField):
             once it have been created.
         """
         super(EavDatatypeField, self).validate(value, instance)
-        from .models import EavAttribute
+        from .models import Attribute
         if not instance.pk:
             return
-        if value != EavAttribute.objects.get(pk=instance.pk).datatype:
+        if value != Attribute.objects.get(pk=instance.pk).datatype:
             raise ValidationError(_(u"You cannot change the datatype of an "
                                     u"existing attribute."))
+

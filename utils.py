@@ -21,17 +21,17 @@ from django.contrib.contenttypes import generic
 from django.db.utils import DatabaseError
 from django.db.models.signals import post_init, post_save, post_delete, pre_init
 from .managers import EntityManager
-from .models import (EavEntity, EavAttribute, EavValue, 
+from .models import (Entity, Attribute, Value, 
                      get_unique_class_identifier)
 
 
 #todo : rename this file in registry
-class EavConfig(EavEntity):
+class EavConfig(Entity):
 
-    proxy_field_name = 'eav'
-    manager_field_name ='objects'
-    generic_relation_field_name = 'eav_values'
-    generic_relation_field_related_name = None
+    eav_attr = 'eav'
+    manager_attr ='objects'
+    generic_relation_attr = 'eav_values'
+    generic_relation_related_name = None
 
     @classmethod
     def get_eav_attributes(cls):
@@ -39,7 +39,7 @@ class EavConfig(EavEntity):
              By default, all attributes apply to an entity,
              unless otherwise specified.
         """
-        return EavAttribute.objects.all()
+        return Attribute.objects.all()
         
 
 class EavRegistry(object):
@@ -69,7 +69,7 @@ class EavRegistry(object):
         instance = kwargs['instance']
         config_cls = EavRegistry.get_config_cls_for_model(sender)
 
-        setattr(instance, config_cls.proxy_field_name, EavEntity(instance))
+        setattr(instance, config_cls.eav_attr, Entity(instance))
 
 
     @staticmethod
@@ -79,7 +79,7 @@ class EavRegistry(object):
             create an attribute.
         """
         for cache in EavRegistry.cache.itervalues():
-            EavEntity.update_attr_cache_for_model(cache['model_cls'])
+            Entity.update_attr_cache_for_model(cache['model_cls'])
 
     
     @staticmethod
@@ -112,7 +112,7 @@ class EavRegistry(object):
             # we want to call attach and save handler on instance creation and
             # saving            
             post_init.connect(EavRegistry.attach, sender=model_cls)
-            post_save.connect(EavEntity.save_handler, sender=model_cls)
+            post_save.connect(Entity.save_handler, sender=model_cls)
         
         # todo: rename cache in data
         EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
@@ -121,38 +121,38 @@ class EavRegistry(object):
 
         # save the old manager if the attribute name conflict with the new
         # one
-        if hasattr(model_cls, config_cls.manager_field_name):
-            mgr = getattr(model_cls, config_cls.manager_field_name)
+        if hasattr(model_cls, config_cls.manager_attr):
+            mgr = getattr(model_cls, config_cls.manager_attr)
             EavRegistry.cache[cls_id]['old_mgr'] = mgr
 
         if not manager_only:
             # set add the config_cls as an attribute of the model
             # it will allow to perform some operation directly from this model
-            setattr(model_cls, config_cls.proxy_field_name, config_cls)
+            setattr(model_cls, config_cls.eav_attr, config_cls)
             
             # todo : not useful anymore ?
-            setattr(getattr(model_cls, config_cls.proxy_field_name),
+            setattr(getattr(model_cls, config_cls.eav_attr),
                             'get_eav_attributes', config_cls.get_eav_attributes)
 
         # attache the new manager to the model
         mgr = EntityManager()
-        mgr.contribute_to_class(model_cls, config_cls.manager_field_name)
+        mgr.contribute_to_class(model_cls, config_cls.manager_attr)
         
         if not manager_only:
             # todo: see with david how to change that
             try:
-                EavEntity.update_attr_cache_for_model(model_cls)
+                Entity.update_attr_cache_for_model(model_cls)
             except DatabaseError:
                 pass
 
             # todo: make that overridable
             # attach the generic relation to the model
-            if config_cls.generic_relation_field_related_name:
-                rel_name = config_cls.generic_relation_field_related_name
+            if config_cls.generic_relation_related_name:
+                rel_name = config_cls.generic_relation_related_name
             else:
                 rel_name = model_cls.__name__
-            gr_name = config_cls.generic_relation_field_name.lower()
-            generic_relation = generic.GenericRelation(EavValue,
+            gr_name = config_cls.generic_relation_attr.lower()
+            generic_relation = generic.GenericRelation(Value,
                                                        object_id_field='entity_id',
                                                        content_type_field='entity_ct',
                                                        related_name=rel_name)
@@ -174,15 +174,15 @@ class EavRegistry(object):
         manager_only = cache['manager_only']
         if not manager_only:
             post_init.disconnect(EavRegistry.attach, sender=model_cls)
-            post_save.disconnect(EavEntity.save_handler, sender=model_cls)
+            post_save.disconnect(Entity.save_handler, sender=model_cls)
         
         try:
-            delattr(model_cls, config_cls.manager_field_name)
+            delattr(model_cls, config_cls.manager_attr)
         except AttributeError:
             pass
 
         # remove remaining reference to the generic relation
-        gen_rel_field = config_cls.generic_relation_field_name
+        gen_rel_field = config_cls.generic_relation_attr
         for field in model_cls._meta.local_many_to_many:
             if field.name == gen_rel_field:
                 model_cls._meta.local_many_to_many.remove(field)
@@ -194,15 +194,15 @@ class EavRegistry(object):
         
         if 'old_mgr' in cache:
             cache['old_mgr'].contribute_to_class(model_cls, 
-                                                config_cls.manager_field_name)
+                                                config_cls.manager_attr)
 
         try:
-            delattr(model_cls, config_cls.proxy_field_name)
+            delattr(model_cls, config_cls.eav_attr)
         except AttributeError:
             pass
 
         if not manager_only:
-            EavEntity.flush_attr_cache_for_model(model_cls)
+            Entity.flush_attr_cache_for_model(model_cls)
             
         EavRegistry.cache.pop(cls_id)
         
@@ -210,5 +210,5 @@ class EavRegistry(object):
      # todo : tst unique identitfier  
      # todo:  test update attribute cache on attribute creation
      
-post_save.connect(EavRegistry.update_attribute_cache, sender=EavAttribute)
-post_delete.connect(EavRegistry.update_attribute_cache, sender=EavAttribute)
+post_save.connect(EavRegistry.update_attribute_cache, sender=Attribute)
+post_delete.connect(EavRegistry.update_attribute_cache, sender=Attribute)
