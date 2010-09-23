@@ -25,7 +25,6 @@ from .models import (Entity, Attribute, Value,
                      get_unique_class_identifier)
 
 
-#todo : rename this file in registry
 class EavConfig(Entity):
 
     eav_attr = 'eav'
@@ -42,7 +41,7 @@ class EavConfig(Entity):
         return Attribute.objects.all()
         
 
-class EavRegistry(object):
+class Registry(object):
     """
         Tools to add eav features to models
     """
@@ -57,8 +56,8 @@ class EavRegistry(object):
         """
         cls_id = get_unique_class_identifier(model_cls)
 
-        if cls_id in EavRegistry.cache:
-            return EavRegistry.cache[cls_id]['config_cls']
+        if cls_id in Registry.cache:
+            return Registry.cache[cls_id]['config_cls']
 
 
     @staticmethod
@@ -67,7 +66,7 @@ class EavRegistry(object):
             Attache EAV toolkit to an instance after init.
         """
         instance = kwargs['instance']
-        config_cls = EavRegistry.get_config_cls_for_model(sender)
+        config_cls = Registry.get_config_cls_for_model(sender)
 
         setattr(instance, config_cls.eav_attr, Entity(instance))
    
@@ -92,20 +91,20 @@ class EavRegistry(object):
         
         cls_id = get_unique_class_identifier(model_cls)
         
-        if cls_id in EavRegistry.cache:
+        if cls_id in Registry.cache:
             return
         
-        config_cls = EavRegistry.wrap_config_class(model_cls, config_cls)
+        config_cls = Registry.wrap_config_class(model_cls, config_cls)
         
         if not manager_only:
             # we want to call attach and save handler on instance creation and
             # saving            
-            post_init.connect(EavRegistry.attach, sender=model_cls)
+            post_init.connect(Registry.attach, sender=model_cls)
             post_save.connect(Entity.post_save_handler, sender=model_cls)
             pre_save.connect(Entity.pre_save_handler, sender=model_cls)
         
         # todo: rename cache in data
-        EavRegistry.cache[cls_id] = { 'config_cls': config_cls,
+        Registry.cache[cls_id] = { 'config_cls': config_cls,
                                       'model_cls': model_cls,
                                       'manager_only': manager_only } 
 
@@ -113,7 +112,7 @@ class EavRegistry(object):
         # one
         if hasattr(model_cls, config_cls.manager_attr):
             mgr = getattr(model_cls, config_cls.manager_attr)
-            EavRegistry.cache[cls_id]['old_mgr'] = mgr
+            Registry.cache[cls_id]['old_mgr'] = mgr
 
         if not manager_only:
             # set add the config_cls as an attribute of the model
@@ -150,14 +149,14 @@ class EavRegistry(object):
         """
         cls_id = get_unique_class_identifier(model_cls)
         
-        if not cls_id in EavRegistry.cache:
+        if not cls_id in Registry.cache:
             return
 
-        cache = EavRegistry.cache[cls_id]
+        cache = Registry.cache[cls_id]
         config_cls = cache['config_cls']
         manager_only = cache['manager_only']
         if not manager_only:
-            post_init.disconnect(EavRegistry.attach, sender=model_cls)
+            post_init.disconnect(Registry.attach, sender=model_cls)
             post_save.disconnect(Entity.post_save_handler, sender=model_cls)
             pre_save.disconnect(Entity.pre_save_handler, sender=model_cls)
         
@@ -186,7 +185,7 @@ class EavRegistry(object):
         except AttributeError:
             pass
             
-        EavRegistry.cache.pop(cls_id)
+        Registry.cache.pop(cls_id)
         
      # todo : test cache
      # todo : tst unique identitfier  

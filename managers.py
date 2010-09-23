@@ -80,10 +80,10 @@ def expand_eav_filter(model_cls, key, value):
         key = 'eav_values__in'
         value = Values.objects.filter(value_int=5, attribute__slug='height')
     '''
-    from .utils import EavRegistry
+    from .registry import Registry
     fields = key.split('__')
 
-    config_cls = EavRegistry.get_config_cls_for_model(model_cls)
+    config_cls = Registry.get_config_cls_for_model(model_cls)
     if len(fields) > 1 and config_cls and \
        fields[0] == config_cls.eav_attr:
         slug = fields[1]
@@ -124,8 +124,8 @@ class EntityManager(models.Manager):
         return super(EntityManager, self).get(*args, **kwargs)
 
     def create(self, **kwargs):
-        from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(self.model)
+        from .registry import Registry
+        config_cls = Registry.get_config_cls_for_model(self.model)
         attributes = config_cls.get_attributes()
         prefix = '%s__' % config_cls.eav_attr
 

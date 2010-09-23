@@ -191,8 +191,8 @@ class Value(models.Model):
 
     >>> from django.db import models
     >>> from django.contrib.auth.models import User
-    >>> from .utils import EavRegistry
-    >>> EavRegistry.register(User)
+    >>> from .registry import Registry
+    >>> Registry.register(User)
     >>> u = User.objects.create(username='crazy_dev_user')
     >>> a = Attribute.objects.create(name='Favorite Drink', datatype='text',
     ... slug='fav_drink')
@@ -292,8 +292,8 @@ class Entity(object):
         return object.__getattr__(self, name)
 
     def get_all_attributes(self):
-        from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(self.model.__class__)
+        from .registry import Registry
+        config_cls = Registry.get_config_cls_for_model(self.model.__class__)
         return config_cls.get_attributes()
 
     def save(self):
@@ -339,15 +339,15 @@ class Entity(object):
 
     @staticmethod
     def post_save_handler(sender, *args, **kwargs):
-        from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(sender)
+        from .registry import Registry
+        config_cls = Registry.get_config_cls_for_model(sender)
         entity = getattr(kwargs['instance'], config_cls.eav_attr)
         entity.save()
 
     @staticmethod
     def pre_save_handler(sender, *args, **kwargs):
-        from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(sender)
+        from .registry import Registry
+        config_cls = Registry.get_config_cls_for_model(sender)
         entity = getattr(kwargs['instance'], config_cls.eav_attr)
         entity.validate_attributes()
 

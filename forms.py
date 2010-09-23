@@ -25,7 +25,7 @@ from django.forms import BooleanField, CharField, DateTimeField, FloatField, \
 from django.contrib.admin.widgets import AdminSplitDateTime
 from django.utils.translation import ugettext_lazy as _
 
-from .utils import EavRegistry
+from .registry import Registry
 
 
 
@@ -50,7 +50,7 @@ class BaseDynamicEntityForm(ModelForm):
 
     def __init__(self, data=None, *args, **kwargs):
         super(BaseDynamicEntityForm, self).__init__(data, *args, **kwargs)
-        config_cls = EavRegistry.get_config_cls_for_model(self.instance.__class__)
+        config_cls = Registry.get_config_cls_for_model(self.instance.__class__)
         self.entity = getattr(self.instance, config_cls.eav_attr)
         self._build_dynamic_fields()
 

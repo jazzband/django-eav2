@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 
 from ..models import *
-from ..utils import EavRegistry, EavConfig
+from ..registry import Registry, EavConfig
 from .models import Patient
 
 
@@ -18,8 +18,8 @@ class EavFilterTests(TestCase):
 
     def setUp(self):
     
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient)
+        Registry.unregister(Patient)
+        Registry.register(Patient)
 
         self.attribute = Attribute.objects\
                                      .create(datatype=Attribute.TYPE_TEXT,
@@ -32,8 +32,8 @@ class EavFilterTests(TestCase):
                                              value_text='Denver')
                                              
     def tearDown(self):
-        EavRegistry.unregister(Patient)
-        EavRegistry.unregister(User)
+        Registry.unregister(Patient)
+        Registry.unregister(User)
         
 
     def additional_attribute_setup(self):
@@ -57,7 +57,7 @@ class EavFilterTests(TestCase):
                 return Attribute.objects.all()
         
         self.UserEav = UserEav
-        EavRegistry.register(User, UserEav)
+        Registry.register(User, UserEav)
         self.user = User.objects.create(username='John')
 
        
@@ -169,7 +169,7 @@ class EavFilterTests(TestCase):
     def test_you_can_filter_entity_by_q_objects_with_lookups(self):
         class UserEav(EavConfig):
             manager_attr = 'eav_objects'
-        EavRegistry.register(User, UserEav)
+        Registry.register(User, UserEav)
         
         Attribute.objects.create(datatype=Attribute.TYPE_INT,
                                     name='Height')
@@ -214,7 +214,7 @@ class EavFilterTests(TestCase):
         This test demonstrates a few EAV queries that are known to be broken.
         it currently fails.
         '''
-        EavRegistry.register(User)
+        Registry.register(User)
         
         Attribute.objects.create(datatype=Attribute.TYPE_INT,
                                  name='Height')

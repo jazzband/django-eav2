@@ -3,7 +3,7 @@ from datetime import datetime
 from django.test import TestCase
 
 from ..models import *
-from ..utils import EavRegistry, EavConfig
+from ..registry import Registry, EavConfig
 from .models import Patient
 
 
@@ -16,8 +16,8 @@ class EavBasicTests(TestCase):
 
     def setUp(self):
     
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient)
+        Registry.unregister(Patient)
+        Registry.register(Patient)
 
         self.attribute = Attribute.objects.create(datatype=Attribute.TYPE_TEXT,
                                                 name='City', help_text='The City', slug='city')
@@ -29,7 +29,7 @@ class EavBasicTests(TestCase):
                                           value_text='Denver')
 
     def tearDown(self):
-        EavRegistry.unregister(Patient)
+        Registry.unregister(Patient)
 
 
     def test_attribute_unicode(self):
@@ -106,32 +106,32 @@ class EavBasicTests(TestCase):
         self.assertEqual(val.value, value)
         
 
-    def test_eavregistry_ataches_and_detaches_eav_attribute(self):
-        EavRegistry.unregister(Patient)
+    def test_Registry_ataches_and_detaches_eav_attribute(self):
+        Registry.unregister(Patient)
         p = Patient()
         self.assertFalse(hasattr(p, 'eav'))
 
-        EavRegistry.register(Patient)
+        Registry.register(Patient)
         p2 = Patient()
         self.assertTrue(p2.eav)
 
 
-    def test_eavregistry_ataches_and_detaches_eav_attribute(self):
+    def test_Registry_ataches_and_detaches_eav_attribute(self):
         
         self.assertTrue(self.entity.eav)
         self.assertTrue(self.entity.eav_values)
         self.assertTrue(self.value.entity)
         # todo : should we have self.value.patient herer ?
        
-        EavRegistry.unregister(Patient)
+        Registry.unregister(Patient)
         p = Patient()
         self.assertFalse(hasattr(p, 'eav'))
         self.assertFalse(hasattr(p, 'eav'))
         self.assertFalse(hasattr(p, 'eav_values'))
         
 
-    def test_eavregistry_accept_a_settings_class_with_get_queryset(self):
-        EavRegistry.unregister(Patient)
+    def test_Registry_accept_a_settings_class_with_get_queryset(self):
+        Registry.unregister(Patient)
 
         class PatientEav(EavConfig):
 
@@ -139,19 +139,19 @@ class EavBasicTests(TestCase):
             def get_eav_attributes(self):
                 return Attribute.objects.all()
 
-        EavRegistry.register(Patient, PatientEav)
+        Registry.register(Patient, PatientEav)
         
         p = Patient()
 
-        EavRegistry.unregister(Patient)
+        Registry.unregister(Patient)
         
     
-    def test_eavregistry_accept_a_settings_class_with_field_names(self):
+    def test_Registry_accept_a_settings_class_with_field_names(self):
         
         p = Patient.objects.create(name='Renaud')
         registered_manager = Patient.objects   
         registered_eav_value = p.eav_values
-        EavRegistry.unregister(Patient)
+        Registry.unregister(Patient)
 
         class PatientEav(EavConfig):
 
@@ -160,7 +160,7 @@ class EavBasicTests(TestCase):
             generic_relation_attr  = 'my_eav_values'
             generic_relation_related_name = "patient"
 
-        EavRegistry.register(Patient, PatientEav)
+        Registry.register(Patient, PatientEav)
         
         p2 = Patient.objects.create(name='Henry')
         self.assertEqual(type(p.eav), type(p2.my_eav))
@@ -176,6 +176,6 @@ class EavBasicTests(TestCase):
                          
         bak_registered_manager = Patient.objects 
 
-        EavRegistry.unregister(Patient)
+        Registry.unregister(Patient)
         
         self.assertEqual(type(Patient.objects), type(bak_registered_manager))

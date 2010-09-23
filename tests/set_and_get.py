@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 
 from ..models import *
-from ..utils import EavRegistry, EavConfig
+from ..registry import Registry, EavConfig
 from .models import Patient
 
 
@@ -16,8 +16,8 @@ class EavSetterAndGetterTests(TestCase):
 
 
     def setUp(self):
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient)
+        Registry.unregister(Patient)
+        Registry.register(Patient)
 
         self.attribute = Attribute.objects\
                                      .create(datatype=Attribute.TYPE_TEXT,
@@ -31,8 +31,8 @@ class EavSetterAndGetterTests(TestCase):
 
                                              
     def tearDown(self):
-        EavRegistry.unregister(Patient)
-        EavRegistry.unregister(User)
+        Registry.unregister(Patient)
+        Registry.unregister(User)
         
 
     def additional_attribute_setup(self):
@@ -164,9 +164,9 @@ class EavSetterAndGetterTests(TestCase):
 
         self.additional_attribute_setup()
                 
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient, self.PatientEav)
-        EavRegistry.register(User, self.UserEav)
+        Registry.unregister(Patient)
+        Registry.register(Patient, self.PatientEav)
+        Registry.register(User, self.UserEav)
 
         p = Patient.objects.create(name='Bob')
 
@@ -187,8 +187,8 @@ class EavSetterAndGetterTests(TestCase):
         self.assertEqual(Patient.objects.get(pk=self.patient.pk).eav.city,
                          'Tunis')
 
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient, self.PatientEav)
+        Registry.unregister(Patient)
+        Registry.register(Patient, self.PatientEav)
         
         p = Patient.objects.create(name='Patrick')
         p.eav.city = 'Paris'
@@ -204,9 +204,9 @@ class EavSetterAndGetterTests(TestCase):
     
         self.additional_attribute_setup()
     
-        EavRegistry.unregister(Patient)
-        EavRegistry.register(Patient, self.PatientEav)
-        EavRegistry.register(User, self.UserEav)
+        Registry.unregister(Patient)
+        Registry.register(Patient, self.PatientEav)
+        Registry.register(User, self.UserEav)
         
         p = Patient.objects.create(name='Patrick')
         u = User.objects.create(username='John')
@@ -232,7 +232,7 @@ class EavSetterAndGetterTests(TestCase):
     
         self.additional_attribute_setup()
     
-        EavRegistry.unregister(Patient)
+        Registry.unregister(Patient)
 
         class SubPatientEav(self.PatientEav):       
         
@@ -240,7 +240,7 @@ class EavSetterAndGetterTests(TestCase):
             def get_attributes(cls):
                 return Attribute.objects.filter(slug='country')
                 
-        EavRegistry.register(Patient, SubPatientEav)
+        Registry.register(Patient, SubPatientEav)
         
         self.patient.eav.city = 'Paris'
         self.patient.eav.country = 'USA'
