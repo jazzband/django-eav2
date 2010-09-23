@@ -44,7 +44,7 @@ def eav_filter(func):
             new_key, new_value = expand_eav_filter(self.model, key, value)
             new_kwargs.update({new_key: new_value})
 
-        return func(self, *new_args, **new_kwargs).distinct()
+        return func(self, *new_args, **new_kwargs)
     return wrapper
 
 
@@ -113,11 +113,15 @@ def expand_eav_filter(model_cls, key, value):
 class EntityManager(models.Manager):
     @eav_filter
     def filter(self, *args, **kwargs):
-        return super(EntityManager, self).filter(*args, **kwargs)
+        return super(EntityManager, self).filter(*args, **kwargs).distinct()
 
     @eav_filter
     def exclude(self, *args, **kwargs):
-        return super(EntityManager, self).exclude(*args, **kwargs)
+        return super(EntityManager, self).exclude(*args, **kwargs).distinct()
+
+    @eav_filter    
+    def get(self, *args, **kwargs):
+        return super(EntityManager, self).get(*args, **kwargs)
 
     def create(self, **kwargs):
         from .utils import EavRegistry
@@ -141,4 +145,7 @@ class EntityManager(models.Manager):
         return obj
 
     def get_or_create(self, **kwargs):
-        return super(EntityManager, self).get_or_create(**kwargs)
+        try:
+            return self.get(**kwargs)
+        except self.model.DoesNotExist:
+            return self.create(**kwargs)
