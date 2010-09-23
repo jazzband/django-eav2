@@ -133,6 +133,11 @@ class Attribute(models.Model):
     def validate_value(self, value):
         for validator in self.get_validators():
             validator(value)
+        if self.datatype == self.TYPE_ENUM:
+            if value not in self.enum_group.enums.all():
+                raise ValidationError(_(u"%(enum)s is not a valid choice "
+                                        u"for %(attr)s") % \
+                                       {'enum': value, 'attr': self})
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -353,4 +358,4 @@ if 'django_nose' in settings.INSTALLED_APPS:
 
     Please, someone tell me a better way to do this.
     '''
-    from .tests.models import Patient
+    from .tests.models import Patient, Encounter

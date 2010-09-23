@@ -3,6 +3,7 @@ from django.test import TestCase
 import eav
 from ..registry import Registry, EavConfig
 from ..managers import EntityManager
+from ..models import Attribute
 
 from .models import Patient, Encounter
 
@@ -21,6 +22,11 @@ class RegistryTests(TestCase):
             eav_attr = 'eav_field'
             generic_relation_attr = 'encounter_eav_values'
             generic_relation_related_name = 'encounters'
+
+            @classmethod
+            def get_attributes(cls):
+                return 'testing'
+
         eav.register(Encounter, EncounterEav)
         
 
@@ -44,6 +50,7 @@ class RegistryTests(TestCase):
         self.assertEqual(Patient._eav_config_cls.eav_attr, 'eav')
 
         self.assertTrue(hasattr(Encounter, '_eav_config_cls'))
+        self.assertEqual(Encounter._eav_config_cls.get_attributes(), 'testing')
         self.assertEqual(Encounter._eav_config_cls.manager_attr, 'eav_objects')
         self.assertEqual(Encounter._eav_config_cls.eav_attr, 'eav_field')
         eav.unregister(Patient)

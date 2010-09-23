@@ -87,10 +87,7 @@ class Registry(object):
         cls_id = get_unique_class_identifier(model_cls)
         config_cls = model_cls._eav_config_cls
 
-        try:
-            delattr(model_cls, config_cls.manager_attr)
-        except AttributeError:
-            pass
+        delattr(model_cls, config_cls.manager_attr)
         
         if 'old_mgr' in Registry.cache[cls_id]:
             Registry.cache[cls_id]['old_mgr'] \
@@ -200,9 +197,6 @@ class Registry(object):
             Registry.detach_signals(model_cls)
             Registry.detach_generic_relation(model_cls)
 
-        try:
-            delattr(model_cls, '_eav_config_cls')
-        except AttributeError:
-            pass
-            
+        delattr(model_cls, '_eav_config_cls')
+          
         Registry.cache.pop(cls_id)
