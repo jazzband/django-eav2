@@ -123,6 +123,7 @@ class Attribute(models.Model):
             'int': validate_int,
             'date': validate_date,
             'bool': validate_bool,
+            'object': validate_object,
             'enum': validate_enum,
         }
 
@@ -289,14 +290,6 @@ class Entity(object):
             except Value.DoesNotExist:
                 return None
         return object.__getattr__(self, name)
-
-    '''
-    @classmethod
-    def get_all_attributes_for_model(cls, model_cls):
-        from .utils import EavRegistry
-        config_cls = EavRegistry.get_config_cls_for_model(model_cls)
-        return config_cls.get_attributes()
-    '''
 
     def get_all_attributes(self):
         from .utils import EavRegistry

@@ -119,7 +119,7 @@ class EntityManager(models.Manager):
     def exclude(self, *args, **kwargs):
         return super(EntityManager, self).exclude(*args, **kwargs)
 
-    def create(self, *args, **kwargs):
+    def create(self, **kwargs):
         from .utils import EavRegistry
         config_cls = EavRegistry.get_config_cls_for_model(self.model)
         attributes = config_cls.get_attributes()
@@ -139,3 +139,6 @@ class EntityManager(models.Manager):
             setattr(obj_eav, key, value)
         obj.save()
         return obj
+
+    def get_or_create(self, **kwargs):
+        return super(EntityManager, self).get_or_create(**kwargs)

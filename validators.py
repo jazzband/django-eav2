@@ -26,7 +26,7 @@ def validate_date(value):
 def validate_bool(value):
     pass
 
-def validate_model(value):
+def validate_object(value):
     pass
 
 def validate_enum(value):
