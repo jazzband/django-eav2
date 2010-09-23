@@ -118,3 +118,24 @@ class EntityManager(models.Manager):
     @eav_filter
     def exclude(self, *args, **kwargs):
         return super(EntityManager, self).exclude(*args, **kwargs)
+
+    def create(self, *args, **kwargs):
+        from .utils import EavRegistry
+        config_cls = EavRegistry.get_config_cls_for_model(self.model)
+        attributes = config_cls.get_attributes()
+        prefix = '%s__' % config_cls.eav_attr
+
+        new_kwargs = {}
+        eav_kwargs = {}
+        for key, value in kwargs.iteritems():
+            if key.startswith(prefix):
+                eav_kwargs.update({key[len(prefix):]: value})
+            else:
+                new_kwargs.update({key: value})
+                
+        obj = self.model(**new_kwargs)
+        obj_eav = getattr(obj, config_cls.eav_attr)
+        for key, value in eav_kwargs.iteritems():
+            setattr(obj_eav, key, value)
+        obj.save()
+        return obj

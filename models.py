@@ -21,12 +21,13 @@ import inspect
 import re
 from datetime import datetime
 
-from django.db import models, IntegrityError
+from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
+from .validators import *
 from .fields import EavSlugField, EavDatatypeField
 
 
@@ -82,7 +83,7 @@ class Attribute(models.Model):
         (TYPE_INT, _(u"Integer")),
         (TYPE_DATE, _(u"Date")),
         (TYPE_BOOLEAN, _(u"True / False")),
-        (TYPE_OBJECT, _(u"Python Object")),
+        (TYPE_OBJECT, _(u"Django Object")),
         (TYPE_ENUM,    _(u"Multiple Choice")),
     )
 
@@ -114,6 +115,23 @@ class Attribute(models.Model):
 
     required = models.BooleanField(_(u"required"), default=False)
 
+
+    def get_validators(self):
+        DATATYPE_VALIDATORS = {
+            'text': validate_text,
+            'float': validate_float,
+            'int': validate_int,
+            'date': validate_date,
+            'bool': validate_bool,
+            'enum': validate_enum,
+        }
+
+        validation_function = DATATYPE_VALIDATORS[self.datatype]
+        return [validation_function]
+
+    def validate_value(self, value):
+        for validator in self.get_validators():
+            validator(value)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -188,7 +206,8 @@ class Value(models.Model):
 
     entity_ct = models.ForeignKey(ContentType, related_name='value_entities')
     entity_id = models.IntegerField()
-    entity = generic.GenericForeignKey(ct_field='entity_ct', fk_field='entity_id')
+    entity = generic.GenericForeignKey(ct_field='entity_ct',
+                                       fk_field='entity_id')
 
     value_text = models.TextField(blank=True, null=True)
     value_float = models.FloatField(blank=True, null=True)
@@ -224,7 +243,7 @@ class Value(models.Model):
                                         {'choice': self.value_enum,
                                          'attribute': self.attribute})
 
-    # todo: do it in a faster way (one update)
+    # TODO: Remove
     def _blank(self):
         """
             Set all the field to none
@@ -256,7 +275,6 @@ class Entity(object):
         self.model = instance
         self.ct = ContentType.objects.get_for_model(instance)
 
-
     def __getattr__(self, name):
         if not name.startswith('_'):
             try:
@@ -272,10 +290,15 @@ class Entity(object):
                 return None
         return object.__getattr__(self, name)
 
+    '''
+    @classmethod
+    def get_all_attributes_for_model(cls, model_cls):
+        from .utils import EavRegistry
+        config_cls = EavRegistry.get_config_cls_for_model(model_cls)
+        return config_cls.get_attributes()
+    '''
+
     def get_all_attributes(self):
-        '''
-        Return all the attributes that are applicable to self.model.
-        '''
         from .utils import EavRegistry
         config_cls = EavRegistry.get_config_cls_for_model(self.model.__class__)
         return config_cls.get_attributes()
@@ -286,12 +309,21 @@ class Entity(object):
                 attribute_value = getattr(self, attribute.slug)
                 attribute.save_value(self.model, attribute_value)
 
-    def check_all_required(self):
+    def validate_attributes(self):
         for attribute in self.get_all_attributes():
-            if getattr(self, attribute.slug, None) is None and \
-               attribute.required:
-                raise IntegrityError(_(u"%(attr)s EAV field cannot be " \
-                                       u"blank") % {'attr':attribute.slug})
+            value = getattr(self, attribute.slug, None)
+            if value is None:
+                if attribute.required:
+                    raise ValidationError(_(u"%(attr)s EAV field cannot " \
+                                            u"be blank") % \
+                                            {'attr': attribute.slug})
+            else:
+                try:
+                    attribute.validate_value(value)
+                except ValidationError, e:
+                    raise ValidationError(_(u"%(attr)s EAV field %(err)s") % \
+                                            {'attr': attribute.slug,
+                                             'err': e})
 
     def get_values(self):
         '''
@@ -324,4 +356,4 @@ class Entity(object):
         from .utils import EavRegistry
         config_cls = EavRegistry.get_config_cls_for_model(sender)
         entity = getattr(kwargs['instance'], config_cls.eav_attr)
-        entity.check_all_required()
+        entity.validate_attributes()
