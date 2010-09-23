@@ -153,7 +153,7 @@ class Registry(object):
 
 
     @staticmethod
-    def register(model_cls, config_cls=EavConfig, manager_only=False):
+    def register(model_cls, config_cls=EavConfig):
         """
             Inject eav features into the given model and attach a signal 
             listener to it for setup.
@@ -175,7 +175,7 @@ class Registry(object):
 
         Registry.attach_manager(model_cls)
 
-        if not manager_only:
+        if not config_cls.manager_only:
             Registry.attach_signals(model_cls)   
             Registry.attach_generic_relation(model_cls)
 
@@ -196,7 +196,7 @@ class Registry(object):
 
         Registry.detach_manager(model_cls)
 
-        if not manager_only:
+        if not config_cls.manager_only:
             Registry.detach_signals(model_cls)
             Registry.detach_generic_relation(model_cls)
 
