@@ -27,8 +27,9 @@ from .models import (Entity, Attribute, Value,
 
 class EavConfig(Entity):
 
-    eav_attr = 'eav'
     manager_attr ='objects'
+    manager_only = False
+    eav_attr = 'eav'
     generic_relation_attr = 'eav_values'
     generic_relation_related_name = None
 
@@ -61,15 +62,27 @@ class Registry(object):
 
 
     @staticmethod
-    def attach(sender, *args, **kwargs):
-        """
-            Attache EAV toolkit to an instance after init.
-        """
+    def attach_eav_attr(sender, *args, **kwargs):
+        '''
+        Attache EAV Entity toolkit to an instance after init.
+        '''
         instance = kwargs['instance']
         config_cls = Registry.get_config_cls_for_model(sender)
-
         setattr(instance, config_cls.eav_attr, Entity(instance))
-   
+
+    @staticmethod
+    def attach_signals(model_cls):
+        post_init.connect(Registry.attach_eav_attr, sender=model_cls)
+        pre_save.connect(Entity.pre_save_handler, sender=model_cls)
+        post_save.connect(Entity.post_save_handler, sender=model_cls)
+
+
+    @staticmethod
+    def detach_signals(model_cls):
+        post_init.disconnect(Registry.attach_eav_attr, sender=model_cls)
+        pre_save.disconnect(Entity.pre_save_handler, sender=model_cls)
+        post_save.disconnect(Entity.post_save_handler, sender=model_cls)    
+ 
     @staticmethod
     def wrap_config_class(model_cls, config_cls):
         """
@@ -90,56 +103,46 @@ class Registry(object):
         """
         
         cls_id = get_unique_class_identifier(model_cls)
-        
+
         if cls_id in Registry.cache:
             return
-        
-        config_cls = Registry.wrap_config_class(model_cls, config_cls)
-        
-        if not manager_only:
-            # we want to call attach and save handler on instance creation and
-            # saving            
-            post_init.connect(Registry.attach, sender=model_cls)
-            post_save.connect(Entity.post_save_handler, sender=model_cls)
-            pre_save.connect(Entity.pre_save_handler, sender=model_cls)
-        
-        # todo: rename cache in data
-        Registry.cache[cls_id] = { 'config_cls': config_cls,
-                                      'model_cls': model_cls,
-                                      'manager_only': manager_only } 
 
-        # save the old manager if the attribute name conflict with the new
-        # one
+        config_cls = Registry.wrap_config_class(model_cls, config_cls)
+
+        Registry.cache[cls_id] = {'config_cls': config_cls,
+                                  'model_cls': model_cls}
+
+        # save the old manager if the attribute name conflict with the new one
         if hasattr(model_cls, config_cls.manager_attr):
             mgr = getattr(model_cls, config_cls.manager_attr)
             Registry.cache[cls_id]['old_mgr'] = mgr
 
-        if not manager_only:
-            # set add the config_cls as an attribute of the model
-            # it will allow to perform some operation directly from this model
-            setattr(model_cls, config_cls.eav_attr, config_cls)
-            
-            # todo : not useful anymore ?
-            setattr(getattr(model_cls, config_cls.eav_attr),
-                            'get_attributes', config_cls.get_attributes)
-
         # attache the new manager to the model
         mgr = EntityManager()
         mgr.contribute_to_class(model_cls, config_cls.manager_attr)
+
+        if manager_only:
+            return
         
-        if not manager_only:
-            # todo: make that overridable
-            # attach the generic relation to the model
-            if config_cls.generic_relation_related_name:
-                rel_name = config_cls.generic_relation_related_name
-            else:
-                rel_name = model_cls.__name__
-            gr_name = config_cls.generic_relation_attr.lower()
-            generic_relation = generic.GenericRelation(Value,
-                                                       object_id_field='entity_id',
-                                                       content_type_field='entity_ct',
-                                                       related_name=rel_name)
-            generic_relation.contribute_to_class(model_cls, gr_name)
+        Registry.attach_signals(model_cls)   
+
+        # set add the config_cls as an attribute of the model
+        # it will allow to perform some operation directly from this model
+        setattr(model_cls, '_eav_config_cls', config_cls)
+
+
+        # todo: make that overridable
+        # attach the generic relation to the model
+        if config_cls.generic_relation_related_name:
+            rel_name = config_cls.generic_relation_related_name
+        else:
+            rel_name = model_cls.__name__
+        gr_name = config_cls.generic_relation_attr.lower()
+        generic_relation = generic.GenericRelation(Value,
+                                                   object_id_field='entity_id',
+                                                   content_type_field='entity_ct',
+                                                   related_name=rel_name)
+        generic_relation.contribute_to_class(model_cls, gr_name)
 
     @staticmethod
     def unregister(model_cls):
@@ -154,11 +157,9 @@ class Registry(object):
 
         cache = Registry.cache[cls_id]
         config_cls = cache['config_cls']
-        manager_only = cache['manager_only']
+        manager_only = cache['config_cls'].manager_only
         if not manager_only:
-            post_init.disconnect(Registry.attach, sender=model_cls)
-            post_save.disconnect(Entity.post_save_handler, sender=model_cls)
-            pre_save.disconnect(Entity.pre_save_handler, sender=model_cls)
+            Registry.detach_signals(model_cls)
         
         try:
             delattr(model_cls, config_cls.manager_attr)
@@ -178,7 +179,7 @@ class Registry(object):
         
         if 'old_mgr' in cache:
             cache['old_mgr'].contribute_to_class(model_cls, 
-                                                config_cls.manager_attr)
+                                                 config_cls.manager_attr)
 
         try:
             delattr(model_cls, config_cls.eav_attr)
@@ -186,8 +187,4 @@ class Registry(object):
             pass
             
         Registry.cache.pop(cls_id)
-        
-     # todo : test cache
-     # todo : tst unique identitfier  
-     # todo:  test update attribute cache on attribute creation
 

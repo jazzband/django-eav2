@@ -284,17 +284,14 @@ class Entity(object):
                 raise AttributeError(_(u"%(obj)s has no EAV attribute named " \
                                        u"'%(attr)s'") % \
                                      {'obj':self.model, 'attr':name})
-
             try:
                 return self.get_value_by_attribute(attribute).value
             except Value.DoesNotExist:
                 return None
-        return object.__getattr__(self, name)
+        return getattr(super(Entity, self), name)
 
     def get_all_attributes(self):
-        from .registry import Registry
-        config_cls = Registry.get_config_cls_for_model(self.model.__class__)
-        return config_cls.get_attributes()
+        return self.model._eav_config_cls.get_attributes()
 
     def save(self):
         for attribute in self.get_all_attributes():
@@ -339,16 +336,14 @@ class Entity(object):
 
     @staticmethod
     def post_save_handler(sender, *args, **kwargs):
-        from .registry import Registry
-        config_cls = Registry.get_config_cls_for_model(sender)
-        entity = getattr(kwargs['instance'], config_cls.eav_attr)
+        instance = kwargs['instance']
+        entity = getattr(instance, instance._eav_config_cls.eav_attr)
         entity.save()
 
     @staticmethod
     def pre_save_handler(sender, *args, **kwargs):
-        from .registry import Registry
-        config_cls = Registry.get_config_cls_for_model(sender)
-        entity = getattr(kwargs['instance'], config_cls.eav_attr)
+        instance = kwargs['instance']
+        entity = getattr(kwargs['instance'], instance._eav_config_cls.eav_attr)
         entity.validate_attributes()
 
 if 'django_nose' in settings.INSTALLED_APPS:
