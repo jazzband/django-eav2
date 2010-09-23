@@ -3,7 +3,7 @@ from django.db import models
 
 class Patient(models.Model):
     class Meta:
-        app_label = 'eav_ng'
+        app_label = 'eav'
 
     name = models.CharField(max_length=20)
 
