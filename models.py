@@ -26,10 +26,10 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+from django.conf import settings
 
 from .validators import *
 from .fields import EavSlugField, EavDatatypeField
-
 
 def get_unique_class_identifier(cls):
     '''
@@ -350,3 +350,12 @@ class Entity(object):
         config_cls = EavRegistry.get_config_cls_for_model(sender)
         entity = getattr(kwargs['instance'], config_cls.eav_attr)
         entity.validate_attributes()
+
+if 'django_nose' in settings.INSTALLED_APPS:
+    '''
+    The django_nose test runner won't automatically create our Patient model
+    database table which is required for tests, unless we import it here.
+
+    Please, someone tell me a better way to do this.
+    '''
+    from .tests.models import Patient
