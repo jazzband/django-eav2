@@ -16,6 +16,12 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with EAV-Django.  If not, see <http://gnu.org/licenses/>.
+'''
+.. automodule:: models
+   :members:
+
+This is my models file
+'''
 
 import inspect
 import re
@@ -30,12 +36,6 @@ from django.conf import settings
 
 from .validators import *
 from .fields import EavSlugField, EavDatatypeField
-
-def get_unique_class_identifier(cls):
-    '''
-    Return a unique identifier for a class
-    '''
-    return '.'.join((inspect.getfile(cls), cls.__name__))
 
 
 class EnumValue(models.Model):

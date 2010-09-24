@@ -16,24 +16,18 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with EAV-Django.  If not, see <http://gnu.org/licenses/>.
-
-VERSION = (0, 9, 0, "dev", 'a')
+VERSION = (0, 9, 1)
 
 def get_version():
-    if VERSION[3] == "final":
-        return "%s.%s.%s" % (VERSION[0], VERSION[1], VERSION[2])
-    elif VERSION[3] == "dev":
-        if VERSION[2] == 0:
-            return "%s.%s.%s%s" % (VERSION[0], VERSION[1], VERSION[3], VERSION[4])
-        return "%s.%s.%s.%s%s" % (VERSION[0], VERSION[1], VERSION[2], VERSION[3], VERSION[4])
-    else:
-        return "%s.%s.%s%s" % (VERSION[0], VERSION[1], VERSION[2], VERSION[3])
+    version = "%s.%s" % (VERSION[0], VERSION[1])
+    if VERSION[2] != 0:
+        version = "%s.%s" % (version, VERSION[2])
+    return version
 
 __version__ = get_version()
 
 def register(model_cls, config_cls=None):
-    from registry import Registry, EavConfig
-    config_cls = config_cls or EavConfig
+    from registry import Registry
     Registry.register(model_cls, config_cls)
 
 def unregister(model_cls):
