@@ -122,15 +122,14 @@ class Registry(object):
 
 
     def _detach_generic_relation(self):
-        gen_rel_field = self.config_cls.generic_relation_attr
+        gen_rel_field = self.config_cls.generic_relation_attr.lower()
         for field in self.model_cls._meta.local_many_to_many:
             if field.name == gen_rel_field:
                 self.model_cls._meta.local_many_to_many.remove(field)
                 break
-        try:
-            delattr(self.model_cls, gen_rel_field)
-        except AttributeError:
-            pass
+
+        delattr(self.model_cls, gen_rel_field)
+
 
     def _register_self(self):
         self._attach_manager()
