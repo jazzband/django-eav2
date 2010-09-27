@@ -3,3 +3,4 @@
 *.orig
 *.db
 *.sqlite*
+_build
