@@ -4,3 +4,4 @@
 *.db
 *.sqlite*
 _build
+build
