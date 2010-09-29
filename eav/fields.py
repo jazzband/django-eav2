@@ -30,7 +30,6 @@ Classes
 -------
 '''
 
-import uuid
 import re
 
 from django.db import models
