@@ -40,7 +40,7 @@ Usage
 
 Edit settings.py
 ~~~~~~~~~~~~~~~~
-Add ``eav`` to your INSTALLED_APPS in your settings.py file.
+Add ``eav`` to your ``INSTALLED_APPS`` in your project's ``settings.py`` file.
 
 Register your model(s)
 ~~~~~~~~~~~~~~~~~~~~~~

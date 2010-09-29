@@ -37,6 +37,9 @@ You can install django-eav directly from guthub::
 
     pip install -e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
 
+After installing, add ``eav`` to your ``INSTALLED_APPS`` in your
+project's ``settings.py`` file.
+
 Usage
 =====
 In order to attach EAV attributes to a model, you first need to register it
