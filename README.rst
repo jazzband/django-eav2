@@ -12,7 +12,7 @@ check `Wikipedia
 <http://en.wikipedia.org/wiki/Entity-attribute-value_model>`_.
 
 .. note::
-   This software was inspired / derrived from the excellent `eav-django
+   This software was inspired / derived from the excellent `eav-django
    <http://pypi.python.org/pypi/eav-django/1.0.2>`_ written by Andrey
    Mikhaylenko.
    
