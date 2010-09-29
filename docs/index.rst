@@ -33,7 +33,7 @@ check `Wikipedia
 
 Installation
 ============
-You can install django-eav directly from guthub:
+You can install django-eav directly from guthub::
 
     pip install -e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
 
