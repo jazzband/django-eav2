@@ -39,6 +39,7 @@ model with eav::
 
 Create some attributes
 ~~~~~~~~~~~~~~~~~~~~~~
+::
 
     >>> from eav.models import Attribute
     >>> Attribute.objects.create(name='Weight', datatype=Attribute.TYPE_FLOAT)
@@ -63,6 +64,7 @@ Assign eav values
 
 Filter on eav values
 ~~~~~~~~~~~~~~~~~~~~
+::
 
     >>> MyModel.objects.filter(eav__weight=15.4)
 
