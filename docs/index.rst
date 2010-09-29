@@ -33,9 +33,9 @@ check `Wikipedia
 
 Installation
 ============
-Until it is properly packaged, you'll just need to copy the eav directory
-alongside your other django apps in your project directory.  Then simply add
-``eav`` to your INSTALLED_APPS, then run ``syncdb`` to create the tables.
+You can install django-eav directly from guthub:
+
+    pip install -e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
 
 Usage
 =====

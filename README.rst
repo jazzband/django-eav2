@@ -26,8 +26,21 @@ check `Wikipedia
    * This app has slightly more robust (but still not perfect) filtering.
 
 
+Installation
+------------
+
+From Github
+~~~~~~~~~~~
+You can install django-eav directly from guthub:
+
+    pip install -e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
+
 Usage
 -----
+
+Edit settings.py
+~~~~~~~~~~~~~~~~
+Add ``eav`` to your INSTALLED_APPS in your settings.py file.
 
 Register your model(s)
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -36,6 +49,9 @@ model with eav::
 
     >>> import eav
     >>> eav.register(MyModel)
+
+Generally you would do this in your ``models.py`` immediate after your model
+declarations.
 
 Create some attributes
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -71,17 +87,7 @@ Filter on eav values
     >>> MyModel.objects.exclude(name='bob', eav__weight=15.4, eav__color='red')
 
 
-Further Information
--------------------
-
-Install from GitHub
-~~~~~~~~~~~~~~~~~~~
-
-It should be possible to install this tool directly from github using pip::
-
-    pip install -e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
-
 Documentation and Examples
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
-    `<http://mvpdev.github.com/django-eav>`_
+`<http://mvpdev.github.com/django-eav>`_
