@@ -21,7 +21,7 @@ check `Wikipedia
    <http://pypi.python.org/pypi/eav-django/1.0.2>`_ written by Andrey
    Mikhaylenko.
    
-   There are a few notable differences between this implimentation and the
+   There are a few notable differences between this implementation and the
    eav-django implementation.
    
    * This one is called django-eav, whereas the other is called eav-django.
@@ -192,7 +192,7 @@ You can even use Q objects, however there are some known issues
 What about if you have a foreign key to a model that uses eav, but you want
 to filter from a model that doesn't use eav?  For example, let's say you have
 a ``Patient`` model that **doesn't** use eav, but it has a foreign key to
-``Encounter`` that **does** use eav. You can even filter through eav accross
+``Encounter`` that **does** use eav. You can even filter through eav across
 this relationship, but you need to use the eav manager for ``Patient``.
 
 Just register ``Patient`` with eav, but set ``manager_only = True``
@@ -228,7 +228,7 @@ Known Issues
 Q Object Filters
 ----------------
 Due to an unexplained Q object / generic relation issue, exclude filters with
-EAV Q objects, or EAV Q objects ANDed together may produce innacurate results.
+EAV Q objects, or EAV Q objects ANDed together may produce inaccurate results.
 
 Additional Resources
 ====================

@@ -16,7 +16,7 @@ check `Wikipedia
    <http://pypi.python.org/pypi/eav-django/1.0.2>`_ written by Andrey
    Mikhaylenko.
    
-   There are a few notable differences between this implimentation and the
+   There are a few notable differences between this implementation and the
    eav-django implementation.
    
    * This one is called django-eav, whereas the other is called eav-django.
