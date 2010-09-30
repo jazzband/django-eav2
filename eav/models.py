@@ -174,7 +174,7 @@ class Attribute(models.Model):
 
     slug = EavSlugField(_(u"slug"), max_length=50, db_index=True,
                           help_text=_(u"Short unique attribute label"),
-                          unique=True)
+                          primary_key=True)
 
     description = models.CharField(_(u"description"), max_length=256,
                                      blank=True, null=True,
