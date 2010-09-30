@@ -129,7 +129,7 @@ class Attribute(models.Model):
     Examples:
 
     >>> Attribute.objects.create(name='Height', datatype=Attribute.TYPE_INT)
-    <Attribute: Height (Float)>
+    <Attribute: Height (Integer)>
 
     >>> Attribute.objects.create(name='Color', datatype=Attribute.TYPE_TEXT)
     <Attribute: Color (Text)>
