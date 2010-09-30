@@ -53,7 +53,7 @@ class EavConfig(object):
         By default, all :class:`~eav.models.Attribute` object apply to an
         entity, unless you provide a custom EavConfig class overriding this.
         '''
-        return Attribute.objects.all()
+        return Attribute.on_site.all()
 
 
 class Registry(object):
