@@ -334,10 +334,6 @@ class Value(models.Model):
     <Value: crazy_dev_user - Favorite Drink: "red bull">
     '''
 
-    class Meta:
-        unique_together = ('entity_ct', 'entity_id', 'attribute')
-
-
     entity_ct = models.ForeignKey(ContentType, related_name='value_entities')
     entity_id = models.IntegerField()
     entity = generic.GenericForeignKey(ct_field='entity_ct',
