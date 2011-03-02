@@ -42,7 +42,7 @@ class BaseEntityAdmin(ModelAdmin):
         form = context['adminform'].form
 
         # infer correct data from the form
-        fieldsets = [(None, {'fields': form.fields.keys()})]
+        fieldsets = self.fieldsets or [(None, {'fields': form.fields.keys()})]
         adminform = admin.helpers.AdminForm(form, fieldsets,
                                       self.prepopulated_fields)
         media = mark_safe(self.media + adminform.media)
