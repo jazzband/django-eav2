@@ -204,8 +204,8 @@ class Attribute(models.Model):
 
     required = models.BooleanField(_(u"required"), default=False)
 
-    on_site = CurrentSiteManager()
     objects = models.Manager()
+    on_site = CurrentSiteManager()
 
     def get_validators(self):
         '''
