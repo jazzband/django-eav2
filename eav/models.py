@@ -485,7 +485,7 @@ class Entity(object):
         '''
         Returns a list of slugs for all attributes available to this entity.
         '''
-        return self.get_all_attributes().values_list('slug', Flat=True)
+        return self.get_all_attributes().values_list('slug', flat=True)
 
     def get_attribute_by_slug(self, slug):
         '''
