@@ -107,11 +107,11 @@ class Attribute(models.Model):
     number of children, number of patients, has fever?, etc...
 
     Each attribute has a name, and a description, along with a slug that must
-    be unique.  If you don't provide a slug, a default slug (derrived from
+    be unique.  If you don't provide a slug, a default slug (derived from
     name), will be created.
 
     The *required* field is a boolean that indicates whether this EAV attribute
-    is required for entitys to which it applies. It defaults to *False*.
+    is required for entities to which it applies. It defaults to *False*.
 
     .. warning::
        Just like a normal model field that is required, you will not be able
