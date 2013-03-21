@@ -443,13 +443,27 @@ class Entity(object):
         '''
         return self.model._eav_config_cls.get_attributes()
 
+    def _hasattr(self, attribute_slug):
+        '''
+        Since we override __getattr__ with a backdown to the database, this exists as a way of 
+        checking whether a user has set a real attribute on ourselves, without going to the db if not
+        '''
+        return attribute_slug in self.__dict__
+
+    def _getattr(self, attribute_slug):
+        '''
+        Since we override __getattr__ with a backdown to the database, this exists as a way of 
+        getting the value a user set for one of our attributes, without going to the db to check
+        '''
+        return self.__dict__[attribute_slug]
+
     def save(self):
         '''
         Saves all the EAV values that have been set on this entity.
         '''
         for attribute in self.get_all_attributes():
-            if hasattr(self, attribute.slug):
-                attribute_value = getattr(self, attribute.slug)
+            if self._hasattr(attribute.slug):
+                attribute_value = self._getattr(attribute.slug)
                 attribute.save_value(self.model, attribute_value)
 
     def validate_attributes(self):
@@ -459,20 +473,34 @@ class Entity(object):
 
         Raise ``ValidationError`` if they can't be.
         '''
+        values_dict = self.get_values_dict()
+
         for attribute in self.get_all_attributes():
-            value = getattr(self, attribute.slug, None)
+            value = None
+            if self._hasattr(attribute.slug):
+                value = self._getattr(attribute.slug)
+            else:
+                value = values_dict.get(attribute.slug, None)
+            
             if value is None:
                 if attribute.required:
                     raise ValidationError(_(u"%(attr)s EAV field cannot " \
-                                            u"be blank") % \
-                                            {'attr': attribute.slug})
+                                                u"be blank") % \
+                                              {'attr': attribute.slug})
             else:
                 try:
                     attribute.validate_value(value)
                 except ValidationError, e:
                     raise ValidationError(_(u"%(attr)s EAV field %(err)s") % \
-                                            {'attr': attribute.slug,
-                                             'err': e})
+                                              {'attr': attribute.slug,
+                                               'err': e})
+                
+    def get_values_dict(self):
+        values_dict = dict()
+        for value in self.get_values():
+            values_dict[value.attribute.slug] = value.value
+
+        return values_dict
 
     def get_values(self):
         '''
