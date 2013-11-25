@@ -533,7 +533,7 @@ class Entity(object):
 
         This would allow you to do:
 
-        >>> for i in m.eav: print i
+        \>\>\> for i in m.eav: print i
         '''
         return iter(self.get_values())
 
