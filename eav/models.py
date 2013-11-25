@@ -57,9 +57,9 @@ class EnumValue(models.Model):
 
     For example:
 
-    >>> yes = EnumValue.objects.create(value='yes')
-    >>> no = EnumValue.objects.create(value='no')
-    >>> unkown = EnumValue.objects.create(value='unkown')
+    >>> yes = EnumValue.objects.create(value='Yes')
+    >>> no = EnumValue.objects.create(value='No')
+    >>> unkown = EnumValue.objects.create(value='Unkown')
 
     >>> ynu = EnumGroup.objects.create(name='Yes / No / Unkown')
     >>> ynu.enums.add(yes, no, unkown)
