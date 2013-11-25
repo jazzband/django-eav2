@@ -64,7 +64,7 @@ class EnumValue(models.Model):
     >>> ynu = EnumGroup.objects.create(name='Yes / No / Unkown')
     >>> ynu.enums.add(yes, no, unkown)
 
-    >>> Atrribute.objects.create(name='Has Fever?',
+    >>> Attribute.objects.create(name='Has Fever?',
     ...                          datatype=Attribute.TYPE_ENUM,
     ...                          enum_group=ynu)
 
