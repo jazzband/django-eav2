@@ -57,16 +57,17 @@ class EnumValue(models.Model):
 
     For example:
 
-    >>> yes = EnumValue.objects.create(value='Yes')
+    >>> yes = EnumValue.objects.create(value='Yes') # doctest: SKIP
     >>> no = EnumValue.objects.create(value='No')
     >>> unkown = EnumValue.objects.create(value='Unkown')
 
-    >>> ynu = EnumGroup.objects.create(name='Yes/No/Unkown')
+    >>> ynu = EnumGroup.objects.create(name='Yes / No / Unkown')
     >>> ynu.enums.add(yes, no, unkown)
 
-    >>> Attribute.objects.create(name='Has fever?',
+    >>> Attribute.objects.create(name='Has Fever?',
     ...                          datatype=Attribute.TYPE_ENUM,
     ...                          enum_group=ynu)
+    <Attribute: Has the fever? (Multiple Choice)>
 
     .. note::
        The same *EnumValue* objects should be reused within multiple
@@ -533,7 +534,7 @@ class Entity(object):
 
         This would allow you to do:
 
-        \>\>\> for i in m.eav: print i
+        >>> for i in m.eav: print i # doctest:SKIP
         '''
         return iter(self.get_values())
 
