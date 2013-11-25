@@ -141,7 +141,7 @@ class Attribute(models.Model):
     >>> unkown = EnumValue.objects.create(value='unkown')
     >>> ynu = EnumGroup.objects.create(name='Yes / No / Unkown')
     >>> ynu.enums.add(yes, no, unkown)
-    >>> Atrribute.objects.create(name='Has Fever?',
+    >>> Attribute.objects.create(name='Has Fever?',
     ...                          datatype=Attribute.TYPE_ENUM,
     ...                          enum_group=ynu)
     <Attribute: Has Fever? (Multiple Choice)>
