@@ -161,7 +161,7 @@ class EntityManager(models.Manager):
         if not config_cls or config_cls.manager_only:
             return super(EntityManager, self).create(**kwargs)
 
-        attributes = config_cls.get_attributes()
+        #attributes = config_cls.get_attributes()
         prefix = '%s__' % config_cls.eav_attr
 
         new_kwargs = {}
