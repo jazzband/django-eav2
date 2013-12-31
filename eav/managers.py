@@ -184,6 +184,6 @@ class EntityManager(models.Manager):
         Reproduces the behavior of get_or_create, eav friendly.
         '''
         try:
-            return self.get(**kwargs)
+            return self.get(**kwargs), False
         except self.model.DoesNotExist:
-            return self.create(**kwargs)
+            return self.create(**kwargs), True
