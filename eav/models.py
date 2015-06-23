@@ -491,7 +491,7 @@ class Entity(object):
             else:
                 try:
                     attribute.validate_value(value)
-                except ValidationError, e:
+                except ValidationError as e:
                     raise ValidationError(_(u"%(attr)s EAV field %(err)s") % \
                                               {'attr': attribute.slug,
                                                'err': e})
