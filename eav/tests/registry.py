@@ -5,7 +5,7 @@ from ..registry import Registry, EavConfig
 from ..managers import EntityManager
 from ..models import Attribute
 
-from .models import Patient, Encounter
+from .models import Patient, Encounter, ExampleModel
 
 
 class RegistryTests(TestCase):
@@ -55,6 +55,11 @@ class RegistryTests(TestCase):
         self.assertEqual(Encounter._eav_config_cls.eav_attr, 'eav_field')
         eav.unregister(Patient)
         eav.unregister(Encounter)
+
+    def test_registering_via_decorator_with_defaults(self):
+        self.assertTrue(hasattr(ExampleModel, '_eav_config_cls'))
+        self.assertEqual(ExampleModel._eav_config_cls.manager_attr, 'objects')
+        self.assertEqual(ExampleModel._eav_config_cls.eav_attr, 'eav')
 
     def test_unregistering(self):
         old_mgr = Patient.objects

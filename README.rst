@@ -35,12 +35,29 @@ You can install django-eav directly from guthub::
 
     pip install -e git+git://github.com/mvpdev/django-eav.git#egg=django-eav
 
+Prerequisites
+-------------
+
+Django Sites Framework
+~~~~~~~~~~~~~~~~~~~~~~
+As of Django 1.7, the `Sites framework <https://docs.djangoproject.com/en/1.8/ref/contrib/sites/#enabling-the-sites-framework>`_ is not enabled by default; Django-EAV requires this framework.
+To enable the sites framework, follow these steps:
+
+Add ``django.contrib.sites`` to your INSTALLED_APPS setting. Be sure to add sites to the installed apps list BEFORE eav!
+
+Define a ``SITE_ID`` setting::
+
+    SITE_ID = 1
+
+Run ``migrate``
+
+
 Usage
 -----
 
 Edit settings.py
 ~~~~~~~~~~~~~~~~
-Add ``eav`` to your ``INSTALLED_APPS`` in your project's ``settings.py`` file.
+Add ``eav`` to your ``INSTALLED_APPS`` in your project's ``settings.py`` file. Be sure to add eav to the installed apps list AFTER the sites framework!
 
 Register your model(s)
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -51,7 +68,12 @@ model with eav::
     >>> eav.register(MyModel)
 
 Generally you would do this in your ``models.py`` immediate after your model
-declarations.
+declarations. Alternatively, you can use the registration decorator provided::
+
+    from eav.decorators import register_eav
+    @register_eav()
+    class MyModel(models.Model):
+        ...
 
 Create some attributes
 ~~~~~~~~~~~~~~~~~~~~~~
