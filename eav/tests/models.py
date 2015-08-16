@@ -21,7 +21,7 @@ class Encounter(models.Model):
         return '%s: encounter num %d' % (self.patient, self.num)
 
 @register_eav()
-class ExampleModel(models.Model)
+class ExampleModel(models.Model):
     class Meta:
         app_label = 'eav'
 

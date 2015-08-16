@@ -70,6 +70,12 @@ class RegistryTests(TestCase):
         self.assertEqual(Patient.objects, old_mgr)
         self.assertFalse(hasattr(Patient, '_eav_config_cls'))
 
+    def test_unregistering_via_decorator(self):
+        self.assertTrue(ExampleModel.objects.__class__.__name__ == 'EntityManager')
+        eav.unregister(ExampleModel)
+        e = ExampleModel()
+        self.assertFalse(ExampleModel.objects.__class__.__name__ == 'EntityManager')
+
     def test_unregistering_unregistered_model_proceeds_silently(self):
         eav.unregister(Patient)
 
