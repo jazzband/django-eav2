@@ -34,8 +34,7 @@ Functions
 ---------
 '''
 
-from datetime import datetime, date
-
+from django.utils import timezone
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ValidationError
@@ -74,7 +73,7 @@ def validate_date(value):
     Raises ``ValidationError`` unless *value* is an instance of ``datetime``
     or ``date``
     '''
-    if not (isinstance(value, datetime) or isinstance(value, date)):
+    if not (isinstance(value, timezone.datetime) or isinstance(value, timezone.datetime.date)):
         raise ValidationError(_(u"Must be a date or datetime"))
 
 
