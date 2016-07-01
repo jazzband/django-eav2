@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from django.utils import timezone
 
 from django.test import TestCase
 from django.core.exceptions import ValidationError
@@ -91,13 +91,13 @@ class DataValidation(TestCase):
         self.assertRaises(ValidationError, p.save)
         p.eav.dob = 15
         self.assertRaises(ValidationError, p.save)
-        now = datetime.now()
-        now = datetime(year=now.year, month=now.month, day=now.day,
-                       hour=now.hour, minute=now.minute, second=now.second)
+        now = timezone.now()
+        now = timezone.datetime(year=now.year, month=now.month, day=now.day,
+                                hour=now.hour, minute=now.minute, second=now.second)
         p.eav.dob = now
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob, now)
-        today = date.today()
+        today = timezone.today()
         p.eav.dob = today
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob.date(), today)
