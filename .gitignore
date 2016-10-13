@@ -5,3 +5,4 @@
 *.sqlite*
 _build
 build
+django_eav.egg-info/*
