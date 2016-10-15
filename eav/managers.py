@@ -110,11 +110,11 @@ def expand_eav_filter(model_cls, key, value):
         return '%s__in' % gr_name, value
 
     try:
-        field, m, direct, m2m = model_cls._meta.get_field_by_name(fields[0])
+        field = model_cls._meta.get_field(fields[0])
     except models.FieldDoesNotExist:
         return key, value
 
-    if direct:
+    if not field.auto_created or field.concrete:
         return key, value
     else:
         sub_key = '__'.join(fields[1:])
