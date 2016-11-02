@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 coding=utf-8
 #
-#    This software is derived from EAV-Django originally written and 
+#    This software is derived from EAV-Django originally written and
 #    copyrighted by Andrey Mikhaylenko <http://pypi.python.org/pypi/eav-django>
 #
 #    This is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ from django.utils.safestring import mark_safe
 from .models import Attribute, Value, EnumValue, EnumGroup
 
 class BaseEntityAdmin(ModelAdmin):
-    
+
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         """
         Wrapper for ModelAdmin.render_change_form. Replaces standard static
@@ -94,7 +94,7 @@ class BaseEntityInline(InlineModelAdmin):
         return [(None, {'fields': form.fields.keys()})]
 
 class AttributeAdmin(ModelAdmin):
-    list_display = ('name', 'slug', 'datatype', 'description', 'site')
+    list_display = ('name', 'content_type', 'slug', 'datatype', 'description', 'site')
     list_filter = ['site']
     prepopulated_fields = {'slug': ('name',)}
 

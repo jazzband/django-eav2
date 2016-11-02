@@ -82,8 +82,9 @@ class EavDatatypeField(models.CharField):
         :class:`~eav.models.Value` objects.
         '''
         super(EavDatatypeField, self).validate(value, instance)
-        from .models import Attribute
         if not instance.pk:
+            return
+        if type(instance).objects.get(pk=instance.pk).datatype == instance.datatype:
             return
         if instance.value_set.count():
             raise ValidationError(_(u"You cannot change the datatype of an "

@@ -152,8 +152,8 @@ class Attribute(models.Model):
     '''
 
     class Meta:
-        ordering = ['name']
-        unique_together = ('site', 'slug')
+        ordering = ['content_type', 'name']
+        unique_together = ('site', 'content_type', 'slug')
 
     TYPE_TEXT = 'text'
     TYPE_FLOAT = 'float'
@@ -175,6 +175,10 @@ class Attribute(models.Model):
 
     name = models.CharField(_(u"name"), max_length=100,
                             help_text=_(u"User-friendly attribute name"))
+
+    content_type = models.ForeignKey(ContentType,
+                            blank=True, null=True,
+                            verbose_name=_(u"content type"))
 
     site = models.ForeignKey(Site, verbose_name=_(u"site"),
                              default=settings.SITE_ID)
@@ -204,6 +208,8 @@ class Attribute(models.Model):
     modified = models.DateTimeField(_(u"modified"), auto_now=True)
 
     required = models.BooleanField(_(u"required"), default=False)
+
+    display_order = models.PositiveIntegerField(_(u"display order"), default=1)
 
     objects = models.Manager()
     on_site = CurrentSiteManager()
@@ -312,7 +318,7 @@ class Attribute(models.Model):
             value_obj.save()
 
     def __unicode__(self):
-        return u"%s (%s)" % (self.name, self.get_datatype_display())
+        return u"%s.%s (%s)" % (self.content_type, self.name, self.get_datatype_display())
 
 
 class Value(models.Model):
@@ -442,18 +448,19 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         '''
-        return self.model._eav_config_cls.get_attributes()
+        return self.model._eav_config_cls.get_attributes().filter(
+            models.Q(content_type__isnull=True) | models.Q(content_type=self.ct)).order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         '''
-        Since we override __getattr__ with a backdown to the database, this exists as a way of 
+        Since we override __getattr__ with a backdown to the database, this exists as a way of
         checking whether a user has set a real attribute on ourselves, without going to the db if not
         '''
         return attribute_slug in self.__dict__
 
     def _getattr(self, attribute_slug):
         '''
-        Since we override __getattr__ with a backdown to the database, this exists as a way of 
+        Since we override __getattr__ with a backdown to the database, this exists as a way of
         getting the value a user set for one of our attributes, without going to the db to check
         '''
         return self.__dict__[attribute_slug]
@@ -482,7 +489,7 @@ class Entity(object):
                 value = self._getattr(attribute.slug)
             else:
                 value = values_dict.get(attribute.slug, None)
-            
+
             if value is None:
                 if attribute.required:
                     raise ValidationError(_(u"%(attr)s EAV field cannot " \
@@ -495,7 +502,7 @@ class Entity(object):
                     raise ValidationError(_(u"%(attr)s EAV field %(err)s") % \
                                               {'attr': attribute.slug,
                                                'err': e})
-                
+
     def get_values_dict(self):
         values_dict = dict()
         for value in self.get_values():
