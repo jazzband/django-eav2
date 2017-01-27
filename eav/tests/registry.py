@@ -5,7 +5,7 @@ from ..registry import Registry, EavConfig
 from ..managers import EntityManager
 from ..models import Attribute
 
-from .models import Patient, Encounter
+from .models import Patient, Encounter, ExampleModel
 
 
 class RegistryTests(TestCase):
@@ -56,6 +56,11 @@ class RegistryTests(TestCase):
         eav.unregister(Patient)
         eav.unregister(Encounter)
 
+    def test_registering_via_decorator_with_defaults(self):
+        self.assertTrue(hasattr(ExampleModel, '_eav_config_cls'))
+        self.assertEqual(ExampleModel._eav_config_cls.manager_attr, 'objects')
+        self.assertEqual(ExampleModel._eav_config_cls.eav_attr, 'eav')
+
     def test_unregistering(self):
         old_mgr = Patient.objects
         eav.register(Patient)
@@ -64,6 +69,12 @@ class RegistryTests(TestCase):
         self.assertFalse(Patient.objects.__class__.__name__ == 'EntityManager')
         self.assertEqual(Patient.objects, old_mgr)
         self.assertFalse(hasattr(Patient, '_eav_config_cls'))
+
+    def test_unregistering_via_decorator(self):
+        self.assertTrue(ExampleModel.objects.__class__.__name__ == 'EntityManager')
+        eav.unregister(ExampleModel)
+        e = ExampleModel()
+        self.assertFalse(ExampleModel.objects.__class__.__name__ == 'EntityManager')
 
     def test_unregistering_unregistered_model_proceeds_silently(self):
         eav.unregister(Patient)
