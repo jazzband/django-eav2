@@ -119,12 +119,18 @@ class Registry(object):
         '''
         Attach the manager to *manager_attr* specified in *config_cls*
         '''
-        # save the old manager if the attribute name conflict with the new one
+        # Save the old manager if the attribute name conflict with the new one.
         if hasattr(self.model_cls, self.config_cls.manager_attr):
             mgr = getattr(self.model_cls, self.config_cls.manager_attr)
             self.config_cls.old_mgr = mgr
 
-        # attache the new manager to the model
+        # Remove default 'objects' manager.
+        for i, manager in enumerate(self.model_cls._meta.local_managers):
+            if manager.name == 'objects':
+                del self.model_cls._meta.local_managers[i]
+                self.model_cls._meta._expire_cache()
+
+        # Attach the new manager to the model.
         mgr = EntityManager()
         mgr.contribute_to_class(self.model_cls, self.config_cls.manager_attr)
 
