@@ -34,30 +34,36 @@ from .models import Attribute, Value
 
 def eav_filter(func):
     '''
-    Decorator used to wrap filter and exlclude methods.  Passes args through
+    Decorator used to wrap filter and exclude methods.  Passes args through
     expand_q_filters and kwargs through expand_eav_filter. Returns the
     called function (filter or exclude)
     '''
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        new_args = []
+    def wrapper(self, *args, **kwargs):       
+        nargs = []
         for arg in args:
             if isinstance(arg, models.Q):
-                # modify Q objects (warning: recursion ahead)
+                # Modify Q objects (warning: recursion ahead).
                 arg = expand_q_filters(arg, self.model)
-            new_args.append(arg)
+            nargs.append(arg)
 
-        new_kwargs = {}
+        nkwargs = {}
         for key, value in kwargs.items():
-            # modify kwargs (warning: recursion ahead)
-            new_key, new_value = expand_eav_filter(self.model, key, value)
-            new_kwargs.update({new_key: new_value})
+            # Modify kwargs (warning: recursion ahead).
+            nkey, nval = expand_eav_filter(self.model, key, value)
+            
+            if nkey in nkwargs:
+                # Apply AND to both querysets.
+                nkwargs[nkey] = (nkwargs[nkey] & nval).distinct()
+            else:
+                nkwargs.update({nkey: nval})
 
-        return func(self, *new_args, **new_kwargs)
+        return func(self, *nargs, **nkwargs)
+    
     return wrapper
 
-
+ 
 def expand_q_filters(q, root_cls):
     '''
     Takes a Q object and a model class.
@@ -65,6 +71,7 @@ def expand_q_filters(q, root_cls):
     through expand_eav_filter
     '''
     new_children = []
+    
     for qi in q.children:
         if type(qi) is tuple:
             # this child is a leaf node: in Q this is a 2-tuple of:
@@ -74,6 +81,7 @@ def expand_q_filters(q, root_cls):
         else:
             # this child is another Q node: recursify!
             new_children.append(expand_q_filters(qi, root_cls))
+            
     q.children = new_children
     return q
 
