@@ -123,12 +123,8 @@ class Registry(object):
         if hasattr(self.model_cls, self.config_cls.manager_attr):
             mgr = getattr(self.model_cls, self.config_cls.manager_attr)
             self.config_cls.old_mgr = mgr
-
-        # Remove default 'objects' manager.
-        for i, manager in enumerate(self.model_cls._meta.local_managers):
-            if manager.name == 'objects':
-                del self.model_cls._meta.local_managers[i]
-                self.model_cls._meta._expire_cache()
+            self.model_cls._meta.local_managers.remove(mgr)
+            self.model_cls._meta._expire_cache()
 
         # Attach the new manager to the model.
         mgr = EntityManager()
@@ -136,9 +132,12 @@ class Registry(object):
 
     def _detach_manager(self):
         '''
-        Detach the manager, and reatach the previous manager (if there was one)
+        Detach the manager and reatach the previous manager (if there was one).
         '''
-        delattr(self.model_cls, self.config_cls.manager_attr)
+        mgr = getattr(self.model_cls, self.config_cls.manager_attr)
+        self.model_cls._meta.local_managers.remove(mgr)
+        self.model_cls._meta._expire_cache()
+
         if hasattr(self.config_cls, 'old_mgr'):
             self.config_cls.old_mgr \
                 .contribute_to_class(self.model_cls,
