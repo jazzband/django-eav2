@@ -119,7 +119,7 @@ class Registry(object):
         '''
         Attach the manager to *manager_attr* specified in *config_cls*
         '''
-        # Save the old manager if the attribute name conflict with the new one.
+        # Save the old manager if the attribute name conflicts with the new one.
         if hasattr(self.model_cls, self.config_cls.manager_attr):
             mgr = getattr(self.model_cls, self.config_cls.manager_attr)
             self.config_cls.old_mgr = mgr
@@ -132,7 +132,7 @@ class Registry(object):
 
     def _detach_manager(self):
         '''
-        Detach the manager and reatach the previous manager (if there was one).
+        Detach the manager and restore the previous one (if there was one).
         '''
         mgr = getattr(self.model_cls, self.config_cls.manager_attr)
         self.model_cls._meta.local_managers.remove(mgr)

@@ -233,7 +233,7 @@ class Attribute(models.Model):
             'object': validate_object,
             'enum': validate_enum,
         }
-
+        
         validation_function = DATATYPE_VALIDATORS[self.datatype]
         return [validation_function]
 

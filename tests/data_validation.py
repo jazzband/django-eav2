@@ -5,8 +5,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 
 import eav
-from ..registry import EavConfig
-from ..models import Attribute, Value, EnumValue, EnumGroup
+from eav.registry import EavConfig
+from eav.models import Attribute, Value, EnumValue, EnumGroup
 
 from .models import Patient, Encounter
 
@@ -87,17 +87,17 @@ class DataValidation(TestCase):
 
     def test_date_validation(self):
         p = Patient.objects.create(name='Joe')
-        p.eav.dob = 'bad'
-        self.assertRaises(ValidationError, p.save)
+        p.eav.dob = '12'
+        self.assertRaises(ValidationError, lambda: p.save())
         p.eav.dob = 15
-        self.assertRaises(ValidationError, p.save)
+        self.assertRaises(ValidationError, lambda: p.save())
         now = timezone.now()
         now = timezone.datetime(year=now.year, month=now.month, day=now.day,
                                 hour=now.hour, minute=now.minute, second=now.second)
         p.eav.dob = now
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob, now)
-        today = timezone.today()
+        today = timezone.now().date()
         p.eav.dob = today
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob.date(), today)

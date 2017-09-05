@@ -1,14 +1,13 @@
 from django.test import TestCase
 
 import eav
-from ..registry import Registry, EavConfig
-from ..managers import EntityManager
+from eav.registry import Registry, EavConfig
+from eav.managers import EntityManager
 
 from .models import Patient, Encounter
 
 
 class RegistryTests(TestCase):
-
     def setUp(self):
         pass
 
@@ -16,6 +15,7 @@ class RegistryTests(TestCase):
         pass
 
     def register_encounter(self):
+        print('x')
         class EncounterEav(EavConfig):
             manager_attr = 'eav_objects'
             eav_attr = 'eav_field'

@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from ..models import EnumGroup, Attribute, Value
+from eav.models import EnumGroup, Attribute, Value
 
 import eav
 from .models import Patient

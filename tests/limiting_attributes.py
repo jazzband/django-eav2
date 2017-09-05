@@ -1,8 +1,8 @@
 from django.test import TestCase
 
 import eav
-from ..registry import EavConfig
-from ..models import Attribute, Value
+from eav.registry import EavConfig
+from eav.models import Attribute, Value
 
 from .models import Patient, Encounter
 
