@@ -15,14 +15,13 @@ class RegistryTests(TestCase):
         pass
 
     def register_encounter(self):
-        print('x')
         class EncounterEav(EavConfig):
             manager_attr = 'eav_objects'
             eav_attr = 'eav_field'
             generic_relation_attr = 'encounter_eav_values'
             generic_relation_related_name = 'encounters'
         eav.register(Encounter, EncounterEav)
-        
+
 
     def test_registering_with_defaults(self):
         eav.register(Patient)
