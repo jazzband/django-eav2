@@ -40,7 +40,7 @@ def eav_filter(func):
     '''
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):       
+    def wrapper(self, *args, **kwargs):
         nargs = []
         for arg in args:
             if isinstance(arg, models.Q):
@@ -52,7 +52,7 @@ def eav_filter(func):
         for key, value in kwargs.items():
             # Modify kwargs (warning: recursion ahead).
             nkey, nval = expand_eav_filter(self.model, key, value)
-            
+
             if nkey in nkwargs:
                 # Apply AND to both querysets.
                 nkwargs[nkey] = (nkwargs[nkey] & nval).distinct()
@@ -60,10 +60,10 @@ def eav_filter(func):
                 nkwargs.update({nkey: nval})
 
         return func(self, *nargs, **nkwargs)
-    
+
     return wrapper
 
- 
+
 def expand_q_filters(q, root_cls):
     '''
     Takes a Q object and a model class.
@@ -71,7 +71,7 @@ def expand_q_filters(q, root_cls):
     through expand_eav_filter
     '''
     new_children = []
-    
+
     for qi in q.children:
         if type(qi) is tuple:
             # this child is a leaf node: in Q this is a 2-tuple of:
@@ -81,7 +81,7 @@ def expand_q_filters(q, root_cls):
         else:
             # this child is another Q node: recursify!
             new_children.append(expand_q_filters(qi, root_cls))
-            
+
     q.children = new_children
     return q
 
@@ -174,7 +174,7 @@ class EntityManager(models.Manager):
 
         new_kwargs = {}
         eav_kwargs = {}
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             if key.startswith(prefix):
                 eav_kwargs.update({key[len(prefix):]: value})
             else:
@@ -182,7 +182,7 @@ class EntityManager(models.Manager):
 
         obj = self.model(**new_kwargs)
         obj_eav = getattr(obj, config_cls.eav_attr)
-        for key, value in eav_kwargs.iteritems():
+        for key, value in eav_kwargs.items():
             setattr(obj_eav, key, value)
         obj.save()
         return obj

@@ -45,7 +45,7 @@ def validate_text(value):
     '''
     Raises ``ValidationError`` unless *value* type is ``str`` or ``unicode``
     '''
-    if not (type(value) == unicode or type(value) == str):
+    if not type(value) == str:
         raise ValidationError(_(u"Must be str or unicode"))
 
 

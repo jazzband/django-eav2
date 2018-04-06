@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 coding=utf-8
 #
-#    This software is derived from EAV-Django originally written and 
+#    This software is derived from EAV-Django originally written and
 #    copyrighted by Andrey Mikhaylenko <http://pypi.python.org/pypi/eav-django>
 #
 #    This is free software: you can redistribute it and/or modify
@@ -26,10 +26,11 @@ def get_version():
 
 __version__ = get_version()
 
+
 def register(model_cls, config_cls=None):
-    from registry import Registry
+    from .registry import Registry
     Registry.register(model_cls, config_cls)
 
 def unregister(model_cls):
-    from registry import Registry
+    from .registry import Registry
     Registry.unregister(model_cls)
