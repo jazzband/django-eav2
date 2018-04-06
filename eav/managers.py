@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4 coding=utf-8
 #
 #    This software is derived from EAV-Django originally written and
 #    copyrighted by Andrey Mikhaylenko <http://pypi.python.org/pypi/eav-django>
@@ -34,9 +33,9 @@ from .models import Attribute, Value
 
 def eav_filter(func):
     '''
-    Decorator used to wrap filter and exclude methods.  Passes args through
+    Decorator used to wrap filter and exclude methods. Passes args through
     expand_q_filters and kwargs through expand_eav_filter. Returns the
-    called function (filter or exclude)
+    called function (filter or exclude).
     '''
 
     @wraps(func)
