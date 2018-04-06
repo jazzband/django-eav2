@@ -97,7 +97,7 @@ class EnumGroup(models.Model):
 
     enums = models.ManyToManyField(EnumValue, verbose_name=_(u"enum group"))
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
