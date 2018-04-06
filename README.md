@@ -118,3 +118,15 @@ declarations. Alternatively, you can use the registration decorator provided::
 #### Documentation and Examples
 
 `<http://mvpdev.github.com/django-eav>`_
+
+
+#### Development
+
+##### Running tests
+
+Run tests with the `runtests` script. To run all tests use it without
+arguments or with `--all` option. To run specific tests, just type their names:
+
+```
+./runtests queries models registry
+```
