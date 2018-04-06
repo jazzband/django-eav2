@@ -28,7 +28,7 @@ setup(
 
     description='Entity-attribute-value model implementation as a reusable'
                 'Django app.',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
 
     url='http://github.com/mvpdev/django-eav',
 
