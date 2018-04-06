@@ -137,6 +137,7 @@ class Registry(object):
         mgr = getattr(self.model_cls, self.config_cls.manager_attr)
         self.model_cls._meta.local_managers.remove(mgr)
         self.model_cls._meta._expire_cache()
+        delattr(self.model_cls, self.config_cls.manager_attr)
 
         if hasattr(self.config_cls, 'old_mgr'):
             self.config_cls.old_mgr \
