@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.db.models.query import QuerySet
 
 from .models import Attribute, Value
+from .utils import print_q_expr
 
 
 def register_eav(**kwargs):
@@ -39,6 +40,38 @@ def is_rewritable(expr):
 
 
 def rewrite_q_expr(manager, expr):
+    '''
+    Suppose we have the following Q-expression:
+
+    Patient.objects.filter(
+        Q(eav__fever=no) | Q(eav__city__contains='e', eav__country__startswith='A'))
+    )
+
+    And corresponding tree:
+
+    └── OR
+         ├── AND
+         │    └── eav_values__in [1, 2, 3]
+         └── AND (1)
+              ├── AND
+              │    └── eav_values__in [4, 5]
+              └── AND
+                   └── eav_values__in [6, 7, 8]
+
+    All EAV values are stored in a single table. Therefore, INNER JOIN
+    generated for the AND-expression (1) will always fail, i.e.
+    single row in a eav_values table cannot be both in two disjoint sets at
+    the same time (and the whole point of using AND, usually, is two have
+    two different sets). Therefore, we must paritially rewrite the
+    expression so that the generated SQL is valid:
+
+    └── OR
+         ├── AND
+         │    └── eav_values__in [1, 2, 3]
+         └── AND
+              └── pk__in [1, 2]
+    '''
+
     # Expression can be a Q or an attribute-value tuple.
     if type(expr) == Q:
         expr.children = [rewrite_q_expr(manager, c) for c in expr.children]
