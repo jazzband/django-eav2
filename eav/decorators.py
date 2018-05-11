@@ -72,35 +72,50 @@ def rewrite_q_expr(manager, expr):
               └── pk__in [1, 2]
     '''
 
-    # Expression can be a Q or an attribute-value tuple.
+    # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
+    # We are only interested in Qs.
+
     if type(expr) == Q:
+        # Recurively check child nodes.
         expr.children = [rewrite_q_expr(manager, c) for c in expr.children]
+        # Check which ones need a rewrite.
         rewritable = [c for c in expr.children if is_rewritable(c)]
+
+        # Conflict occurs only with two or more AND-expressions.
+        # If there is only one we can ignore it.
 
         if len(rewritable) > 1:
             q = None
+            # Save nodes which shouldn't be merged (non-EAV).
             other = [c for c in expr.children if not c in rewritable]
 
             for child in rewritable:
-                child = child.children[0]
+                assert child.children and len(child.children) == 1
+                # Child to be merged is always a terminal Q node,
+                # i.e. it's an AND expression with attribute-value tuple child.
+                attrval = child.children[0]
+                assert type(attrval) == tuple
 
-                if child[0] == 'eav_values__in':
-                    _q = manager.model.objects.filter(eav_values__in=child[1])
+                # Child can be either a 'values__in' or 'pk__in' query.
+                # In the latter case,
+
+                if attrval[0] == 'eav_values__in':
+                    _q = manager.model.objects.filter(eav_values__in=attrval[1])
                     q = q if q != None else _q
-
-                    if expr.connector == 'AND':
-                        q = q & _q
-                    else:
-                        q = q | _q
                 else:
-                    _q = child[1]
-                    q = q if q != None else _q
+                    _q = attrval[1]
 
-                    if expr.connector == 'AND':
-                        q = q & _q
-                    else:
-                        q = q | _q
+                # Explicitly check for None. 'or' doesn't work here
+                # as empty QuerySet, which is valid, is falsy.
+                q = q if q != None else _q
 
+                if expr.connector == 'AND':
+                    q &= _q
+                else:
+                    q |= _q
+
+            # If any two children were merged,
+            # update parent expression.
             if q != None:
                 expr.children = other + [('pk__in', q)]
 
