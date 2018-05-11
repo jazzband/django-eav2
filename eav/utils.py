@@ -1,17 +1,21 @@
-from future import __print_function__
+import sys
+from django.db.models import Q
 
-def print_q_expr(expr, i=None):
+
+def print_q_expr(expr, indent="", is_tail=True):
     '''
-    Dirty and fast method to visualise Q-expression tree.
+    Simple print method for debugging Q-expressions' trees.
     '''
-    i = i or 0
-    if type(expr) == models.Q:
-        print(i * '    ' + '└── ' + expr.connector)
+    sys.stdout.write(indent)
+    sa, sb = (' └── ', '    ') if is_tail else (' ├── ', ' │   ')
+
+    if type(expr) == Q:
+        sys.stdout.write('{}{}\n'.format(sa, expr.connector))
         for child in expr.children:
-            print_q_expr(child, i + 1)
+            print_q_expr(child, indent + sb, expr.children[-1] == child)
     else:
         try:
             queryset = ', '.join(repr(v) for v in expr[1])
         except TypeError:
             queryset = repr(expr[1])
-        print(i * '    ' + '└── ' + expr[0] + ' ' + queryset)
+        sys.stdout.write(' └── {} {}\n'.format(expr[0], queryset))
