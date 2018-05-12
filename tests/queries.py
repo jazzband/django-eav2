@@ -1,13 +1,13 @@
-from django.test import TestCase
-from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
+from django.db.models import Q
+from django.test import TestCase
 
 import eav
+from eav.models import Attribute, EnumGroup, EnumValue, Value
 from eav.registry import EavConfig
-from eav.models import EnumValue, EnumGroup, Attribute, Value
 
-from .models import Patient, Encounter, ExampleModel
+from .models import Encounter, ExampleModel, Patient
 
 
 class Queries(TestCase):
@@ -80,16 +80,34 @@ class Queries(TestCase):
         self.assertEqual(Patient.objects.count(), 5)
         self.assertEqual(Value.objects.count(), 20)
 
-        # Anne
-        # q1 = Q(eav__city__contains='Y') & Q(eav__fever=no)
-        # q2 = Q(eav__age=3)
-        # p = Patient.objects.filter(q1 & q2)
-        # self.assertEqual(p.count(), 1)
+        # Nobody
+        q1 = Q(eav__fever=yes) & Q(eav__fever=no)
+        p = Patient.objects.filter(q1)
+        self.assertEqual(p.count(), 0)
 
-        # # Everyone
-        # q1 = Q(eav__fever=no) | Q(eav__fever=yes)
-        # p = Patient.objects.filter(q1)
-        # self.assertEqual(p.count(), 5)
+        # Anne, Daniel
+        q1 = Q(eav__age__gte=3)        # Everyone except Eugene
+        q2 = Q(eav__age__lt=15)        # Anne, Daniel, Eugene
+        p = Patient.objects.filter(q2 & q1)
+        self.assertEqual(p.count(), 2)
+
+        # Anne
+        q1 = Q(eav__city__contains='Y') & Q(eav__fever=no)
+        q2 = Q(eav__age=3)
+        p = Patient.objects.filter(q1 & q2)
+        self.assertEqual(p.count(), 1)
+
+        # Anne, Daniel
+        q1 = Q(eav__city__contains='Y', eav__fever=no)
+        q2 = Q(eav__city='Nice')
+        q3 = Q(eav__age=3)
+        p = Patient.objects.filter((q1 | q2) & q3)
+        self.assertEqual(p.count(), 2)
+
+        # Everyone
+        q1 = Q(eav__fever=no) | Q(eav__fever=yes)
+        p = Patient.objects.filter(q1)
+        self.assertEqual(p.count(), 5)
 
         # Anne, Bob, Daniel
         q1 = Q(eav__fever=no)              # Anne, Bob, Daniel
@@ -98,9 +116,7 @@ class Queries(TestCase):
         q4 = q2 & q3                       # Cyrill, Daniel, Eugene
         q5 = (q1 | q4) & q1                # Anne, Bob, Daniel
         p = Patient.objects.filter(q5)
-        # print(Patient.objects.filter(q4).query)
         self.assertEqual(p.count(), 3)
-        return
 
         # Everyone except Anne
         q1 = Q(eav__city__contains='Y')
