@@ -109,10 +109,15 @@ def rewrite_q_expr(model_cls, expr):
                 attrval = child.children[0]
                 assert type(attrval) == tuple
 
-                # Child can be either a 'eav_values__in' or 'pk__in' query.
                 fname = '{}__in'.format(gr_name)
 
-                if attrval[0] == fname:
+                # Child can be either a 'eav_values__in' or 'pk__in' query.
+                # If it's the former then transform it into the latter.
+                # Otherwise, check if the value is valid for the '__in' query.
+                # If so, reverse it back to QuerySet so that set operators
+                # can be applied.
+
+                if attrval[0] == fname or hasattr(attrval[1], '__contains__'):
                     # Create model queryset.
                     _q = model_cls.objects.filter(**{fname: attrval[1]})
                 else:
