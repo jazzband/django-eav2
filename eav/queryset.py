@@ -74,8 +74,8 @@ def rewrite_q_expr(model_cls, expr):
     Q-expr branch.
 
     Args:
-        manager (Manager): Manager used to contruct empty QuerySet for the
-        related model class.
+        model_cls (Model class): model class used to construct QuerySet
+        from leaf attribute-value expression.
         expr: (Q or tuple): Q-expression (or attr-val leaf) to be rewritten.
 
     Returns: Q or tuple
