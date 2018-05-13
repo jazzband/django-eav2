@@ -31,9 +31,9 @@ from django.db.models.query import QuerySet
 from .models import Attribute, Value
 
 
-def is_rewritable(expr, gr_name):
+def is_eav_and_leaf(expr, gr_name):
     '''
-    Checks whether Q-expression should be rewritten to safe form.
+    Checks whether Q-expression is an EAV AND leaf.
     '''
     return (getattr(expr, 'connector', None) == 'AND' and
             len(expr.children) == 1 and
@@ -92,7 +92,7 @@ def rewrite_q_expr(model_cls, expr):
         # Recurively check child nodes.
         expr.children = [rewrite_q_expr(model_cls, c) for c in expr.children]
         # Check which ones need a rewrite.
-        rewritable = [c for c in expr.children if is_rewritable(c, gr_name)]
+        rewritable = [c for c in expr.children if is_eav_and_leaf(c, gr_name)]
 
         # Conflict occurs only with two or more AND-expressions.
         # If there is only one we can ignore it.
