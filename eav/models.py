@@ -22,8 +22,6 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import fields as generic
-from django.contrib.sites.models import Site
-from django.contrib.sites.managers import CurrentSiteManager
 from django.conf import settings
 
 from .validators import *
@@ -135,7 +133,6 @@ class Attribute(models.Model):
 
     class Meta:
         ordering = ['content_type', 'name']
-        unique_together = ('site', 'content_type', 'slug')
 
     TYPE_TEXT = 'text'
     TYPE_FLOAT = 'float'
@@ -163,12 +160,7 @@ class Attribute(models.Model):
                             blank=True, null=True,
                             verbose_name=_(u"content type"))
 
-    site = models.ForeignKey(Site, verbose_name=_(u"site"),
-                            on_delete=models.PROTECT,
-                            blank=True, null=True,
-                             default=settings.SITE_ID)
-
-    slug = EavSlugField(_(u"slug"), max_length=50, db_index=True,
+    slug = EavSlugField(_(u"slug"), max_length=50, db_index=True, unique=True,
                           help_text=_(u"Short unique attribute label"))
 
     description = models.CharField(_(u"description"), max_length=256,
@@ -198,7 +190,6 @@ class Attribute(models.Model):
     display_order = models.PositiveIntegerField(_(u"display order"), default=1)
 
     objects = models.Manager()
-    on_site = CurrentSiteManager()
 
     def get_validators(self):
         '''
