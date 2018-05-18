@@ -34,6 +34,13 @@ from .models import Attribute, Value
 def is_eav_and_leaf(expr, gr_name):
     '''
     Checks whether Q-expression is an EAV AND leaf.
+
+    Args:
+        expr (Q | tuple): Q-expression to be checked.
+        gr_name (str): Generic relation attribute name, by default 'eav_values'
+
+    Returns:
+        bool
     '''
     return (getattr(expr, 'connector', None) == 'AND' and
             len(expr.children) == 1 and
@@ -76,11 +83,11 @@ def rewrite_q_expr(model_cls, expr):
     Args:
         model_cls (Model class): model class used to construct QuerySet
         from leaf attribute-value expression.
-        expr: (Q or tuple): Q-expression (or attr-val leaf) to be rewritten.
+        expr: (Q | tuple): Q-expression (or attr-val leaf) to be rewritten.
 
-    Returns: Q or tuple
+    Returns:
+        Q | tuple
     '''
-
     # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
     # We are only interested in Qs.
 
@@ -147,7 +154,6 @@ def eav_filter(func):
     expand_q_filters and kwargs through expand_eav_filter. Returns the
     called function (filter or exclude).
     '''
-
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         nargs = []
@@ -179,7 +185,7 @@ def eav_filter(func):
 def expand_q_filters(q, root_cls):
     '''
     Takes a Q object and a model class.
-    Recursivley passes each filter / value in the Q object tree leaf nodes
+    Recursively passes each filter / value in the Q object tree leaf nodes
     through expand_eav_filter
     '''
     new_children = []
