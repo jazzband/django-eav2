@@ -10,9 +10,9 @@ Classes
 '''
 from copy import deepcopy
 
-from django.forms import BooleanField, CharField, DateTimeField, FloatField, \
-                         IntegerField, ModelForm, ChoiceField, ValidationError
 from django.contrib.admin.widgets import AdminSplitDateTime
+from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
+                          FloatField, IntegerField, ModelForm, ValidationError)
 from django.utils.translation import ugettext_lazy as _
 
 

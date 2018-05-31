@@ -9,12 +9,12 @@ Classes
 -------
 '''
 
-from django.db.utils import DatabaseError
-from django.db.models.signals import pre_init, post_init, pre_save, post_save
 from django.contrib.contenttypes import fields as generic
+from django.db.models.signals import post_init, post_save, pre_init, pre_save
+from django.db.utils import DatabaseError
 
 from .managers import EntityManager
-from .models import Entity, Attribute, Value
+from .models import Attribute, Entity, Value
 
 
 class EavConfig(object):

@@ -1,11 +1,11 @@
 from django.contrib import admin
-from django.contrib.admin.options import (
-    ModelAdmin, InlineModelAdmin, StackedInline
-)
+from django.contrib.admin.options import (InlineModelAdmin, ModelAdmin,
+                                          StackedInline)
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
-from .models import Attribute, Value, EnumValue, EnumGroup
+from .models import Attribute, EnumGroup, EnumValue, Value
+
 
 class BaseEntityAdmin(ModelAdmin):
 
@@ -82,4 +82,3 @@ admin.site.register(Attribute, AttributeAdmin)
 admin.site.register(Value)
 admin.site.register(EnumValue)
 admin.site.register(EnumGroup)
-

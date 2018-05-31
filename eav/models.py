@@ -16,18 +16,18 @@ Classes
 '''
 
 
-from django.utils import timezone
-from django.db import models
-from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import fields as generic
-from django.contrib.sites.models import Site
-from django.contrib.sites.managers import CurrentSiteManager
 from django.conf import settings
+from django.contrib.contenttypes import fields as generic
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.managers import CurrentSiteManager
+from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
+from .fields import EavDatatypeField, EavSlugField
 from .validators import *
-from .fields import EavSlugField, EavDatatypeField
 
 
 class EnumValue(models.Model):
