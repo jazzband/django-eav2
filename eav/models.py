@@ -425,7 +425,7 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         '''
-        return self.model._eav_config_cls.get_attributes().all().order_by('display_order')
+        return self.model._eav_config_cls.get_attributes().order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         '''
