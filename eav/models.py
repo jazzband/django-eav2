@@ -132,7 +132,7 @@ class Attribute(models.Model):
     '''
 
     class Meta:
-        ordering = ['content_type', 'name']
+        ordering = ['name']
 
     TYPE_TEXT = 'text'
     TYPE_FLOAT = 'float'
@@ -154,11 +154,6 @@ class Attribute(models.Model):
 
     name = models.CharField(_(u"name"), max_length=100,
                             help_text=_(u"User-friendly attribute name"))
-
-    content_type = models.ForeignKey(ContentType,
-                            on_delete=models.PROTECT,
-                            blank=True, null=True,
-                            verbose_name=_(u"content type"))
 
     slug = EavSlugField(_(u"slug"), max_length=50, db_index=True, unique=True,
                           help_text=_(u"Short unique attribute label"))
@@ -295,7 +290,7 @@ class Attribute(models.Model):
             value_obj.save()
 
     def __unicode__(self):
-        return u"%s.%s (%s)" % (self.content_type, self.name, self.get_datatype_display())
+        return u"%s.%s (%s)" % (self.name, self.get_datatype_display())
 
 
 class Value(models.Model):
@@ -430,8 +425,7 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         '''
-        return self.model._eav_config_cls.get_attributes().filter(
-            models.Q(content_type__isnull=True) | models.Q(content_type=self.ct)).order_by('display_order')
+        return self.model._eav_config_cls.get_attributes().all().order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         '''
