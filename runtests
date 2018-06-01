@@ -17,7 +17,7 @@ if __name__ == "__main__":
             'tests.queries',
             'tests.registry',
             'tests.data_validation',
-            'tests.limiting_attributes',
+            'tests.attributes',
             'tests.misc_models',
             'tests.set_and_get'
         ]
