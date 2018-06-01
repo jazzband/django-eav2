@@ -30,18 +30,14 @@ class Attributes(TestCase):
         Attribute.objects.create(name='age', datatype=Attribute.TYPE_INT)
         Attribute.objects.create(name='height', datatype=Attribute.TYPE_FLOAT)
         Attribute.objects.create(name='weight', datatype=Attribute.TYPE_FLOAT)
-
-        Attribute.objects.create(
-                name='color',
-                datatype=Attribute.TYPE_TEXT
-        )
+        Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
 
     def tearDown(self):
         eav.unregister(Encounter)
         eav.unregister(Patient)
 
     def test_get_attribute_querysets(self):
-        self.assertEqual(Patient._eav_config_cls.get_attributes().count(), 3)
+        self.assertEqual(Patient._eav_config_cls.get_attributes().count(), 4)
         self.assertEqual(Encounter._eav_config_cls.get_attributes().count(), 1)
 
     def test_duplicate_attributs(self):
