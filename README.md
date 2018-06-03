@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/makimo/django-eav2.svg?branch=master)](https://travis-ci.org/makimo/django-eav2)
 [![Coverage Status](https://coveralls.io/repos/github/makimo/django-eav2/badge.svg?branch=master)](https://coveralls.io/github/makimo/django-eav2?branch=master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b90eacf7a90db4b58f13/maintainability)](https://codeclimate.com/github/makimo/django-eav2/maintainability)
+[![Requirements Status](https://requires.io/github/makimo/django-eav2/requirements.svg?branch=master)](https://requires.io/github/makimo/django-eav2/requirements/?branch=master)
 
 ### Django EAV 2 - Entity-Attribute-Value storage for Django
 
