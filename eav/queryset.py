@@ -1,5 +1,5 @@
 '''
-Queryset module.
+Queryset.
 
 This module contains custom EavQuerySet class used for overriding
 relational operators and pure functions for rewriting Q-expressions.

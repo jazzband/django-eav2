@@ -1,7 +1,6 @@
 '''
-**********
-validators
-**********
+Validtors.
+
 This module contains a validator for each Attribute datatype.
 
 A validator is a callable that takes a value and raises a ``ValidationError``
@@ -11,9 +10,6 @@ if it doesn’t meet some criteria. (see
 These validators are called by the
 :meth:`~eav.models.Attribute.validate_value` method in the
 :class:`~eav.models.Attribute` model.
-
-Functions
----------
 '''
 
 import datetime

@@ -1,20 +1,14 @@
 '''
-******
-models
-******
-This module defines the four concrete, non-abstract models:
+Models.
 
-* :class:`Value`
-* :class:`Attribute`
-* :class:`EnumValue`
-* :class:`EnumGroup`
+This module defines the four concrete, non-abstract models:
+    * :class:`Value`
+    * :class:`Attribute`
+    * :class:`EnumValue`
+    * :class:`EnumGroup`
 
 Along with the :class:`Entity` helper class.
-
-Classes
--------
 '''
-
 
 from django.conf import settings
 from django.contrib.contenttypes import fields as generic

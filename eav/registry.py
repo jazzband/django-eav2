@@ -1,13 +1,4 @@
-'''
-########
-registry
-########
-
-This contains the registry classes
-
-Classes
--------
-'''
+'''Registry. This modules contains the registry classes.'''
 
 from django.contrib.contenttypes import fields as generic
 from django.db.models.signals import post_init, post_save, pre_init, pre_save

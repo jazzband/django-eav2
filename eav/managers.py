@@ -1,12 +1,9 @@
 '''
-********
-managers
-********
-Contains the custom manager used by entities registered with eav.
+Managers.
 
-Functions and Classes
----------------------
+This module contains the custom manager used by entities registered with eav.
 '''
+
 from django.db import models
 
 from .queryset import EavQuerySet
@@ -14,7 +11,7 @@ from .queryset import EavQuerySet
 
 class EntityManager(models.Manager):
     '''
-    Our custom manager, overriding ``models.Manager``
+    Our custom manager, overrides ``models.Manager``.
     '''
     _queryset_class = EavQuerySet
 

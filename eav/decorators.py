@@ -1,5 +1,5 @@
 '''
-Decorators module.
+Decorators.
 
 This module contains pure wrapper functions used as decorators.
 Functions in this module should be simple and not involve complex logic.

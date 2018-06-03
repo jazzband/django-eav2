@@ -1,3 +1,5 @@
+'''Utilities. This module contains non-essential helper methods.'''
+
 import sys
 
 from django.db.models import Q

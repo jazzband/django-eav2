@@ -1,13 +1,5 @@
-'''
-#####
-forms
-#####
+'''Forms. This module contains forms used for admin integration.'''
 
-The forms used for admin integration
-
-Classes
--------
-'''
 from copy import deepcopy
 
 from django.contrib.admin.widgets import AdminSplitDateTime

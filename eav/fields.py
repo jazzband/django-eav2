@@ -1,15 +1,9 @@
 '''
-******
-fields
-******
+Fields.
 
 Contains two custom fields:
-
-* :class:`EavSlugField`
-* :class:`EavDatatypeField`
-
-Classes
--------
+    * :class:`EavSlugField`
+    * :class:`EavDatatypeField`
 '''
 
 import re
