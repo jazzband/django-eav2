@@ -289,7 +289,7 @@ class Attribute(models.Model):
             value_obj.save()
 
     def __unicode__(self):
-        return u"%s.%s (%s)" % (self.name, self.get_datatype_display())
+        return u"%s (%s)" % (self.name, self.get_datatype_display())
 
 
 class Value(models.Model):
