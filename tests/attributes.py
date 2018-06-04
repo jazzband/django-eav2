@@ -1,13 +1,17 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 import eav
-from eav.registry import EavConfig
 from eav.models import Attribute, Value
+from eav.registry import EavConfig
 
-from .models import Patient, Encounter
+from .models import Encounter, Patient
 
 
-class LimittingAttributes(TestCase):
+class Attributes(TestCase):
+    '''
+    TODO: Explain this test.
+    '''
 
     def setUp(self):
         class EncounterEavConfig(EavConfig):
@@ -26,16 +30,22 @@ class LimittingAttributes(TestCase):
         Attribute.objects.create(name='age', datatype=Attribute.TYPE_INT)
         Attribute.objects.create(name='height', datatype=Attribute.TYPE_FLOAT)
         Attribute.objects.create(name='weight', datatype=Attribute.TYPE_FLOAT)
+        Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
 
     def tearDown(self):
         eav.unregister(Encounter)
         eav.unregister(Patient)
 
     def test_get_attribute_querysets(self):
-        self.assertEqual(Patient._eav_config_cls \
-                                .get_attributes().count(), 3)
-        self.assertEqual(Encounter._eav_config_cls \
-                                .get_attributes().count(), 1)
+        self.assertEqual(Patient._eav_config_cls.get_attributes().count(), 4)
+        self.assertEqual(Encounter._eav_config_cls.get_attributes().count(), 1)
+
+    def test_duplicate_attributs(self):
+        '''
+        Ensure that no two Attributes with the same slug can exist.
+        '''
+        with self.assertRaises(ValidationError):
+            Attribute.objects.create(name='height', datatype=Attribute.TYPE_FLOAT)
 
     def test_setting_attributes(self):
         p = Patient.objects.create(name='Jon')

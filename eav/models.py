@@ -13,8 +13,6 @@ Along with the :class:`Entity` helper class.
 from django.conf import settings
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.sites.managers import CurrentSiteManager
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -128,8 +126,7 @@ class Attribute(models.Model):
     '''
 
     class Meta:
-        ordering = ['content_type', 'name']
-        unique_together = ('site', 'content_type', 'slug')
+        ordering = ['name']
 
     TYPE_TEXT = 'text'
     TYPE_FLOAT = 'float'
@@ -152,17 +149,7 @@ class Attribute(models.Model):
     name = models.CharField(_(u"name"), max_length=100,
                             help_text=_(u"User-friendly attribute name"))
 
-    content_type = models.ForeignKey(ContentType,
-                            on_delete=models.PROTECT,
-                            blank=True, null=True,
-                            verbose_name=_(u"content type"))
-
-    site = models.ForeignKey(Site, verbose_name=_(u"site"),
-                            on_delete=models.PROTECT,
-                            blank=True, null=True,
-                             default=settings.SITE_ID)
-
-    slug = EavSlugField(_(u"slug"), max_length=50, db_index=True,
+    slug = EavSlugField(_(u"slug"), max_length=50, db_index=True, unique=True,
                           help_text=_(u"Short unique attribute label"))
 
     description = models.CharField(_(u"description"), max_length=256,
@@ -192,7 +179,6 @@ class Attribute(models.Model):
     display_order = models.PositiveIntegerField(_(u"display order"), default=1)
 
     objects = models.Manager()
-    on_site = CurrentSiteManager()
 
     def get_validators(self):
         '''
@@ -298,7 +284,7 @@ class Attribute(models.Model):
             value_obj.save()
 
     def __unicode__(self):
-        return u"%s.%s (%s)" % (self.content_type, self.name, self.get_datatype_display())
+        return u"%s (%s)" % (self.name, self.get_datatype_display())
 
 
 class Value(models.Model):
@@ -433,8 +419,7 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         '''
-        return self.model._eav_config_cls.get_attributes().filter(
-            models.Q(content_type__isnull=True) | models.Q(content_type=self.ct)).order_by('display_order')
+        return self.model._eav_config_cls.get_attributes().order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         '''
