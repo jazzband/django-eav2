@@ -91,7 +91,7 @@ def rewrite_q_expr(model_cls, expr):
     # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
     # We are only interested in Qs.
 
-    if type(expr) == Q:
+    if isinstance(expr, Q):
         config_cls = getattr(model_cls, '_eav_config_cls', None)
         assert config_cls
         gr_name = config_cls.generic_relation_attr
@@ -114,7 +114,7 @@ def rewrite_q_expr(model_cls, expr):
                 # Child to be merged is always a terminal Q node,
                 # i.e. it's an AND expression with attribute-value tuple child.
                 attrval = child.children[0]
-                assert type(attrval) == tuple
+                assert isinstance(attrval, tuple)
 
                 fname = '{}__in'.format(gr_name)
 
@@ -191,7 +191,7 @@ def expand_q_filters(q, root_cls):
     new_children = []
 
     for qi in q.children:
-        if type(qi) is tuple:
+        if isinstance(qi, tuple):
             # This child is a leaf node: in Q this is a 2-tuple of:
             # (filter parameter, value).
             key, value = expand_eav_filter(root_cls, *qi)

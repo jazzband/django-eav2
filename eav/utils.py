@@ -12,7 +12,7 @@ def print_q_expr(expr, indent="", is_tail=True):
     sys.stdout.write(indent)
     sa, sb = (' └── ', '    ') if is_tail else (' ├── ', ' │   ')
 
-    if type(expr) == Q:
+    if isinstance(expr, Q):
         sys.stdout.write('{}{}\n'.format(sa, expr.connector))
         for child in expr.children:
             print_q_expr(child, indent + sb, expr.children[-1] == child)
