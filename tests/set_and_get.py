@@ -1,8 +1,7 @@
 from django.test import TestCase
 
 import eav
-from eav.registry import Registry, EavConfig
-from eav.managers import EntityManager
+from eav.registry import EavConfig
 
 from .models import Patient, Encounter
 

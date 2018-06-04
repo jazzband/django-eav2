@@ -4,7 +4,7 @@ from copy import deepcopy
 
 from django.contrib.admin.widgets import AdminSplitDateTime
 from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
-                          FloatField, IntegerField, ModelForm, ValidationError)
+                          FloatField, IntegerField, ModelForm)
 from django.utils.translation import ugettext_lazy as _
 
 

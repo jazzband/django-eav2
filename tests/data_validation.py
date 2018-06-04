@@ -5,10 +5,9 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 
 import eav
-from eav.registry import EavConfig
 from eav.models import Attribute, Value, EnumValue, EnumGroup
 
-from .models import Patient, Encounter
+from .models import Patient
 
 
 class DataValidation(TestCase):

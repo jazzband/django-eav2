@@ -1,13 +1,11 @@
-from django.contrib.auth.models import User
 from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import Q
 from django.test import TestCase
 
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
-from eav.registry import EavConfig
 
-from .models import Encounter, ExampleModel, Patient
+from .models import Encounter, Patient
 
 
 class Queries(TestCase):

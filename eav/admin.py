@@ -1,8 +1,8 @@
 '''Admin. This module contains classes used for admin integration.'''
 
 from django.contrib import admin
-from django.contrib.admin.options import (InlineModelAdmin, ModelAdmin,
-                                          StackedInline)
+from django.contrib.admin.options import InlineModelAdmin
+from django.contrib.admin.options import ModelAdmin
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 

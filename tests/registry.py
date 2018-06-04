@@ -1,9 +1,7 @@
 from django.test import TestCase
 
 import eav
-from eav.registry import Registry, EavConfig
-from eav.managers import EntityManager
-from eav.models import Attribute
+from eav.registry import EavConfig
 
 from .models import Patient, Encounter, ExampleModel
 
@@ -28,7 +26,7 @@ class RegistryTests(TestCase):
                 return 'testing'
 
         eav.register(Encounter, EncounterEav)
-        
+
     def test_registering_with_defaults(self):
         eav.register(Patient)
         self.assertTrue(hasattr(Patient, '_eav_config_cls'))

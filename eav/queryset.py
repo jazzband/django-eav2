@@ -21,8 +21,7 @@ Q-expressions need to be rewritten for two reasons:
        For details see: ``rewrite_q_expr``.
 '''
 
-import sys
-from functools import reduce, wraps
+from functools import wraps
 
 from django.db import models
 from django.db.models import Q
