@@ -23,3 +23,22 @@ This project aims to:
 
 (For now) our progress can be tracked through issues. Feel free
 to join the discussion.
+
+### Installing from git
+
+```
+pip install git+https://github.com/makimo/django-eav2@master
+```
+
+### Installing from source
+
+```
+git clone git@github.com:makimo/django-eav2.git
+cd django-eav2
+python setup.py install
+```
+To uninstall:
+```
+python setup.py install --record files.txt
+rm $(cat files.txt)
+```
