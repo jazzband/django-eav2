@@ -1,0 +1,4 @@
+[run]
+omit =
+    */migrations/*
+    eav/__init__.py
