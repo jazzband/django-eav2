@@ -1,23 +1,20 @@
 from distutils.core import setup
 
 setup(
-    name='django-eav',
-    version=__import__('eav').__version__,
-    license = 'GNU Lesser General Public License (LGPL), Version 3',
-
-    requires = ['python (>= 2.5)', 'django (>= 1.2)'],
-    provides = ['eav'],
-
-    description='Entity-attribute-value model implementation as a reusable'
-                'Django app.',
-    long_description=open('README.md').read(),
-
-    url='http://github.com/mvpdev/django-eav',
-
-    packages=['eav', 'tests'],
+    name             = 'django-eav2',
+    version          = __import__('eav').__version__,
+    license          = 'GNU Lesser General Public License (LGPL), Version 3',
+    requires         = ['python (>= 3.5)', 'django (>= 1.11.14)'],
+    provides         = ['eav'],
+    description      = 'Entity-Attribute-Value storage for Django',
+    long_description = open('README.md').read(),
+    url              = 'http://github.com/makimo/django-eav2',
+    packages         = ['eav', 'tests'],
+    maintainer       = 'Iwo Herka',
+    maintainer_email = 'hi@iwoherka.eu',
 
     classifiers  = [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
