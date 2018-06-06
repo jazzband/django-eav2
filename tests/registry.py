@@ -3,11 +3,10 @@ from django.test import TestCase
 import eav
 from eav.registry import EavConfig
 
-from .models import Patient, Encounter, ExampleModel
+from .models import Encounter, ExampleModel, Patient
 
 
 class RegistryTests(TestCase):
-
     def setUp(self):
         pass
 
@@ -33,10 +32,8 @@ class RegistryTests(TestCase):
         self.assertEqual(Patient._eav_config_cls.manager_attr, 'objects')
         self.assertFalse(Patient._eav_config_cls.manager_only)
         self.assertEqual(Patient._eav_config_cls.eav_attr, 'eav')
-        self.assertEqual(Patient._eav_config_cls.generic_relation_attr,
-                         'eav_values')
-        self.assertEqual(Patient._eav_config_cls.generic_relation_related_name,
-                         None)
+        self.assertEqual(Patient._eav_config_cls.generic_relation_attr, 'eav_values')
+        self.assertEqual(Patient._eav_config_cls.generic_relation_related_name, None)
         eav.unregister(Patient)
 
     def test_registering_overriding_defaults(self):
@@ -70,7 +67,6 @@ class RegistryTests(TestCase):
     def test_unregistering_via_decorator(self):
         self.assertTrue(ExampleModel.objects.__class__.__name__ == 'EntityManager')
         eav.unregister(ExampleModel)
-        e = ExampleModel()
         self.assertFalse(ExampleModel.objects.__class__.__name__ == 'EntityManager')
 
     def test_unregistering_unregistered_model_proceeds_silently(self):

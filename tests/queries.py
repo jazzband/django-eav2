@@ -35,7 +35,7 @@ class Queries(TestCase):
         eav.unregister(Patient)
 
     def test_get_or_create_with_eav(self):
-        p = Patient.objects.get_or_create(name='Bob', eav__age=5)
+        Patient.objects.get_or_create(name='Bob', eav__age=5)
         self.assertEqual(Patient.objects.count(), 1)
         self.assertEqual(Value.objects.count(), 1)
         p = Patient.objects.get_or_create(name='Bob', eav__age=5)
@@ -49,7 +49,7 @@ class Queries(TestCase):
         p1, _ = Patient.objects.get_or_create(name='Bob', eav__age=6)
         self.assertEqual(Patient.objects.get(eav__age=6), p1)
 
-        p2, _ = Patient.objects.get_or_create(name='Fred', eav__age=6)
+        Patient.objects.create(name='Fred', eav__age=6)
         self.assertRaises(MultipleObjectsReturned, lambda: Patient.objects.get(eav__age=6))
 
     def test_filtering_on_normal_and_eav_fields(self):
