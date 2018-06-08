@@ -7,7 +7,6 @@ setup(
     requires         = ['python (>= 3.5)', 'django (>= 1.11.14)'],
     provides         = ['eav'],
     description      = 'Entity-Attribute-Value storage for Django',
-    long_description = open('README.md').read(),
     url              = 'http://github.com/makimo/django-eav2',
     packages         = ['eav', 'tests'],
     maintainer       = 'Iwo Herka',
