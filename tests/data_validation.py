@@ -91,8 +91,6 @@ class DataValidation(TestCase):
         p.eav.dob = 15
         self.assertRaises(ValidationError, lambda: p.save())
         now = timezone.now()
-        now = timezone.datetime(year=now.year, month=now.month, day=now.day,
-                                hour=now.hour, minute=now.minute, second=now.second)
         p.eav.dob = now
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob, now)
