@@ -1,14 +1,22 @@
 language: python
-python:
-    - "3.6.5"
+matrix:
+    include:
+        - python: 2.7
+          env: TOXENV=py27
+        - python: 3.5
+          env: TOXENV=py35
+        - python: 3.6
+          env: TOXENV=py36
+        - python: 3.7-dev
+          env: TOXENV=py37
 install:
     - pip install -r requirements.txt
+    - pip install tox==3.0.0
     - pip install coveralls==1.3.0
-    - pip install pyyaml==3.12
     - pip install coverage==4.5.1
 before_script:
     - coverage erase
 script:
-    - coverage run --source=eav runtests
+    - coverage run --source=eav runtests; tox
 after_success:
-    - coveralls
+    - COVERALLS_REPO_TOKEN=71NkMDQFpFKB9QYXoK12LYuWUEmQ2wD6V coveralls
