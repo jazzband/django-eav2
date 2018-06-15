@@ -1,6 +1,4 @@
 '''
-Models.
-
 This module defines the four concrete, non-abstract models:
     * :class:`Value`
     * :class:`Attribute`

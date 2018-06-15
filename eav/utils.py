@@ -1,4 +1,4 @@
-'''Utilities. This module contains non-essential helper methods.'''
+'''This module contains non-essential helper methods.'''
 
 import sys
 
