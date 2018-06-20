@@ -160,8 +160,6 @@ class Attribute(models.Model):
                             on_delete=models.PROTECT,
                                    blank=True, null=True)
 
-    type = models.CharField(_(u"type"), max_length=20, blank=True, null=True)
-
     @property
     def help_text(self):
         return self.description
