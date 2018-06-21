@@ -9,6 +9,7 @@ This module defines the four concrete, non-abstract models:
 
 Along with the :class:`Entity` helper class.
 '''
+from copy import copy
 
 from django.conf import settings
 from django.contrib.contenttypes import fields as generic
@@ -18,6 +19,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from .exceptions import IllegalAssignmentException
 from .fields import EavDatatypeField, EavSlugField
 from .validators import *
 
@@ -441,19 +443,9 @@ class Entity(object):
     registered with eav.
     '''
     @staticmethod
-    def post_save_handler(sender, *args, **kwargs):
-        '''
-        Post save handler attached to self.model.  Calls :meth:`save` when
-        the model instance we are attached to is saved.
-        '''
-        instance = kwargs['instance']
-        entity = getattr(instance, instance._eav_config_cls.eav_attr)
-        entity.save()
-
-    @staticmethod
     def pre_save_handler(sender, *args, **kwargs):
         '''
-        Pre save handler attached to self.model.  Called before the
+        Pre save handler attached to self.instance.  Called before the
         model instance we are attached to is saved. This allows us to call
         :meth:`validate_attributes` before the entity is saved.
         '''
@@ -461,12 +453,22 @@ class Entity(object):
         entity = getattr(kwargs['instance'], instance._eav_config_cls.eav_attr)
         entity.validate_attributes()
 
+    @staticmethod
+    def post_save_handler(sender, *args, **kwargs):
+        '''
+        Post save handler attached to self.instance.  Calls :meth:`save` when
+        the model instance we are attached to is saved.
+        '''
+        instance = kwargs['instance']
+        entity = getattr(instance, instance._eav_config_cls.eav_attr)
+        entity.save()
+
     def __init__(self, instance):
         '''
-        Set self.model equal to the instance of the model that we're attached
+        Set self.instance equal to the instance of the model that we're attached
         to. Also, store the content type of that instance.
         '''
-        self.model = instance
+        self.instance = instance
         self.ct = ContentType.objects.get_for_model(instance)
 
     def __getattr__(self, name):
@@ -487,7 +489,7 @@ class Entity(object):
             except Attribute.DoesNotExist:
                 raise AttributeError(
                     _('%(obj)s has no EAV attribute named %(attr)s')
-                    % dict(obj = self.model, attr = name)
+                    % dict(obj = self.instance, attr = name)
                 )
 
             try:
@@ -502,7 +504,7 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         '''
-        return self.model._eav_config_cls.get_attributes().order_by('display_order')
+        return self.instance._eav_config_cls.get_attributes().order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         '''
@@ -527,30 +529,32 @@ class Entity(object):
         for attribute in self.get_all_attributes():
             if self._hasattr(attribute.slug):
                 attribute_value = self._getattr(attribute.slug)
-                attribute.save_value(self.model, attribute_value)
+                attribute.save_value(self.instance, attribute_value)
 
     def validate_attributes(self):
         '''
         Called before :meth:`save`, first validate all the entity values to
         make sure they can be created / saved cleanly.
-
-        Raise ``ValidationError`` if they can't be.
+        Raises ``ValidationError`` if they can't be.
         '''
         values_dict = self.get_values_dict()
 
         for attribute in self.get_all_attributes():
             value = None
 
+            # Value was assigned to this instance.
             if self._hasattr(attribute.slug):
                 value = self._getattr(attribute.slug)
+                values_dict.pop(attribute.slug, None)
+            # Otherwise try pre-loaded from DB.
             else:
-                value = values_dict.get(attribute.slug, None)
+                value = values_dict.pop(attribute.slug, None)
 
             if value is None:
                 if attribute.required:
-                    raise ValidationError(_(
-                        '{} EAV field cannot be blank'.format(attribute.slug)
-                    ))
+                    raise ValidationError(
+                        _('{} EAV field cannot be blank'.format(attribute.slug))
+                    )
             else:
                 try:
                     attribute.validate_value(value)
@@ -560,28 +564,32 @@ class Entity(object):
                         % dict(attr = attribute.slug, err = e)
                     )
 
+        illegal = values_dict or (
+            self.get_object_attributes() - self.get_all_attribute_slugs())
+
+        if illegal:
+            raise IllegalAssignmentException(
+                'Instance of the class {} cannot have values for attributes: {}.'
+                .format(self.instance.__class__, ', '.join(illegal))
+            )
+
     def get_values_dict(self):
-        values_dict = dict()
-
-        for value in self.get_values():
-            values_dict[value.attribute.slug] = value.value
-
-        return values_dict
+        return {v.attribute.slug: v.value for v in self.get_values()}
 
     def get_values(self):
         '''
-        Get all set :class:`Value` objects for self.model
+        Get all set :class:`Value` objects for self.instance
         '''
         return Value.objects.filter(
-            entity_ct=self.ct,
-            entity_id=self.model.pk
+            entity_ct = self.ct,
+            entity_id = self.instance.pk
         ).select_related()
 
     def get_all_attribute_slugs(self):
         '''
         Returns a list of slugs for all attributes available to this entity.
         '''
-        return self.get_all_attributes().values_list('slug', flat=True)
+        return set(self.get_all_attributes().values_list('slug', flat=True))
 
     def get_attribute_by_slug(self, slug):
         '''
@@ -594,6 +602,13 @@ class Entity(object):
         Returns a single :class:`Value` for *attribute*.
         '''
         return self.get_values().get(attribute=attribute)
+
+    def get_object_attributes(self):
+        '''
+        Returns entity instance attributes, except for
+        ``instance`` and ``ct`` which are used internally.
+        '''
+        return set(copy(self.__dict__).keys()) - set(['instance', 'ct'])
 
     def __iter__(self):
         '''

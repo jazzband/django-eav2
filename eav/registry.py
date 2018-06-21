@@ -87,7 +87,7 @@ class Registry(object):
     @staticmethod
     def attach_eav_attr(sender, *args, **kwargs):
         '''
-        Attache EAV Entity toolkit to an instance after init.
+        Attach EAV Entity toolkit to an instance after init.
         '''
         instance = kwargs['instance']
         config_cls = instance.__class__._eav_config_cls
@@ -131,19 +131,22 @@ class Registry(object):
 
     def _attach_signals(self):
         '''
-        Attach all signals for eav
+        Attach pre- and post- save signals from model class
+        to Entity helper. This way, Entity instance will be
+        able to prepare and clean-up before and after creation /
+        update of the user's model class instance.
         '''
-        post_init.connect(Registry.attach_eav_attr, sender=self.model_cls)
-        pre_save.connect(Entity.pre_save_handler, sender=self.model_cls)
-        post_save.connect(Entity.post_save_handler, sender=self.model_cls)
+        post_init.connect(Registry.attach_eav_attr, sender = self.model_cls)
+        pre_save.connect(Entity.pre_save_handler, sender = self.model_cls)
+        post_save.connect(Entity.post_save_handler, sender = self.model_cls)
 
     def _detach_signals(self):
         '''
-        Detach all signals for eav
+        Detach all signals for eav.
         '''
-        post_init.disconnect(Registry.attach_eav_attr, sender=self.model_cls)
-        pre_save.disconnect(Entity.pre_save_handler, sender=self.model_cls)
-        post_save.disconnect(Entity.post_save_handler, sender=self.model_cls)
+        post_init.disconnect(Registry.attach_eav_attr, sender = self.model_cls)
+        pre_save.disconnect(Entity.pre_save_handler, sender = self.model_cls)
+        post_save.disconnect(Entity.post_save_handler, sender = self.model_cls)
 
     def _attach_generic_relation(self):
         '''

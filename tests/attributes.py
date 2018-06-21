@@ -4,6 +4,7 @@ from django.test import TestCase
 import eav
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
+from eav.exceptions import IllegalAssignmentException
 
 from .models import Encounter, Patient
 
@@ -54,7 +55,6 @@ class Attributes(TestCase):
         p.eav.height = 2.3
         p.save()
         e.eav_field.age = 4
-        e.eav_field.height = 4.5
         e.save()
         self.assertEqual(Value.objects.count(), 3)
         p = Patient.objects.get(name='Jon')
@@ -62,4 +62,19 @@ class Attributes(TestCase):
         self.assertEqual(p.eav.height, 2.3)
         e = Encounter.objects.get(num=1)
         self.assertEqual(e.eav_field.age, 4)
-        self.assertFalse(hasattr(e.eav_field, 'height'))
+
+    def test_illegal_assignemnt(self):
+        class EncounterEavConfig(EavConfig):
+            @classmethod
+            def get_attributes(cls):
+                return Attribute.objects.filter(datatype=Attribute.TYPE_INT)
+
+        eav.unregister(Encounter)
+        eav.register(Encounter, EncounterEavConfig)
+
+        p = Patient.objects.create(name='Jon')
+        e = Encounter.objects.create(patient=p, num=1)
+
+        with self.assertRaises(IllegalAssignmentException):
+            e.eav.color = 'red'
+            e.save()
