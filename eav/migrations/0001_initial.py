@@ -22,7 +22,6 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(help_text='User-friendly attribute name', max_length=100, verbose_name='name')),
                 ('slug', eav.fields.EavSlugField(help_text='Short unique attribute label', unique=True, verbose_name='slug')),
                 ('description', models.CharField(blank=True, help_text='Short description', max_length=256, null=True, verbose_name='description')),
-                ('type', models.CharField(blank=True, max_length=20, null=True, verbose_name='type')),
                 ('datatype', eav.fields.EavDatatypeField(choices=[('text', 'Text'), ('float', 'Float'), ('int', 'Integer'), ('date', 'Date'), ('bool', 'True / False'), ('object', 'Django Object'), ('enum', 'Multiple Choice')], max_length=6, verbose_name='data type')),
                 ('created', models.DateTimeField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', models.DateTimeField(auto_now=True, verbose_name='modified')),

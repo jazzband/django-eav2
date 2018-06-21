@@ -11,7 +11,7 @@ class MiscModels(TestCase):
     def test_enumgroup_str(self):
         name = 'Yes / No'
         e = EnumGroup.objects.create(name=name)
-        self.assertEqual(str(e), name)
+        self.assertEqual('<EnumGroup Yes / No>', str(e))
 
     def test_attribute_help_text(self):
         desc = 'Patient Age'

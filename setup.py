@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name             = 'django-eav2',
@@ -13,7 +13,7 @@ setup(
     maintainer_email = 'hi@iwoherka.eu',
 
     classifiers  = [
-        'Development Status :: 5 - Beta',
+        'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
