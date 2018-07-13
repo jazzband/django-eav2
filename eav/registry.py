@@ -25,7 +25,6 @@ class EavConfig(object):
         GenericRelation from Entity to Value. None by default. Therefore,
         if not overridden, it is not possible to query Values by Entities.
     '''
-
     manager_attr = 'objects'
     manager_only = False
     eav_attr = 'eav'

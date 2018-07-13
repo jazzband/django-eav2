@@ -99,5 +99,6 @@ class BaseDynamicEntityForm(ModelForm):
         # Save entity and its attributes.
         if commit:
             instance.save()
+            self._save_m2m()
 
         return instance

@@ -3,7 +3,7 @@ from django.contrib.admin.sites import AdminSite
 
 import eav
 from eav.admin import *
-from .models import Patient
+from .models import Patient, M2MModel, ExampleModel
 from eav.models import Attribute
 from eav.forms import BaseDynamicEntityForm
 from django.contrib import admin
@@ -44,6 +44,12 @@ class PatientForm(ModelForm):
         fields = '__all__'
 
 
+class M2MModelForm(ModelForm):
+    class Meta:
+        model = M2MModel
+        fields = '__all__'
+
+
 class Forms(TestCase):
     def setUp(self):
         eav.register(Patient)
@@ -76,3 +82,11 @@ class Forms(TestCase):
         form = PatientForm(dict(color='Blue'), instance=self.instance)
         with self.assertRaises(ValueError):
             jim = form.save()
+
+
+    def test_m2m(self):
+        m2mmodel = M2MModel.objects.create(name='name')
+        model = ExampleModel.objects.create(name='name')
+        form = M2MModelForm(dict(name='Lorem', models=[model.pk]), instance=m2mmodel)
+        form.save()
+        self.assertEqual(len(m2mmodel.models.all()), 1)
