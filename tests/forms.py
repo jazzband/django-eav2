@@ -38,6 +38,12 @@ request = MockRequest().request()
 request.user = MockSuperUser()
 
 
+class PatientForm(ModelForm):
+    class Meta:
+        model = Patient
+        fields = '__all__'
+
+
 class Forms(TestCase):
     def setUp(self):
         eav.register(Patient)
@@ -58,14 +64,15 @@ class Forms(TestCase):
             len(adminform.form.fields), Attribute.objects.count() + own_fields
         )
 
-    def test_submit(self):
-        class PatientForm(ModelForm):
-            class Meta:
-                model = Patient
-                fields = '__all__'
-
+    def test_valid_submit(self):
         self.instance.eav.color = 'Blue'
         form = PatientForm(self.instance.__dict__, instance=self.instance)
         jim = form.save()
 
         self.assertEqual(jim.eav.color, 'Blue')
+
+
+    def test_invalid_submit(self):
+        form = PatientForm(dict(color='Blue'), instance=self.instance)
+        with self.assertRaises(ValueError):
+            jim = form.save()
