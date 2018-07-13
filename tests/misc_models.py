@@ -7,7 +7,6 @@ from .models import Patient
 
 
 class MiscModels(TestCase):
-
     def test_enumgroup_str(self):
         name = 'Yes / No'
         e = EnumGroup.objects.create(name=name)

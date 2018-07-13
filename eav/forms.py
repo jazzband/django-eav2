@@ -18,7 +18,6 @@ class BaseDynamicEntityForm(ModelForm):
     validation is actually done, all EAV fields are present in it (unless
     Rubric is not defined).
     '''
-
     FIELD_CLASSES = {
         'text': CharField,
         'float': FloatField,
@@ -78,16 +77,15 @@ class BaseDynamicEntityForm(ModelForm):
 
         Returns ``instance``.
         """
-
         if self.errors:
             raise ValueError(_(u"The %s could not be saved because the data"
                              u"didn't validate.") % \
                              self.instance._meta.object_name)
 
-        # create entity instance, don't save yet
+        # Create entity instance, don't save yet.
         instance = super(BaseDynamicEntityForm, self).save(commit=False)
 
-        # assign attributes
+        # Assign attributes.
         for attribute in self.entity.get_all_attributes():
             value = self.cleaned_data.get(attribute.slug)
             if attribute.datatype == attribute.TYPE_ENUM:
@@ -98,7 +96,7 @@ class BaseDynamicEntityForm(ModelForm):
 
             setattr(self.entity, attribute.slug, value)
 
-        # save entity and its attributes
+        # Save entity and its attributes.
         if commit:
             instance.save()
 

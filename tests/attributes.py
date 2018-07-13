@@ -2,18 +2,14 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 
 import eav
+from eav.exceptions import IllegalAssignmentException
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
-from eav.exceptions import IllegalAssignmentException
 
 from .models import Encounter, Patient
 
 
 class Attributes(TestCase):
-    '''
-    TODO: Explain this test.
-    '''
-
     def setUp(self):
         class EncounterEavConfig(EavConfig):
             manager_attr = 'eav_objects'
