@@ -1,13 +1,15 @@
 .. .. image:: _static/logo.png
 ..     :align: center
 
+.. rst-class:: doc-title
+
 Django EAV 2
 ============
 
 Django EAV 2 is an entity-attribute-value storage for modern Django.
 Getting started is very easy.
 
-Registering models looks as follows:
+**Step 1.** Register a model:
 
 .. code-block:: python
 
@@ -24,13 +26,13 @@ or with decorators:
     class Supplier(models.Model):
         ...
 
-Create an attribute with:
+**Step 2.** Create an attribute:
 
 .. code-block:: python
 
     Attribute.objects.create(name='City', datatype=Attribute.TYPE_TEXT)
 
-and you're ready to go:
+**Step 3.** That's it! You're ready to go:
 
 .. code-block:: python
 
@@ -45,7 +47,10 @@ Documentation
 -------------
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+
+    getting_started
+    usage
 
 
 API Reference

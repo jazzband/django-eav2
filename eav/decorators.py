@@ -6,7 +6,7 @@ Functions in this module should be simple and not involve complex logic.
 def register_eav(**kwargs):
     '''
     Registers the given model(s) classes and wrapped ``Model`` class with
-    Djagno EAV::
+    Django EAV 2::
 
         @register_eav
         class Author(models.Model):

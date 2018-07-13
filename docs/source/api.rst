@@ -1,3 +1,5 @@
+.. rst-class:: doc-api
+
 API Reference
 =============
 
