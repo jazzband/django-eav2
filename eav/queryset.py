@@ -94,7 +94,6 @@ def rewrite_q_expr(model_cls, expr):
 
     if isinstance(expr, Q):
         config_cls = getattr(model_cls, '_eav_config_cls', None)
-        assert config_cls
         gr_name = config_cls.generic_relation_attr
 
         # Recurively check child nodes.
@@ -111,11 +110,13 @@ def rewrite_q_expr(model_cls, expr):
             other = [c for c in expr.children if not c in rewritable]
 
             for child in rewritable:
-                assert child.children and len(child.children) == 1
+                if not (child.children and len(child.children) == 1):
+                    raise AssertionError('Child must have exactly one descendant')
                 # Child to be merged is always a terminal Q node,
                 # i.e. it's an AND expression with attribute-value tuple child.
                 attrval = child.children[0]
-                assert isinstance(attrval, tuple)
+                if not isinstance(attrval, tuple):
+                    raise AssertionError('Attribute-value must be a tuple')
 
                 fname = '{}__in'.format(gr_name)
 
@@ -261,7 +262,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through ``eav_filter``, then pass to
         the ``models.Manager`` filter method.
         '''
-        return super(self.__class__, self).filter(*args, **kwargs)
+        return super().filter(*args, **kwargs)
 
     @eav_filter
     def exclude(self, *args, **kwargs):
@@ -269,7 +270,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through ``eav_filter``, then pass to
         the ``models.Manager`` exclude method.
         '''
-        return super(self.__class__, self).exclude(*args, **kwargs)
+        return super().exclude(*args, **kwargs)
 
     @eav_filter
     def get(self, *args, **kwargs):
@@ -277,4 +278,4 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through ``eav_filter``, then pass to
         the ``models.Manager`` get method.
         '''
-        return super(self.__class__, self).get(*args, **kwargs)
+        return super().get(*args, **kwargs)

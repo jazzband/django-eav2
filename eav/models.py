@@ -11,7 +11,6 @@ Along with the :class:`Entity` helper class.
 '''
 from copy import copy
 
-from django.conf import settings
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError

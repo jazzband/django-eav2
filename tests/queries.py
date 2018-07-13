@@ -38,10 +38,10 @@ class Queries(TestCase):
         Patient.objects.get_or_create(name='Bob', eav__age=5)
         self.assertEqual(Patient.objects.count(), 1)
         self.assertEqual(Value.objects.count(), 1)
-        p = Patient.objects.get_or_create(name='Bob', eav__age=5)
+        Patient.objects.get_or_create(name='Bob', eav__age=5)
         self.assertEqual(Patient.objects.count(), 1)
         self.assertEqual(Value.objects.count(), 1)
-        p = Patient.objects.get_or_create(name='Bob', eav__age=6)
+        Patient.objects.get_or_create(name='Bob', eav__age=6)
         self.assertEqual(Patient.objects.count(), 2)
         self.assertEqual(Value.objects.count(), 2)
 
