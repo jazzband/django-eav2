@@ -75,3 +75,9 @@ class RegistryTests(TestCase):
     def test_double_registering_model_is_harmless(self):
         eav.register(Patient)
         eav.register(Patient)
+
+    def test_doesnt_register_nonmodel(self):
+        with self.assertRaises(ValueError):
+            @eav.decorators.register_eav()
+            class Foo(object):
+                pass
