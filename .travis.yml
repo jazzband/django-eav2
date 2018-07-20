@@ -10,7 +10,7 @@ matrix:
         - python: 3.7-dev
           env: TOXENV=py37
 install:
-    - pip install -r requirements.txt
+    - pip install Django>=1.11
     - pip install tox==3.0.0
     - pip install coveralls==1.3.0
     - pip install coverage==4.5.1
