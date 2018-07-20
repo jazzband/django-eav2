@@ -48,7 +48,7 @@ class DataValidation(TestCase):
         self.assertEqual(Patient.objects.count(), 0)
         self.assertEqual(Value.objects.count(), 0)
 
-        p = Patient.objects.create(name='Joe', eav__weight=2, eav__age=5)
+        Patient.objects.create(name='Joe', eav__weight=2, eav__age=5)
         self.assertEqual(Patient.objects.count(), 1)
         self.assertEqual(Value.objects.count(), 2)
 

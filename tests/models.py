@@ -29,3 +29,12 @@ class ExampleModel(models.Model):
 
     def __unicode__(self):
         return self.name
+
+
+@register_eav()
+class M2MModel(models.Model):
+    name = models.CharField(max_length=12)
+    models = models.ManyToManyField(ExampleModel)
+
+    def __unicode__(self):
+        return self.name

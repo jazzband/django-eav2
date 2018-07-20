@@ -5,7 +5,7 @@ import sys
 from django.db.models import Q
 
 
-def print_q_expr(expr, indent="", is_tail=True): # pragma: no cover
+def print_q_expr(expr, indent="", is_tail=True):
     '''
     Simple print method for debugging Q-expressions' trees.
     '''

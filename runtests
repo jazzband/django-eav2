@@ -19,7 +19,8 @@ if __name__ == "__main__":
             'tests.data_validation',
             'tests.attributes',
             'tests.misc_models',
-            'tests.set_and_get'
+            'tests.set_and_get',
+            'tests.forms'
         ]
     else:
         tests = ['tests.{}'.format(arg) for arg in sys.argv[1:]]
