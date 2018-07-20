@@ -7,7 +7,8 @@ This module defines the four concrete, non-abstract models:
     * :class:`EnumValue`
     * :class:`EnumGroup`
 
-Along with the :class:`Entity` helper class.
+Along with the :class:`Entity` helper class and :class:`EAVModelMeta`
+optional metaclass for each eav model class.
 '''
 from copy import copy
 
@@ -15,12 +16,14 @@ from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from .exceptions import IllegalAssignmentException
 from .fields import EavDatatypeField, EavSlugField
 from .validators import *
+from . import register
 
 
 class EnumValue(models.Model):
@@ -435,7 +438,6 @@ class Value(models.Model):
     def __repr__(self):
         return '{}: "{}" ({})'.format(self.attribute.name, self.value, self.entity.pk)
 
-
 class Entity(object):
     '''
     The helper class that will be attached to any entity
@@ -616,3 +618,10 @@ class Entity(object):
             for i in m.eav: print(i)
         '''
         return iter(self.get_values())
+
+class EAVModelMeta(ModelBase):
+    def __new__(cls, name, bases, namespace, **kwds):
+        #import pdb; pdb.set_trace()
+        result = super(EAVModelMeta, cls).__new__(cls, name, bases, dict(namespace)) #EAVModelMeta, self
+        register(result)
+        return result
