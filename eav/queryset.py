@@ -262,7 +262,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through ``eav_filter``, then pass to
         the ``models.Manager`` filter method.
         '''
-        return super().filter(*args, **kwargs)
+        return super(EavQuerySet, self).filter(*args, **kwargs)
 
     @eav_filter
     def exclude(self, *args, **kwargs):
@@ -270,7 +270,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through ``eav_filter``, then pass to
         the ``models.Manager`` exclude method.
         '''
-        return super().exclude(*args, **kwargs)
+        return super(EavQuerySet, self).exclude(*args, **kwargs)
 
     @eav_filter
     def get(self, *args, **kwargs):
@@ -278,4 +278,4 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through ``eav_filter``, then pass to
         the ``models.Manager`` get method.
         '''
-        return super().get(*args, **kwargs)
+        return super(EavQuerySet, self).get(*args, **kwargs)
