@@ -1,5 +1,4 @@
 from django.db import models
-from eav.decorators import register_eav
 from eav.models import EAVModelMeta
 
 
