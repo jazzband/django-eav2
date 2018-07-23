@@ -1,4 +1,4 @@
-'''Registry. This modules contains the registry classes.'''
+'''This modules contains the registry classes.'''
 
 from django.contrib.contenttypes import fields as generic
 from django.db.models.signals import post_init, post_save, pre_save
@@ -9,21 +9,22 @@ from .models import Attribute, Entity, Value
 
 class EavConfig(object):
     '''
-    The default EavConfig class used if it is not overriden on registration.
+    The default ``EavConfig`` class used if it is not overriden on registration.
     This is where all the default eav attribute names are defined.
 
     Available options are as follows:
-        1. manager_attr - Specifies manager name. Used to refer to the
-        manager from Entity class, "objects" by default.
-        2. manager_only - Specifies whether signals and generic relation should
-        be setup for the registered model.
-        3. eav_attr - Named of the Entity toolkit instance on the registered
-        model instance. "eav" by default. See attach_eav_attr.
-        4. generic_relation_attr - Name of the GenericRelation to Value
-        objects. "eav_values" by default.
-        5. generic_relation_related_name - Name of the related name for
-        GenericRelation from Entity to Value. None by default. Therefore,
-        if not overridden, it is not possible to query Values by Entities.
+
+    1. manager_attr - Specifies manager name. Used to refer to the
+       manager from Entity class, "objects" by default.
+    2. manager_only - Specifies whether signals and generic relation should
+       be setup for the registered model.
+    3. eav_attr - Named of the Entity toolkit instance on the registered
+       model instance. "eav" by default. See attach_eav_attr.
+    4. generic_relation_attr - Name of the GenericRelation to Value
+       objects. "eav_values" by default.
+    5. generic_relation_related_name - Name of the related name for
+       GenericRelation from Entity to Value. None by default. Therefore,
+       if not overridden, it is not possible to query Values by Entities.
     '''
     manager_attr = 'objects'
     manager_only = False

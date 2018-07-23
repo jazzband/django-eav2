@@ -1,4 +1,4 @@
-'''Forms. This module contains forms used for admin integration.'''
+'''This module contains forms used for admin integration.'''
 
 from copy import deepcopy
 
@@ -10,13 +10,25 @@ from django.utils.translation import ugettext_lazy as _
 
 class BaseDynamicEntityForm(ModelForm):
     '''
-    ModelForm for entity with support for EAV attributes. Form fields are
-    created on the fly depending on Schema defined for given entity instance.
+    ``ModelForm`` for entity with support for EAV attributes. Form fields are
+    created on the fly depending on schema defined for given entity instance.
     If no schema is defined (i.e. the entity instance has not been saved yet),
     only static fields are used. However, on form validation the schema will be
     retrieved and EAV fields dynamically added to the form, so when the
     validation is actually done, all EAV fields are present in it (unless
     Rubric is not defined).
+
+    Mapping between attribute types and field classes is as follows:
+
+    =====  =============
+    Type      Field
+    =====  =============
+    text   CharField
+    float  IntegerField
+    int    DateTimeField
+    bool   BooleanField
+    enum   ChoiceField
+    =====  =============
     '''
     FIELD_CLASSES = {
         'text': CharField,

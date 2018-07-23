@@ -1,6 +1,6 @@
-'''
-Managers.
+# -*- coding: utf-8 -*-
 
+'''
 This module contains the custom manager used by entities registered with eav.
 '''
 from django.db import models

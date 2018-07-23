@@ -1,11 +1,3 @@
-'''
-Fields.
-
-Contains two custom fields:
-    * :class:`EavSlugField`
-    * :class:`EavDatatypeField`
-'''
-
 import re
 
 from django.core.exceptions import ValidationError
@@ -23,7 +15,7 @@ class EavSlugField(models.SlugField):
         Slugs are used to convert the Python attribute name to a database
         lookup and vice versa. We need it to be a valid Python identifier.
         We don't want it to start with a '_', underscore will be used
-        var variables we don't want to be saved in db.
+        var variables we don't want to be saved in the database.
         '''
         super(EavSlugField, self).validate(value, instance)
         slug_regex = r'[a-z][a-z0-9_]*'

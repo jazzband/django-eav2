@@ -8,8 +8,8 @@
 
 ## Django EAV 2 - Entity-Attribute-Value storage for Django
 
-Django EAV 2 is a fork of django-eav (which itself was derived from eav-django). 
-You can find documentation <a href="https://django-eav-2.readthedocs.io/en/improvement-docs/">here</a>.
+Django EAV 2 is a fork of django-eav (which itself was derived from eav-django).
+You can find documentation <a href="https://django-eav-2.rtfd.io">here</a>.
 
 ## Installation
 You can install **django-eav2** from three sources:

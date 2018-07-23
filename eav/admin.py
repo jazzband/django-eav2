@@ -1,8 +1,7 @@
-'''Admin. This module contains classes used for admin integration.'''
+'''This module contains classes used for admin integration.'''
 
 from django.contrib import admin
-from django.contrib.admin.options import InlineModelAdmin
-from django.contrib.admin.options import ModelAdmin
+from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
@@ -34,18 +33,19 @@ class BaseEntityAdmin(ModelAdmin):
 
 
 class BaseEntityInlineFormSet(BaseInlineFormSet):
-    """
+    '''
     An inline formset that correctly initializes EAV forms.
-    """
+    '''
     def add_fields(self, form, index):
         if self.instance:
             setattr(form.instance, self.fk.name, self.instance)
             form._build_dynamic_fields()
+
         super(BaseEntityInlineFormSet, self).add_fields(form, index)
 
 
 class BaseEntityInline(InlineModelAdmin):
-    """
+    '''
     Inline model admin that works correctly with EAV attributes. You should mix
     in the standard StackedInline or TabularInline classes in order to define
     formset representation, e.g.::
@@ -54,12 +54,11 @@ class BaseEntityInline(InlineModelAdmin):
             model = Item
             form = forms.ItemForm
 
-    .. warning: TabularInline does *not* work out of the box. There is,
+    .. warning:: TabularInline does *not* work out of the box. There is,
         however, a patched template `admin/edit_inline/tabular.html` bundled
         with EAV-Django. You can copy or symlink the `admin` directory to your
         templates search path (see Django documentation).
-
-    """
+    '''
     formset = BaseEntityInlineFormSet
 
     def get_fieldsets(self, request, obj=None):
