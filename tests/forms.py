@@ -2,26 +2,30 @@ from django.test import TestCase
 from django.contrib.admin.sites import AdminSite
 
 import eav
+import sys
 from eav.admin import *
 from .models import Patient, M2MModel, ExampleModel
 from eav.models import Attribute
 from eav.forms import BaseDynamicEntityForm
 from django.contrib import admin
-from django.core.handlers.base import BaseHandler  
-from django.test.client import RequestFactory  
+from django.core.handlers.base import BaseHandler
+from django.test.client import RequestFactory
 from django.forms import ModelForm
 
 
-class MockRequest(RequestFactory):  
-    def request(self, **request):  
-        "Construct a generic request object."  
-        request = RequestFactory.request(self, **request)  
-        handler = BaseHandler()  
-        handler.load_middleware()  
-        for middleware_method in handler._request_middleware:  
-            if middleware_method(request):  
-                raise Exception("Couldn't create request mock object - "  
-                                "request middleware returned a response")  
+class MockRequest(RequestFactory):
+    def request(self, **request):
+        "Construct a generic request object."
+        request = RequestFactory.request(self, **request)
+        handler = BaseHandler()
+        handler.load_middleware()
+        # BaseHandler_request_middleware is not set in Django2.0
+        # and removed in Django2.1
+        if sys.version_info[0] < 2:
+            for middleware_method in handler._request_middleware:
+                if middleware_method(request):
+                    raise Exception("Couldn't create request mock object - "
+                                    "request middleware returned a response")
         return request
 
 
