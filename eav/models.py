@@ -438,6 +438,7 @@ class Value(models.Model):
     def __repr__(self):
         return '{}: "{}" ({})'.format(self.attribute.name, self.value, self.entity.pk)
 
+
 class Entity(object):
     '''
     The helper class that will be attached to any entity
@@ -619,9 +620,9 @@ class Entity(object):
         '''
         return iter(self.get_values())
 
+
 class EAVModelMeta(ModelBase):
     def __new__(cls, name, bases, namespace, **kwds):
-        #import pdb; pdb.set_trace()
-        result = super(EAVModelMeta, cls).__new__(cls, name, bases, dict(namespace)) #EAVModelMeta, self
+        result = super(EAVModelMeta, cls).__new__(cls, name, bases, dict(namespace))
         register(result)
         return result

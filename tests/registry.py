@@ -5,6 +5,7 @@ import eav
 from eav.registry import EavConfig
 
 from .models import Encounter, ExampleModel, Patient
+
 if sys.version_info[0] > 2:
     from .metaclass_models3 import ExampleMetaclassModel
 else:

@@ -8,6 +8,7 @@ from eav.models import Attribute, Value
 from eav.registry import EavConfig
 
 from .models import Encounter, Patient
+
 if sys.version_info[0] > 2:
     from .metaclass_models3 import RegisterTestModel
 else:
