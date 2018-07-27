@@ -1,4 +1,4 @@
-'''Forms. This module contains forms used for admin integration.'''
+"""This module contains forms used for admin integration."""
 
 from copy import deepcopy
 
@@ -9,15 +9,27 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class BaseDynamicEntityForm(ModelForm):
-    '''
-    ModelForm for entity with support for EAV attributes. Form fields are
-    created on the fly depending on Schema defined for given entity instance.
+    """
+    ``ModelForm`` for entity with support for EAV attributes. Form fields are
+    created on the fly depending on schema defined for given entity instance.
     If no schema is defined (i.e. the entity instance has not been saved yet),
     only static fields are used. However, on form validation the schema will be
     retrieved and EAV fields dynamically added to the form, so when the
     validation is actually done, all EAV fields are present in it (unless
     Rubric is not defined).
-    '''
+
+    Mapping between attribute types and field classes is as follows:
+
+    =====  =============
+    Type      Field
+    =====  =============
+    text   CharField
+    float  IntegerField
+    int    DateTimeField
+    bool   BooleanField
+    enum   ChoiceField
+    =====  =============
+    """
     FIELD_CLASSES = {
         'text': CharField,
         'float': FloatField,
@@ -34,7 +46,7 @@ class BaseDynamicEntityForm(ModelForm):
         self._build_dynamic_fields()
 
     def _build_dynamic_fields(self):
-        # reset form fields
+        # Reset form fields.
         self.fields = deepcopy(self.base_fields)
 
         for attribute in self.entity.get_all_attributes():
@@ -48,13 +60,12 @@ class BaseDynamicEntityForm(ModelForm):
             }
 
             datatype = attribute.datatype
+
             if datatype == attribute.TYPE_ENUM:
-                enums = attribute.get_choices() \
-                                 .values_list('id', 'value')
-
-                choices = [('', '-----')] + list(enums)
-
+                values = attribute.get_choices().values_list('id', 'value')
+                choices = [('', '-----')] + list(values)
                 defaults.update({'choices': choices})
+
                 if value:
                     defaults.update({'initial': value.pk})
 
@@ -66,21 +77,20 @@ class BaseDynamicEntityForm(ModelForm):
             MappedField = self.FIELD_CLASSES[datatype]
             self.fields[attribute.slug] = MappedField(**defaults)
 
-            # fill initial data (if attribute was already defined)
-            if value and not datatype == attribute.TYPE_ENUM: #enum done above
+            # Fill initial data (if attribute was already defined).
+            if value and not datatype == attribute.TYPE_ENUM:
                 self.initial[attribute.slug] = value
 
     def save(self, commit=True):
         """
         Saves this ``form``'s cleaned_data into model instance
-        ``self.instance`` and related EAV attributes.
-
-        Returns ``instance``.
+        ``self.instance`` and related EAV attributes. Returns ``instance``.
         """
         if self.errors:
-            raise ValueError(_(u"The %s could not be saved because the data"
-                             u"didn't validate.") % \
-                             self.instance._meta.object_name)
+            raise ValueError(_(
+                'The %s could not be saved because the data'
+                'didn\'t validate.' % self.instance._meta.object_name
+            ))
 
         # Create entity instance, don't save yet.
         instance = super(BaseDynamicEntityForm, self).save(commit=False)
@@ -88,9 +98,10 @@ class BaseDynamicEntityForm(ModelForm):
         # Assign attributes.
         for attribute in self.entity.get_all_attributes():
             value = self.cleaned_data.get(attribute.slug)
+
             if attribute.datatype == attribute.TYPE_ENUM:
                 if value:
-                    value = attribute.enum_group.enums.get(pk=value)
+                    value = attribute.enum_group.values.get(pk=value)
                 else:
                     value = None
 

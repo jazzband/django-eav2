@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='enumgroup',
-            name='enums',
+            name='values',
             field=models.ManyToManyField(to='eav.EnumValue', verbose_name='enum group'),
         ),
         migrations.AddField(

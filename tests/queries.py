@@ -24,9 +24,9 @@ class Queries(TestCase):
         self.unknown = EnumValue.objects.create(value='unknown')
 
         ynu = EnumGroup.objects.create(name='Yes / No / Unknown')
-        ynu.enums.add(self.yes)
-        ynu.enums.add(self.no)
-        ynu.enums.add(self.unknown)
+        ynu.values.add(self.yes)
+        ynu.values.add(self.no)
+        ynu.values.add(self.unknown)
 
         Attribute.objects.create(name='fever', datatype=Attribute.TYPE_ENUM, enum_group=ynu)
 

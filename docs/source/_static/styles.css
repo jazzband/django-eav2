@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+@font-face {
+    font-family: "Roboto Slab";
+    src: url("./RobotoSlab-Regular.ttf");
+}
+
+pre {
+    background-color: #f6f6f6 !important;
+}
+
+.doc-title h1 {
+    text-align: center; 
+    padding: 2rem !important;
+}
+
+.doc-api {
+    font-size: 14px;
+}
+
+div.sphinxsidebar h3 {
+   font-size: 21px !important;
+}
+
+body {
+    font-size: 16px;
+}
+
+div.admonition p.admonition-title, div.sphinxsidebar h3, div.sphinxsidebar h4,
+  div.sphinxsidebar input, div.body h1, div.body h2, div.body h3, div.body h4,
+  div.body h5, div.body h6  { font-family: 'Roboto Slab', 'Helvetica', 'Arial',
+                              sans-serif; font-weight: 400; }
+div.body h1, div.body h2, div.body h3, div.body h4,
+  div.body h5, div.body h6  { color: #353535; }
+pre, code                   { font-family: 'Ubuntu Mono', 'Consolas', 'Menlo',
+                              'Deja Vu Sans Mono', 'Bitstream Vera Sans Mono';
+                              font-size: 15px; background: transparent; }
+pre, * pre                  { padding: 7px 0 7px 30px!important;
+                              margin: 15px 0!important;
+                              line-height: 1.3; }
+
+
+div.body                    { color: #3E4349; }
+a                           { color: #5D2CD1; }
+a:hover                     { color: #7546E3; }
+p.version-warning           { background-color: #7546E3; }
+a.reference                 { border-bottom: 1px dotted #5D2CD1; }
+a.reference:hover           { border-bottom: 1px solid #7546E3; }
+a.footnote-reference        { border-bottom: 1px dotted #5D2CD1; }
+a.footnote-reference:hover  { border-bottom: 1px solid #7546E3; }
+a:hover code                { background-color: #eeeeee; }
+code.xref, a code           { background-color: #E8EFF0;
+                              border-bottom: 1px solid white; }
+
+div.indexwrapper h1 {
+    text-indent: -999999px;
+    background: url(click.png) no-repeat center center;
+    height: 200px;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    div.indexwrapper h1 {
+        background: url(click@2x.png) no-repeat center center;
+        background-size: 420px 175px;
+    }
+}
