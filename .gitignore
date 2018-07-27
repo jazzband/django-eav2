@@ -123,3 +123,6 @@ venv.bak/
 *~
 # Auto-generated tag files
 tags
+
+## Mac
+.DS_Store

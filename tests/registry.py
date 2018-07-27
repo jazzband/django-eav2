@@ -1,9 +1,15 @@
 from django.test import TestCase
 
+import sys
 import eav
 from eav.registry import EavConfig
 
 from .models import Encounter, ExampleModel, Patient
+
+if sys.version_info[0] > 2:
+    from .metaclass_models3 import ExampleMetaclassModel
+else:
+    from .metaclass_models2 import ExampleMetaclassModel
 
 
 class RegistryTests(TestCase):
@@ -55,6 +61,11 @@ class RegistryTests(TestCase):
         self.assertEqual(ExampleModel._eav_config_cls.manager_attr, 'objects')
         self.assertEqual(ExampleModel._eav_config_cls.eav_attr, 'eav')
 
+    def test_register_via_metaclass_with_defaults(self):
+        self.assertTrue(hasattr(ExampleMetaclassModel, '_eav_config_cls'))
+        self.assertEqual(ExampleMetaclassModel._eav_config_cls.manager_attr, 'objects')
+        self.assertEqual(ExampleMetaclassModel._eav_config_cls.eav_attr, 'eav')
+
     def test_unregistering(self):
         old_mgr = Patient.objects
         eav.register(Patient)
@@ -68,6 +79,11 @@ class RegistryTests(TestCase):
         self.assertTrue(ExampleModel.objects.__class__.__name__ == 'EntityManager')
         eav.unregister(ExampleModel)
         self.assertFalse(ExampleModel.objects.__class__.__name__ == 'EntityManager')
+
+    def test_unregistering_via_metaclass(self):
+        self.assertTrue(ExampleMetaclassModel.objects.__class__.__name__ == 'EntityManager')
+        eav.unregister(ExampleMetaclassModel)
+        self.assertFalse(ExampleMetaclassModel.objects.__class__.__name__ == 'EntityManager')
 
     def test_unregistering_unregistered_model_proceeds_silently(self):
         eav.unregister(Patient)

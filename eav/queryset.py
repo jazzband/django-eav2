@@ -251,7 +251,7 @@ def expand_eav_filter(model_cls, key, value):
     else:
         sub_key = '__'.join(fields[1:])
         key, value = expand_eav_filter(field.model, sub_key, value)
-        return '{}__{}'.format(ields[0], key), value
+        return '{}__{}'.format(fields[0], key), value
 
 
 class EavQuerySet(QuerySet):
