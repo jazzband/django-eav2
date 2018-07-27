@@ -34,7 +34,7 @@ class EnumValue(models.Model):
         unknown = EnumValue.objects.create(value='Unknown')
 
         ynu = EnumGroup.objects.create(name='Yes / No / Unknown')
-        ynu.enums.add(yes, no, unknown)
+        ynu.values.add(yes, no, unknown)
 
         Attribute.objects.create(name='has fever?', datatype=Attribute.TYPE_ENUM, enum_group=ynu)
         # = <Attribute: has fever? (Multiple Choice)>
@@ -55,14 +55,14 @@ class EnumValue(models.Model):
 
 class EnumGroup(models.Model):
     '''
-    *EnumGroup* objects have two fields - a *name* ``CharField`` and *enums*,
+    *EnumGroup* objects have two fields - a *name* ``CharField`` and *values*,
     a ``ManyToManyField`` to :class:`EnumValue`. :class:`Attribute` classes
     with datatype *TYPE_ENUM* have a ``ForeignKey`` field to *EnumGroup*.
 
     See :class:`EnumValue` for an example.
     '''
     name = models.CharField(_('name'), unique = True, max_length = 100)
-    enums = models.ManyToManyField(EnumValue, verbose_name = _('enum group'))
+    values = models.ManyToManyField(EnumValue, verbose_name = _('enum group'))
 
     def __str__(self):
         return '<EnumGroup {}>'.format(self.name)
@@ -108,7 +108,7 @@ class Attribute(models.Model):
         no = EnumValue.objects.create(value='no')
         unknown = EnumValue.objects.create(value='unknown')
         ynu = EnumGroup.objects.create(name='Yes / No / Unknown')
-        ynu.enums.add(yes, no, unknown)
+        ynu.values.add(yes, no, unknown)
 
         Attribute.objects.create(name='has fever?', datatype=Attribute.TYPE_ENUM, enum_group=ynu)
         # = <Attribute: has fever? (Multiple Choice)>
@@ -241,7 +241,7 @@ class Attribute(models.Model):
             validator(value)
 
         if self.datatype == self.TYPE_ENUM:
-            if value not in self.enum_group.enums.all():
+            if value not in self.enum_group.values.all():
                 raise ValidationError(
                     _('%(val)s is not a valid choice for %(attr)s')
                     % dict(val = value, attr = self)
@@ -279,7 +279,7 @@ class Attribute(models.Model):
         Returns a query set of :class:`EnumValue` objects for this attribute.
         Returns None if the datatype of this attribute is not *TYPE_ENUM*.
         '''
-        return self.enum_group.enums.all() if self.datatype == Attribute.TYPE_ENUM else None
+        return self.enum_group.values.all() if self.datatype == Attribute.TYPE_ENUM else None
 
     def save_value(self, entity, value):
         '''
@@ -407,7 +407,7 @@ class Value(models.Model):
         and value_enum is not a valid choice for this value's attribute.
         '''
         if self.attribute.datatype == Attribute.TYPE_ENUM and self.value_enum:
-            if self.value_enum not in self.attribute.enum_group.enums.all():
+            if self.value_enum not in self.attribute.enum_group.values.all():
                 raise ValidationError(
                     _('%(enum)s is not a valid choice for %(attr)s')
                     % dict(enum = self.value_enum, attr = self.attribute)

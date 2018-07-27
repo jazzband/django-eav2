@@ -61,10 +61,10 @@ class BaseDynamicEntityForm(ModelForm):
 
             datatype = attribute.datatype
             if datatype == attribute.TYPE_ENUM:
-                enums = attribute.get_choices() \
+                values = attribute.get_choices() \
                                  .values_list('id', 'value')
 
-                choices = [('', '-----')] + list(enums)
+                choices = [('', '-----')] + list(values)
 
                 defaults.update({'choices': choices})
                 if value:
@@ -102,7 +102,7 @@ class BaseDynamicEntityForm(ModelForm):
             value = self.cleaned_data.get(attribute.slug)
             if attribute.datatype == attribute.TYPE_ENUM:
                 if value:
-                    value = attribute.enum_group.enums.get(pk=value)
+                    value = attribute.enum_group.values.get(pk=value)
                 else:
                     value = None
 
