@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-'''
+"""
 This module contains custom :class:`EavQuerySet` class used for overriding
 relational operators and pure functions for rewriting Q-expressions.
 Q-expressions need to be rewritten for two reasons:
@@ -19,7 +18,7 @@ Q-expressions need to be rewritten for two reasons:
 
 2. To ensure that Q-expression tree is compiled to valid SQL.
    For details see: :func:`rewrite_q_expr`.
-'''
+"""
 
 from functools import wraps
 
@@ -31,7 +30,7 @@ from .models import Attribute, Value
 
 
 def is_eav_and_leaf(expr, gr_name):
-    '''
+    """
     Checks whether Q-expression is an EAV AND leaf.
 
     Args:
@@ -40,14 +39,16 @@ def is_eav_and_leaf(expr, gr_name):
 
     Returns:
         bool
-    '''
-    return (getattr(expr, 'connector', None) == 'AND' and
-            len(expr.children) == 1 and
-            expr.children[0][0] in ['pk__in', '{}__in'.format(gr_name)])
+    """
+    return (
+        getattr(expr, 'connector', None) == 'AND' and
+        len(expr.children) == 1 and
+        expr.children[0][0] in ['pk__in', '{}__in'.format(gr_name)]
+    )
 
 
 def rewrite_q_expr(model_cls, expr):
-    '''
+    """
     Rewrites Q-expression to safe form, in order to ensure that
     generated SQL is valid.
 
@@ -90,7 +91,7 @@ IGNORE
 
     Returns:
         Union[Q, tuple]
-    '''
+    """
     # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
     # We are only interested in Qs.
 
@@ -153,11 +154,11 @@ IGNORE
 
 
 def eav_filter(func):
-    '''
+    """
     Decorator used to wrap filter and exclude methods. Passes args through
     :func:`expand_q_filters` and kwargs through :func:`expand_eav_filter`. Returns the
     called function (filter or exclude).
-    '''
+    """
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         nargs = []
@@ -187,11 +188,11 @@ def eav_filter(func):
 
 
 def expand_q_filters(q, root_cls):
-    '''
+    """
     Takes a Q object and a model class.
     Recursively passes each filter / value in the Q object tree leaf nodes
     through :func:`expand_eav_filter`.
-    '''
+    """
     new_children = []
 
     for qi in q.children:
@@ -209,7 +210,7 @@ def expand_q_filters(q, root_cls):
 
 
 def expand_eav_filter(model_cls, key, value):
-    '''
+    """
     Accepts a model class and a key, value.
     Recurisively replaces any eav filter with a subquery.
 
@@ -222,7 +223,7 @@ def expand_eav_filter(model_cls, key, value):
 
         key = 'eav_values__in'
         value = Values.objects.filter(value_int=5, attribute__slug='height')
-    '''
+    """
     fields = key.split('__')
     config_cls = getattr(model_cls, '_eav_config_cls', None)
 
@@ -254,30 +255,30 @@ def expand_eav_filter(model_cls, key, value):
 
 
 class EavQuerySet(QuerySet):
-    '''
+    """
     Overrides relational operators for EAV models.
-    '''
+    """
 
     @eav_filter
     def filter(self, *args, **kwargs):
-        '''
+        """
         Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
         the ``Manager`` filter method.
-        '''
+        """
         return super(EavQuerySet, self).filter(*args, **kwargs)
 
     @eav_filter
     def exclude(self, *args, **kwargs):
-        '''
+        """
         Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
         the ``Manager`` exclude method.
-        '''
+        """
         return super(EavQuerySet, self).exclude(*args, **kwargs)
 
     @eav_filter
     def get(self, *args, **kwargs):
-        '''
+        """
         Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
         the ``Manager`` get method.
-        '''
+        """
         return super(EavQuerySet, self).get(*args, **kwargs)

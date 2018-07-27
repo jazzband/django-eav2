@@ -2,4 +2,3 @@
 omit =
     */migrations/*
     eav/__init__.py
-    eav/utils.py

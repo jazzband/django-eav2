@@ -1,4 +1,4 @@
-'''This modules contains the registry classes.'''
+"""This modules contains the registry classes."""
 
 from django.contrib.contenttypes import fields as generic
 from django.db.models.signals import post_init, post_save, pre_save
@@ -8,7 +8,7 @@ from .models import Attribute, Entity, Value
 
 
 class EavConfig(object):
-    '''
+    """
     The default ``EavConfig`` class used if it is not overriden on registration.
     This is where all the default eav attribute names are defined.
 
@@ -25,7 +25,7 @@ class EavConfig(object):
     5. generic_relation_related_name - Name of the related name for
        GenericRelation from Entity to Value. None by default. Therefore,
        if not overridden, it is not possible to query Values by Entities.
-    '''
+    """
     manager_attr = 'objects'
     manager_only = False
     eav_attr = 'eav'
@@ -34,28 +34,28 @@ class EavConfig(object):
 
     @classmethod
     def get_attributes(cls):
-        '''
+        """
         By default, all :class:`~eav.models.Attribute` object apply to an
         entity, unless you provide a custom EavConfig class overriding this.
-        '''
+        """
         return Attribute.objects.all()
 
 
 class Registry(object):
-    '''
+    """
     Handles registration through the
     :meth:`register` and :meth:`unregister` methods.
-    '''
+    """
 
     @staticmethod
     def register(model_cls, config_cls=None):
-        '''
+        """
         Registers *model_cls* with eav. You can pass an optional *config_cls*
         to override the EavConfig defaults.
 
         .. note::
            Multiple registrations for the same entity are harmlessly ignored.
-        '''
+        """
         if hasattr(model_cls, '_eav_config_cls'):
             return
 
@@ -71,12 +71,12 @@ class Registry(object):
 
     @staticmethod
     def unregister(model_cls):
-        '''
+        """
         Unregisters *model_cls* with eav.
 
         .. note::
            Unregistering a class not already registered is harmlessly ignored.
-        '''
+        """
         if not getattr(model_cls, '_eav_config_cls', None):
             return
         reg = Registry(model_cls)
@@ -86,24 +86,24 @@ class Registry(object):
 
     @staticmethod
     def attach_eav_attr(sender, *args, **kwargs):
-        '''
+        """
         Attach EAV Entity toolkit to an instance after init.
-        '''
+        """
         instance = kwargs['instance']
         config_cls = instance.__class__._eav_config_cls
         setattr(instance, config_cls.eav_attr, Entity(instance))
 
     def __init__(self, model_cls):
-        '''
+        """
         Set the *model_cls* and its *config_cls*
-        '''
+        """
         self.model_cls = model_cls
         self.config_cls = model_cls._eav_config_cls
 
     def _attach_manager(self):
-        '''
+        """
         Attach the manager to *manager_attr* specified in *config_cls*
-        '''
+        """
         # Save the old manager if the attribute name conflicts with the new one.
         if hasattr(self.model_cls, self.config_cls.manager_attr):
             mgr = getattr(self.model_cls, self.config_cls.manager_attr)
@@ -116,9 +116,9 @@ class Registry(object):
         mgr.contribute_to_class(self.model_cls, self.config_cls.manager_attr)
 
     def _detach_manager(self):
-        '''
+        """
         Detach the manager and restore the previous one (if there was one).
-        '''
+        """
         mgr = getattr(self.model_cls, self.config_cls.manager_attr)
         self.model_cls._meta.local_managers.remove(mgr)
         self.model_cls._meta._expire_cache()
@@ -130,28 +130,28 @@ class Registry(object):
                                      self.config_cls.manager_attr)
 
     def _attach_signals(self):
-        '''
+        """
         Attach pre- and post- save signals from model class
         to Entity helper. This way, Entity instance will be
         able to prepare and clean-up before and after creation /
         update of the user's model class instance.
-        '''
+        """
         post_init.connect(Registry.attach_eav_attr, sender = self.model_cls)
         pre_save.connect(Entity.pre_save_handler, sender = self.model_cls)
         post_save.connect(Entity.post_save_handler, sender = self.model_cls)
 
     def _detach_signals(self):
-        '''
+        """
         Detach all signals for eav.
-        '''
+        """
         post_init.disconnect(Registry.attach_eav_attr, sender = self.model_cls)
         pre_save.disconnect(Entity.pre_save_handler, sender = self.model_cls)
         post_save.disconnect(Entity.post_save_handler, sender = self.model_cls)
 
     def _attach_generic_relation(self):
-        '''
+        """
         Set up the generic relation for the entity
-        '''
+        """
         rel_name = self.config_cls.generic_relation_related_name or \
                    self.model_cls.__name__
 
@@ -164,9 +164,9 @@ class Registry(object):
         generic_relation.contribute_to_class(self.model_cls, gr_name)
 
     def _detach_generic_relation(self):
-        '''
+        """
         Remove the generic relation from the entity
-        '''
+        """
         gen_rel_field = self.config_cls.generic_relation_attr.lower()
         for field in self.model_cls._meta.local_many_to_many:
             if field.name == gen_rel_field:
@@ -176,9 +176,9 @@ class Registry(object):
         delattr(self.model_cls, gen_rel_field)
 
     def _register_self(self):
-        '''
+        """
         Call the necessary registration methods
-        '''
+        """
         self._attach_manager()
 
         if not self.config_cls.manager_only:
@@ -186,9 +186,9 @@ class Registry(object):
             self._attach_generic_relation()
 
     def _unregister_self(self):
-        '''
+        """
         Call the necessary unregistration methods
-        '''
+        """
         self._detach_manager()
 
         if not self.config_cls.manager_only:
