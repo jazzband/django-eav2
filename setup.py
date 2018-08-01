@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name             = 'django-eav2',
@@ -8,7 +8,7 @@ setup(
     provides         = ['eav'],
     description      = 'Entity-Attribute-Value storage for Django',
     url              = 'http://github.com/makimo/django-eav2',
-    packages         = ['eav', 'tests'],
+    packages         = find_packages(),
     maintainer       = 'Iwo Herka',
     maintainer_email = 'hi@iwoherka.eu',
 
