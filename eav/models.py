@@ -51,7 +51,7 @@ class EnumValue(models.Model):
        only have a total of four *EnumValues* objects, as you should have used
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
-    value = models.CharField(_('value'), db_index=True, unique=True, max_length=50)
+    value = models.CharField(_('Value'), db_index=True, unique=True, max_length=50)
 
     def __str__(self):
         return '<EnumValue {}>'.format(self.value)
@@ -65,8 +65,8 @@ class EnumGroup(models.Model):
 
     See :class:`EnumValue` for an example.
     """
-    name = models.CharField(_('name'), unique = True, max_length = 100)
-    values = models.ManyToManyField(EnumValue, verbose_name = _('enum group'))
+    name = models.CharField(_('Name'), unique = True, max_length = 100)
+    values = models.ManyToManyField(EnumValue, verbose_name = _('Enum group'))
 
     def __str__(self):
         return '<EnumGroup {}>'.format(self.name)
@@ -395,7 +395,7 @@ class Value(models.Model):
         Attribute,
         db_index     = True,
         on_delete    = models.PROTECT,
-        verbose_name = _('attribute')
+        verbose_name = _('Attribute')
     )
 
     def save(self, *args, **kwargs):
