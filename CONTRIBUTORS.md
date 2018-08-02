@@ -13,4 +13,5 @@ Contributors, alphabetically:
  * MajekX (Adam Majczyk)
  * nicpottier (Nic Pottier)
  * tavaresb (Bruno Tavares)
+ * therefromhere (John Carter)
  * timlinux (Tim Sutton)
