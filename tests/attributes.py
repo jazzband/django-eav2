@@ -14,6 +14,7 @@ if sys.version_info[0] > 2:
 else:
     from .metaclass_models2 import RegisterTestModel
 
+
 class Attributes(TestCase):
     def setUp(self):
         class EncounterEavConfig(EavConfig):

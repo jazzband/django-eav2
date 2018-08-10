@@ -59,6 +59,18 @@ class Forms(TestCase):
         eav.register(Patient)
         Attribute.objects.create(name='weight', datatype=Attribute.TYPE_FLOAT)
         Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
+
+        self.female = EnumValue.objects.create(value='Female')
+        self.male = EnumValue.objects.create(value='Male')
+        gender_group = EnumGroup.objects.create(name='Gender')
+        gender_group.values.add(self.female, self.male)
+
+        Attribute.objects.create(
+            name='gender',
+            datatype=Attribute.TYPE_ENUM,
+            enum_group=gender_group
+        )
+
         self.instance = Patient.objects.create(name='Jim Morrison')
         self.site = AdminSite()
 
@@ -81,12 +93,17 @@ class Forms(TestCase):
 
         self.assertEqual(jim.eav.color, 'Blue')
 
-
     def test_invalid_submit(self):
         form = PatientForm(dict(color='Blue'), instance=self.instance)
         with self.assertRaises(ValueError):
             jim = form.save()
 
+    def test_valid_enums(self):
+        self.instance.eav.gender = self.female
+        form = PatientForm(self.instance.__dict__, instance=self.instance)
+        rose = form.save()
+
+        self.assertEqual(rose.eav.gender, self.female)
 
     def test_m2m(self):
         m2mmodel = M2MModel.objects.create(name='name')
