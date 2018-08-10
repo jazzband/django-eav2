@@ -19,12 +19,14 @@ Q-expressions need to be rewritten for two reasons:
 2. To ensure that Q-expression tree is compiled to valid SQL.
    For details see: :func:`rewrite_q_expr`.
 """
-
+from itertools import count
 from functools import wraps
 
+from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db import models
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
+from django.db.utils import NotSupportedError
 
 from .models import Attribute, Value
 
@@ -282,3 +284,91 @@ class EavQuerySet(QuerySet):
         the ``Manager`` get method.
         """
         return super(EavQuerySet, self).get(*args, **kwargs)
+
+    def order_by(self, *fields):
+        # Django only allows to order querysets by direct fields and
+        # foreign-key chains. In order to bypass this behaviour and order
+        # by EAV attributes, it is required to construct custom order-by
+        # clause manually using Django's conditional expressions.
+        # This will be slow, of course.
+        order_clauses = []
+        query_clause = self
+
+        for term in [t.split('__') for t in fields]:
+            # Continue only for EAV attributes.
+            if len(term) == 2 and term[0] == 'eav':
+                # Retrieve Attribute over which the ordering is performed.
+                try:
+                    attr = Attribute.objects.get(slug=term[1])
+                except ObjectDoesNotExist:
+                    raise ObjectDoesNotExist(
+                        'Cannot find EAV attribute "{}"'.format(term[1])
+                    )
+
+                field_name = 'value_%s' % attr.datatype
+
+                pks_values = Value.objects.filter(
+                    # Retrieve pk-values pairs of the related values
+                    # (i.e. values for the specified attribute and
+                    # belonging to entities in the queryset).
+                    attribute__slug=attr.slug,
+                    entity_id__in=self
+                ).order_by(
+                    # Order values by their value-field of
+                    # appriopriate attribute data-type.
+                    field_name
+                ).values_list(
+                    # Retrieve only primary-keys of the entities
+                    # in the current queryset.
+                    'entity_id', field_name
+                )
+
+                # Retrive ordered values from pk-value list.
+                _, ordered_values = zip(*pks_values)
+
+                # Add explicit ordering and turn
+                # list of pairs into look-up table.
+                val2ind = dict(zip(ordered_values, count()))
+
+                # Finally, zip ordered pks with their grouped orderings.
+                entities_pk = [(pk, val2ind[val]) for pk, val in pks_values]
+
+                # Using ordered primary-keys, construct
+                # CASE clause of the form:
+                #
+                #     CASE
+                #         WHEN id = 2 THEN 1
+                #         WHEN id = 5 THEN 2
+                #         WHEN id = 9 THEN 2
+                #         WHEN id = 4 THEN 3
+                #     END
+                #
+                when_clauses = [
+                    When(id=pk, then=i)
+                    for pk, i in entities_pk
+                ]
+
+                order_clause = Case(
+                    *when_clauses,
+                    output_field=IntegerField()
+                )
+
+                clause_name = '__'.join(term)
+                # Use when-clause to construct
+                # custom order-by clause.
+                query_clause = query_clause.annotate(
+                    **{clause_name: order_clause}
+                )
+
+                order_clauses.append(clause_name)
+
+            elif len(term) >= 2 and term[0] == 'eav':
+                raise NotSupportedError(
+                    'EAV does not support ordering through '
+                    'foreign-key chains'
+                )
+
+            else:
+                order_clauses.append(term[0])
+
+        return QuerySet.order_by(query_clause, *order_clauses)

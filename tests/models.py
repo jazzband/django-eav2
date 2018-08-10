@@ -4,6 +4,8 @@ from eav.decorators import register_eav
 
 class Patient(models.Model):
     name = models.CharField(max_length=12)
+    example = models.ForeignKey(
+        'ExampleModel', null=True, blank=True, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name

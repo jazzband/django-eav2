@@ -1,5 +1,6 @@
-from django.core.exceptions import MultipleObjectsReturned
-from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from django.db.models import Q, Model
+from django.db.utils import NotSupportedError
 from django.test import TestCase
 
 import eav
@@ -34,25 +35,7 @@ class Queries(TestCase):
         eav.unregister(Encounter)
         eav.unregister(Patient)
 
-    def test_get_or_create_with_eav(self):
-        Patient.objects.get_or_create(name='Bob', eav__age=5)
-        self.assertEqual(Patient.objects.count(), 1)
-        self.assertEqual(Value.objects.count(), 1)
-        Patient.objects.get_or_create(name='Bob', eav__age=5)
-        self.assertEqual(Patient.objects.count(), 1)
-        self.assertEqual(Value.objects.count(), 1)
-        Patient.objects.get_or_create(name='Bob', eav__age=6)
-        self.assertEqual(Patient.objects.count(), 2)
-        self.assertEqual(Value.objects.count(), 2)
-
-    def test_get_with_eav(self):
-        p1, _ = Patient.objects.get_or_create(name='Bob', eav__age=6)
-        self.assertEqual(Patient.objects.get(eav__age=6), p1)
-
-        Patient.objects.create(name='Fred', eav__age=6)
-        self.assertRaises(MultipleObjectsReturned, lambda: Patient.objects.get(eav__age=6))
-
-    def test_filtering_on_normal_and_eav_fields(self):
+    def init_data(self):
         yes = self.yes
         no = self.no
 
@@ -74,12 +57,33 @@ class Queries(TestCase):
                 eav__country=row[4]
             )
 
+    def test_get_or_create_with_eav(self):
+        Patient.objects.get_or_create(name='Bob', eav__age=5)
+        self.assertEqual(Patient.objects.count(), 1)
+        self.assertEqual(Value.objects.count(), 1)
+        Patient.objects.get_or_create(name='Bob', eav__age=5)
+        self.assertEqual(Patient.objects.count(), 1)
+        self.assertEqual(Value.objects.count(), 1)
+        Patient.objects.get_or_create(name='Bob', eav__age=6)
+        self.assertEqual(Patient.objects.count(), 2)
+        self.assertEqual(Value.objects.count(), 2)
+
+    def test_get_with_eav(self):
+        p1, _ = Patient.objects.get_or_create(name='Bob', eav__age=6)
+        self.assertEqual(Patient.objects.get(eav__age=6), p1)
+
+        Patient.objects.create(name='Fred', eav__age=6)
+        self.assertRaises(MultipleObjectsReturned, lambda: Patient.objects.get(eav__age=6))
+
+    def test_filtering_on_normal_and_eav_fields(self):
+        self.init_data()
+
         # Check number of objects in DB.
         self.assertEqual(Patient.objects.count(), 5)
         self.assertEqual(Value.objects.count(), 20)
 
         # Nobody
-        q1 = Q(eav__fever=yes) & Q(eav__fever=no)
+        q1 = Q(eav__fever=self.yes) & Q(eav__fever=self.no)
         p = Patient.objects.filter(q1)
         self.assertEqual(p.count(), 0)
 
@@ -90,26 +94,26 @@ class Queries(TestCase):
         self.assertEqual(p.count(), 2)
 
         # Anne
-        q1 = Q(eav__city__contains='Y') & Q(eav__fever=no)
+        q1 = Q(eav__city__contains='Y') & Q(eav__fever=self.no)
         q2 = Q(eav__age=3)
         p = Patient.objects.filter(q1 & q2)
         self.assertEqual(p.count(), 1)
 
         # Anne, Daniel
-        q1 = Q(eav__city__contains='Y', eav__fever=no)
+        q1 = Q(eav__city__contains='Y', eav__fever=self.no)
         q2 = Q(eav__city='Nice')
         q3 = Q(eav__age=3)
         p = Patient.objects.filter((q1 | q2) & q3)
         self.assertEqual(p.count(), 2)
 
         # Everyone
-        q1 = Q(eav__fever=no) | Q(eav__fever=yes)
+        q1 = Q(eav__fever=self.no) | Q(eav__fever=self.yes)
         p = Patient.objects.filter(q1)
         self.assertEqual(p.count(), 5)
 
         # Anne, Bob, Daniel
-        q1 = Q(eav__fever=no)              # Anne, Bob, Daniel
-        q2 = Q(eav__fever=yes)             # Cyrill, Eugene
+        q1 = Q(eav__fever=self.no)         # Anne, Bob, Daniel
+        q2 = Q(eav__fever=self.yes)        # Cyrill, Eugene
         q3 = Q(eav__country__contains='e') # Cyrill, Daniel, Eugene
         q4 = q2 & q3                       # Cyrill, Daniel, Eugene
         q5 = (q1 | q4) & q1                # Anne, Bob, Daniel
@@ -123,7 +127,7 @@ class Queries(TestCase):
 
         # Anne, Bob, Daniel
         q1 = Q(eav__city__contains='Y')
-        q2 = Q(eav__fever=no)
+        q2 = Q(eav__fever=self.no)
         q3 = q1 | q2
         p = Patient.objects.filter(q3)
         self.assertEqual(p.count(), 3)
@@ -134,6 +138,49 @@ class Queries(TestCase):
         self.assertEqual(p.count(), 2)
 
         # Eugene
-        q1 = Q(name__contains='E', eav__fever=yes)
+        q1 = Q(name__contains='E', eav__fever=self.yes)
         p = Patient.objects.filter(q1)
         self.assertEqual(p.count(), 1)
+
+    def test_order_by(self):
+        def order(ordering):
+            query = Patient.objects.all().order_by(*ordering)
+            return list(query.values_list('name', flat=True))
+
+        self.init_data()
+
+        self.assertEqual(
+            ['Bob', 'Eugene', 'Cyrill', 'Anne', 'Daniel'],
+            order(['eav__city'])
+        )
+
+        self.assertEqual(
+            ['Eugene', 'Anne', 'Daniel', 'Bob', 'Cyrill'],
+            order(['eav__age', 'eav__city'])
+        )
+
+        self.assertEqual(
+            ['Eugene', 'Cyrill', 'Anne', 'Daniel', 'Bob'],
+            order(['eav__fever', 'eav__age'])
+        )
+
+        self.assertEqual(
+            ['Eugene', 'Cyrill', 'Daniel', 'Bob', 'Anne'],
+            order(['eav__fever', '-name'])
+        )
+
+        self.assertEqual(
+            ['Eugene', 'Daniel', 'Cyrill', 'Bob', 'Anne'],
+            order(['-name', 'eav__age'])
+        )
+
+        self.assertEqual(
+            ['Anne', 'Bob', 'Cyrill', 'Daniel', 'Eugene'],
+            order(['example__name'])
+        )
+
+        with self.assertRaises(NotSupportedError):
+            Patient.objects.all().order_by('eav__first__second')
+
+        with self.assertRaises(ObjectDoesNotExist):
+            Patient.objects.all().order_by('eav__nonsense')

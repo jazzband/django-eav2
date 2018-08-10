@@ -79,7 +79,7 @@ class Forms(TestCase):
         admin.form = BaseDynamicEntityForm
         view = admin.change_view(request, str(self.instance.pk))
 
-        own_fields = 1
+        own_fields = 2
         adminform = view.context_data['adminform']
 
         self.assertEqual(
