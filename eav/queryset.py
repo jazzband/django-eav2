@@ -293,10 +293,11 @@ class EavQuerySet(QuerySet):
         # This will be slow, of course.
         order_clauses = []
         query_clause = self
+        config_cls = self.model._eav_config_cls
 
         for term in [t.split('__') for t in fields]:
             # Continue only for EAV attributes.
-            if len(term) == 2 and term[0] == 'eav':
+            if len(term) == 2 and term[0] == config_cls.eav_attr:
                 # Retrieve Attribute over which the ordering is performed.
                 try:
                     attr = Attribute.objects.get(slug=term[1])
@@ -362,7 +363,7 @@ class EavQuerySet(QuerySet):
 
                 order_clauses.append(clause_name)
 
-            elif len(term) >= 2 and term[0] == 'eav':
+            elif len(term) >= 2 and term[0] == config_cls.eav_attr:
                 raise NotSupportedError(
                     'EAV does not support ordering through '
                     'foreign-key chains'
