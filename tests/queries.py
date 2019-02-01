@@ -1,10 +1,11 @@
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.db.models import Q, Model
+from django.db.models import Q
 from django.db.utils import NotSupportedError
 from django.test import TestCase
 
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
+from eav.registry import EavConfig
 
 from .models import Encounter, Patient
 
@@ -142,45 +143,58 @@ class Queries(TestCase):
         p = Patient.objects.filter(q1)
         self.assertEqual(p.count(), 1)
 
-    def test_order_by(self):
-        def order(ordering):
-            query = Patient.objects.all().order_by(*ordering)
-            return list(query.values_list('name', flat=True))
+    def _order(self, ordering):
+        query = Patient.objects.all().order_by(*ordering)
+        return list(query.values_list('name', flat=True))
 
-        self.init_data()
-
+    def assert_order_by_results(self, eav_attr='eav'):
         self.assertEqual(
             ['Bob', 'Eugene', 'Cyrill', 'Anne', 'Daniel'],
-            order(['eav__city'])
+            self._order(['%s__city' % eav_attr])
         )
 
         self.assertEqual(
             ['Eugene', 'Anne', 'Daniel', 'Bob', 'Cyrill'],
-            order(['eav__age', 'eav__city'])
+            self._order(['%s__age' % eav_attr, '%s__city' % eav_attr])
         )
 
         self.assertEqual(
             ['Eugene', 'Cyrill', 'Anne', 'Daniel', 'Bob'],
-            order(['eav__fever', 'eav__age'])
+            self._order(['%s__fever' % eav_attr, '%s__age' % eav_attr])
         )
 
         self.assertEqual(
             ['Eugene', 'Cyrill', 'Daniel', 'Bob', 'Anne'],
-            order(['eav__fever', '-name'])
+            self._order(['%s__fever' % eav_attr, '-name'])
         )
 
         self.assertEqual(
             ['Eugene', 'Daniel', 'Cyrill', 'Bob', 'Anne'],
-            order(['-name', 'eav__age'])
+            self._order(['-name', '%s__age' % eav_attr])
         )
 
         self.assertEqual(
             ['Anne', 'Bob', 'Cyrill', 'Daniel', 'Eugene'],
-            order(['example__name'])
+            self._order(['example__name'])
         )
 
         with self.assertRaises(NotSupportedError):
-            Patient.objects.all().order_by('eav__first__second')
+            Patient.objects.all().order_by('%s__first__second' % eav_attr)
 
         with self.assertRaises(ObjectDoesNotExist):
-            Patient.objects.all().order_by('eav__nonsense')
+            Patient.objects.all().order_by('%s__nonsense' % eav_attr)
+
+    def test_order_by(self):
+        self.init_data()
+        self.assert_order_by_results()
+
+    def test_order_by_with_custom_config(self):
+
+        class CustomConfig(EavConfig):
+            eav_attr = "data"
+            generic_relation_attr = "data_values"
+
+        self.init_data()
+        eav.unregister(Patient)
+        eav.register(Patient, config_cls=CustomConfig)
+        self.assert_order_by_results(eav_attr='data')
