@@ -1,0 +1,194 @@
+# Russian translation for django-eav2
+# Copyright (C) 2019
+# This file is distributed under the same license as the django-eav2 package.
+# Evgeny Pisemsky <evgeny@pisemsky.com>, 2019.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-02-15 01:10+0300\n"
+"PO-Revision-Date: 2019-02-15 02:13+0300\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Last-Translator: Evgeny Pisemsky <evgeny@pisemsky.com>\n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.11\n"
+
+#: fields.py:25
+msgid ""
+"Must be all lower case, start with a letter, and contain only letters, "
+"numbers, or underscores."
+msgstr ""
+"Должно быть в нижнем регистре, начинаться с буквы и содержать только буквы, "
+"числа или подчёркивания."
+
+#: fields.py:62
+msgid "You cannot change the datatype of an attribute that is already in use."
+msgstr "Вы не можете изменить тип данных атрибута, который уже используется."
+
+#: forms.py:91
+#, python-format
+msgid "The %s could not be saved because the datadidn't validate."
+msgstr "%s не может быть сохранено, потому что данные не корректны."
+
+#: models.py:54
+msgid "Value"
+msgstr "Значение"
+
+#: models.py:68 models.py:153
+msgid "Name"
+msgstr "Название"
+
+#: models.py:69
+msgid "Enum group"
+msgstr "Группа выбора"
+
+#: models.py:135
+msgid "Text"
+msgstr "Текст"
+
+#: models.py:136
+msgid "Date"
+msgstr "Дата"
+
+#: models.py:137
+msgid "Float"
+msgstr "Число с плавающей запятой"
+
+#: models.py:138
+msgid "Integer"
+msgstr "Целое число"
+
+#: models.py:139
+msgid "True / False"
+msgstr "Правда / Ложь"
+
+#: models.py:140
+msgid "Django Object"
+msgstr "Объект Django"
+
+#: models.py:141
+msgid "Multiple Choice"
+msgstr "Множественный выбор"
+
+#: models.py:147
+msgid "Data Type"
+msgstr "Тип данных"
+
+#: models.py:155
+msgid "User-friendly attribute name"
+msgstr "Понятное пользователю название атрибута"
+
+#: models.py:164
+msgid "Slug"
+msgstr "Псевдоним"
+
+#: models.py:168
+msgid "Short unique attribute label"
+msgstr "Короткая уникальная метка атрибута"
+
+#: models.py:177
+msgid "Required"
+msgstr "Обязательно"
+
+#: models.py:181
+msgid "Choice Group"
+msgstr "Группа выбора"
+
+#: models.py:188
+msgid "Description"
+msgstr "Описание"
+
+#: models.py:192
+msgid "Short description"
+msgstr "Краткое описание"
+
+#: models.py:198
+msgid "Display order"
+msgstr "Порядок отображения"
+
+#: models.py:203 models.py:392
+msgid "Modified"
+msgstr "Изменено"
+
+#: models.py:208 models.py:391
+msgid "Created"
+msgstr "Создано"
+
+#: models.py:250
+#, python-format
+msgid "%(val)s is not a valid choice for %(attr)s"
+msgstr "%(val)s не является корректным выбором для %(attr)s"
+
+#: models.py:273
+msgid "You must set the choice group for multiple choice attributes"
+msgstr "Вы должны назначить группу выбора для атрибутов множественного выбора"
+
+#: models.py:278
+msgid "You can only assign a choice group to multiple choice attributes"
+msgstr ""
+"Вы можете назначить группу выбора только для атрибутов множественного выбора"
+
+#: models.py:398
+msgid "Attribute"
+msgstr "Атрибут"
+
+#: models.py:416
+#, python-format
+msgid "%(enum)s is not a valid choice for %(attr)s"
+msgstr "%(enum)s не является корректным выбором для %(attr)s"
+
+#: models.py:492
+#, python-format
+msgid "%(obj)s has no EAV attribute named %(attr)s"
+msgstr "%(obj)s не имеет атрибута EAV с названием %(attr)s"
+
+#: models.py:557
+msgid "{} EAV field cannot be blank"
+msgstr "Поле EAV {} не может быть пустым"
+
+#: models.py:564
+#, python-format
+msgid "%(attr)s EAV field %(err)s"
+msgstr "Поле EAV %(attr)s %(err)s"
+
+#: validators.py:25
+msgid "Must be str or unicode"
+msgstr "Должно быть строкой или юникодом"
+
+#: validators.py:35
+msgid "Must be a float"
+msgstr "Должно быть числом с плавающей запятой"
+
+#: validators.py:45
+msgid "Must be an integer"
+msgstr "Должно быть целым числом"
+
+#: validators.py:54
+msgid "Must be a date or datetime"
+msgstr "Должно быть датой или датой со временем"
+
+#: validators.py:62
+msgid "Must be a boolean"
+msgstr "Должно быть булевым значением"
+
+#: validators.py:71
+msgid "Must be a django model object instance"
+msgstr "Должно быть экземпляром объекта модели Django"
+
+#: validators.py:74
+msgid "Model has not been saved yet"
+msgstr "Модель ещё не была сохранена"
+
+#: validators.py:85
+msgid "Must be an EnumValue model object instance"
+msgstr "Должно быть экземпляром объекта модели EnumValue"
+
+#: validators.py:88
+msgid "EnumValue has not been saved yet"
+msgstr "EnumValue ещё не было сохранено"

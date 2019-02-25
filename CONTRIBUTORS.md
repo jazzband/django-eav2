@@ -12,6 +12,7 @@ Contributors, alphabetically:
  * madEng84
  * MajekX (Adam Majczyk)
  * nicpottier (Nic Pottier)
+ * pisemsky (Evgeny Pisemsky)
  * tavaresb (Bruno Tavares)
  * therefromhere (John Carter)
  * timlinux (Tim Sutton)
