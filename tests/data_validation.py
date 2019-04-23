@@ -155,8 +155,6 @@ class DataValidation(TestCase):
         self.assertRaises(ValidationError, p.save)
         p.eav.fever = object
         self.assertRaises(ValidationError, p.save)
-        p.eav.fever = 'yes'
-        self.assertRaises(ValidationError, p.save)
         p.eav.fever = green
         self.assertRaises(ValidationError, p.save)
         p.eav.fever = EnumValue(value='yes')
