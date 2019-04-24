@@ -28,7 +28,7 @@ from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError
 
-from .models import Attribute, Value
+from .models import Attribute, Value, EnumValue
 
 
 def is_eav_and_leaf(expr, gr_name):
@@ -234,7 +234,10 @@ def expand_eav_filter(model_cls, key, value):
         gr_name = config_cls.generic_relation_attr
         datatype = Attribute.objects.get(slug=slug).datatype
 
-        lookup = '__%s' % fields[2] if len(fields) > 2 else ''
+        if datatype == Attribute.TYPE_ENUM and not isinstance(value, EnumValue):
+            lookup = '__value__{}'.format(fields[2]) if len(fields) > 2 else '__value'
+        else:
+            lookup = '__{}'.format(fields[2]) if len(fields) > 2 else ''
         kwargs = {
             'value_{}{}'.format(datatype, lookup): value,
             'attribute__slug': slug

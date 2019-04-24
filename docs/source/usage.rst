@@ -210,9 +210,10 @@ foreign-keys:
     # Of course, you can mix them with regular queries:
     Part.objects.filter(name='Cog', eav__height=7.8)
 
-    # Querying enums looks as follows:
+    # Querying enums works either by enum instance or by it's text representation as follows:
     yes = EnumValue.objects.get(name='Yes')
-    Part.objects.filter(eav__is_available=yes)
+    Part.objects.filter(eav__is_available=yes)  # via EnumValue
+    Part.objects.filter(eav__is_available='yes)  # via EnumValue's value
 
 You can use ``Q`` expressions too:
 

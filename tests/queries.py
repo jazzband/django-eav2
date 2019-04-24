@@ -95,6 +95,12 @@ class Queries(TestCase):
         self.assertEqual(p.count(), 2)
 
         # Anne
+        q1 = Q(eav__city__contains='Y') & Q(eav__fever='no')
+        q2 = Q(eav__age=3)
+        p = Patient.objects.filter(q1 & q2)
+        self.assertEqual(p.count(), 1)
+
+        # Anne
         q1 = Q(eav__city__contains='Y') & Q(eav__fever=self.no)
         q2 = Q(eav__age=3)
         p = Patient.objects.filter(q1 & q2)
