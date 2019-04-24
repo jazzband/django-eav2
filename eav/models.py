@@ -415,18 +415,6 @@ class Value(models.Model):
         self.full_clean()
         super(Value, self).save(*args, **kwargs)
 
-    def clean(self):
-        """
-        Raises ``ValidationError`` if this value's attribute is *TYPE_ENUM*
-        and value_enum is not a valid choice for this value's attribute.
-        """
-        if self.attribute.datatype == Attribute.TYPE_ENUM and self.value_enum:
-            if self.value_enum not in self.attribute.enum_group.values.all():
-                raise ValidationError(
-                    _('%(enum)s is not a valid choice for %(attr)s')
-                    % dict(enum = self.value_enum, attr = self.attribute)
-                )
-
     def _get_value(self):
         """
         Return the python object this value is holding
