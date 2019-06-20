@@ -19,9 +19,17 @@ from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from .validators import (
+    validate_text,
+    validate_float,
+    validate_int,
+    validate_date,
+    validate_bool,
+    validate_object,
+    validate_enum
+)
 from .exceptions import IllegalAssignmentException
 from .fields import EavDatatypeField, EavSlugField
-from .validators import *
 from . import register
 
 
@@ -245,7 +253,9 @@ class Attribute(models.Model):
             validator(value)
 
         if self.datatype == self.TYPE_ENUM:
-            if value not in self.enum_group.values.all():
+            if isinstance(value, EnumValue):
+                value = value.value
+            if not self.enum_group.values.filter(value=value).exists():
                 raise ValidationError(
                     _('%(val)s is not a valid choice for %(attr)s')
                     % dict(val = value, attr = self)
@@ -405,18 +415,6 @@ class Value(models.Model):
         self.full_clean()
         super(Value, self).save(*args, **kwargs)
 
-    def clean(self):
-        """
-        Raises ``ValidationError`` if this value's attribute is *TYPE_ENUM*
-        and value_enum is not a valid choice for this value's attribute.
-        """
-        if self.attribute.datatype == Attribute.TYPE_ENUM and self.value_enum:
-            if self.value_enum not in self.attribute.enum_group.values.all():
-                raise ValidationError(
-                    _('%(enum)s is not a valid choice for %(attr)s')
-                    % dict(enum = self.value_enum, attr = self.attribute)
-                )
-
     def _get_value(self):
         """
         Return the python object this value is holding
@@ -530,6 +528,8 @@ class Entity(object):
         for attribute in self.get_all_attributes():
             if self._hasattr(attribute.slug):
                 attribute_value = self._getattr(attribute.slug)
+                if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue):
+                    attribute_value = EnumValue.objects.get(value=attribute_value)
                 attribute.save_value(self.instance, attribute_value)
 
     def validate_attributes(self):
