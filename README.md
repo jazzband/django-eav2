@@ -3,7 +3,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/159540d899bd41bb860f0ce996427e1f)](https://www.codacy.com/app/IwoHerka/django-eav2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=makimo/django-eav2&amp;utm_campaign=Badge_Grade)
 [![Maintainability](https://api.codeclimate.com/v1/badges/b90eacf7a90db4b58f13/maintainability)](https://codeclimate.com/github/makimo/django-eav2/maintainability)
 ![Python Version](https://img.shields.io/badge/Python-2.7,%203.5,%203.6,%203.7dev-blue.svg)
-![Django Version](https://img.shields.io/badge/Django-1.11,%202.0,%20tip-green.svg)
+![Django Version](https://img.shields.io/badge/Django-1.11,%202.0,%203.0,%20tip-green.svg)
 
 ## Django EAV 2 - Entity-Attribute-Value storage for Django
 

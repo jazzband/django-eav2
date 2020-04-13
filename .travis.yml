@@ -10,6 +10,8 @@ matrix:
         - python: 3.7-dev
           env: TOXENV=py37-django20
         - python: 3.7-dev
+          env: TOXENV=py37-django30
+        - python: 3.7-dev
           env: TOXENV=py37-djangotip
 install:
     - pip install Django>=1.11
