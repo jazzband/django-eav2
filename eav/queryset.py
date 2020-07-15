@@ -22,6 +22,7 @@ Q-expressions need to be rewritten for two reasons:
 from itertools import count
 from functools import wraps
 
+from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import FieldError, ObjectDoesNotExist
 from django.db import models
 from django.db.models import Case, IntegerField, Q, When
@@ -248,7 +249,7 @@ def expand_eav_filter(model_cls, key, value):
 
     try:
         field = model_cls._meta.get_field(fields[0])
-    except models.FieldDoesNotExist:
+    except FieldDoesNotExist:
         return key, value
 
     if not field.auto_created or field.concrete:
