@@ -235,12 +235,17 @@ def expand_eav_filter(model_cls, key, value):
         gr_name = config_cls.generic_relation_attr
         datatype = Attribute.objects.get(slug=slug).datatype
 
+        value_key = ''
         if datatype == Attribute.TYPE_ENUM and not isinstance(value, EnumValue):
             lookup = '__value__{}'.format(fields[2]) if len(fields) > 2 else '__value'
+            value_key = 'value_{}{}'.format(datatype, lookup)
+        elif datatype == Attribute.TYPE_OBJECT:
+            value_key = 'generic_value_id'
         else:
             lookup = '__{}'.format(fields[2]) if len(fields) > 2 else ''
+            value_key = 'value_{}{}'.format(datatype, lookup)
         kwargs = {
-            'value_{}{}'.format(datatype, lookup): value,
+            value_key: value,
             'attribute__slug': slug
         }
         value = Value.objects.filter(**kwargs)
