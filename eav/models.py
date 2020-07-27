@@ -19,6 +19,8 @@ from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from .validators import validate_decimal
+from .validators import validate_enum_multi
 from .validators import (
     validate_text,
     validate_float,
@@ -59,7 +61,8 @@ class EnumValue(models.Model):
        only have a total of four *EnumValues* objects, as you should have used
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
-    value = models.CharField(_('Value'), db_index=True, unique=True, max_length=50)
+    value = models.CharField(_('Value'), db_index=True, max_length=100)
+    legacy_value = models.CharField(_('Legacy Value'), blank=True, null=True, db_index=True, max_length=100)
 
     def __str__(self):
         return '<EnumValue {}>'.format(self.value)
@@ -73,7 +76,7 @@ class EnumGroup(models.Model):
 
     See :class:`EnumValue` for an example.
     """
-    name = models.CharField(_('Name'), unique = True, max_length = 100)
+    name = models.CharField(_('Name'), max_length = 100)
     values = models.ManyToManyField(EnumValue, verbose_name = _('Enum group'))
 
     def __str__(self):
@@ -131,30 +134,49 @@ class Attribute(models.Model):
     class Meta:
         ordering = ['name']
 
-    TYPE_TEXT    = 'text'
-    TYPE_FLOAT   = 'float'
-    TYPE_INT     = 'int'
-    TYPE_DATE    = 'date'
-    TYPE_BOOLEAN = 'bool'
-    TYPE_OBJECT  = 'object'
-    TYPE_ENUM    = 'enum'
+    TYPE_TEXT       = 'text'
+    TYPE_FLOAT      = 'float'
+    TYPE_DECIMAL    = 'decimal'
+    TYPE_INT        = 'int'
+    TYPE_DATE       = 'date'
+    TYPE_BOOLEAN    = 'bool'
+    TYPE_OBJECT     = 'object'
+    TYPE_ENUM       = 'enum'
+    TYPE_ENUM_MULTI = 'enum_multi'
 
     DATATYPE_CHOICES = (
-        (TYPE_TEXT,    _('Text')),
-        (TYPE_DATE,    _('Date')),
-        (TYPE_FLOAT,   _('Float')),
-        (TYPE_INT,     _('Integer')),
-        (TYPE_BOOLEAN, _('True / False')),
-        (TYPE_OBJECT,  _('Django Object')),
-        (TYPE_ENUM,    _('Multiple Choice')),
+        (TYPE_TEXT,       _('Text')),
+        (TYPE_DATE,       _('Date')),
+        (TYPE_FLOAT,      _('Float')),
+        (TYPE_DECIMAL,    _('Decimal')),
+        (TYPE_INT,        _('Integer')),
+        (TYPE_BOOLEAN,    _('True / False')),
+        (TYPE_OBJECT,     _('Django Object')),
+        (TYPE_ENUM,       _('Choice')),
+        (TYPE_ENUM_MULTI, _('Multiple Choice')),
     )
 
     # Core attributes
+    entity_ct = models.ForeignKey(
+        ContentType,
+        on_delete    = models.PROTECT,
+        related_name = 'attribute_entities',
+        blank=True,
+        null=True,
+    )
+    entity_id = models.UUIDField(
+        blank=True,
+        null=True,
+    )
+    entity = generic.GenericForeignKey(
+        ct_field = 'entity_ct',
+        fk_field = 'entity_id'
+    )
 
     datatype = EavDatatypeField(
         verbose_name = _('Data Type'),
         choices      = DATATYPE_CHOICES,
-        max_length   = 6
+        max_length   = 10
     )
 
     name = models.CharField(
@@ -172,8 +194,7 @@ class Attribute(models.Model):
         verbose_name = _('Slug'),
         max_length   = 50,
         db_index     = True,
-        unique       = True,
-        help_text    = _('Short unique attribute label')
+        help_text    = _('Short attribute label')
     )
 
     """
@@ -233,13 +254,15 @@ class Attribute(models.Model):
            validators to return as well as the default, built-in one.
         """
         DATATYPE_VALIDATORS = {
-            'text':   validate_text,
-            'float':  validate_float,
-            'int':    validate_int,
-            'date':   validate_date,
-            'bool':   validate_bool,
-            'object': validate_object,
-            'enum':   validate_enum,
+            'text':        validate_text,
+            'float':       validate_float,
+            'decimal':     validate_decimal,
+            'int':         validate_int,
+            'date':        validate_date,
+            'bool':        validate_bool,
+            'object':      validate_object,
+            'enum':        validate_enum,
+            'enum_multi':  validate_enum_multi,
         }
 
         return [DATATYPE_VALIDATORS[self.datatype]]
@@ -369,11 +392,12 @@ class Value(models.Model):
     entity_id = models.IntegerField()
     entity = generic.GenericForeignKey(ct_field = 'entity_ct', fk_field = 'entity_id')
 
-    value_text  = models.TextField(blank = True, null = True)
-    value_float = models.FloatField(blank = True, null = True)
-    value_int   = models.IntegerField(blank = True, null = True)
-    value_date  = models.DateTimeField(blank = True, null = True)
-    value_bool  = models.NullBooleanField(blank = True, null = True)
+    value_text    = models.TextField(blank = True, null = True)
+    value_float   = models.FloatField(blank = True, null = True)
+    value_decimal = models.DecimalField(blank = True, null = True, max_digits = 14, decimal_places = 2)
+    value_int     = models.IntegerField(blank = True, null = True)
+    value_date    = models.DateTimeField(blank = True, null = True)
+    value_bool    = models.NullBooleanField(blank = True, null = True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
@@ -381,6 +405,11 @@ class Value(models.Model):
         null         = True,
         on_delete    = models.PROTECT,
         related_name = 'eav_values'
+    )
+
+    value_enum_multi = models.ManyToManyField(
+        EnumValue,
+        related_name = 'eav_multi_values'
     )
 
     generic_value_id = models.IntegerField(blank=True, null=True)
@@ -503,7 +532,7 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         """
-        return self.instance._eav_config_cls.get_attributes().order_by('display_order')
+        return self.instance._eav_config_cls.get_attributes(self.instance).order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         """

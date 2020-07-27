@@ -1,7 +1,9 @@
 """This modules contains the registry classes."""
 
 from django.contrib.contenttypes import fields as generic
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_init, post_save, pre_save
+from django.db.models import Q
 
 from .managers import EntityManager
 from .models import Attribute, Entity, Value
@@ -33,12 +35,20 @@ class EavConfig(object):
     generic_relation_related_name = None
 
     @classmethod
-    def get_attributes(cls):
+    def get_attributes(cls, entity=None):
         """
         By default, all :class:`~eav.models.Attribute` object apply to an
         entity, unless you provide a custom EavConfig class overriding this.
         """
-        return Attribute.objects.all()
+        qs = Attribute.objects.all()
+        if entity:
+            entity_ct = ContentType.objects.get_for_model(entity)
+            qs = qs.filter(
+                Q(entity_ct__isnull=True, entity_id__isnull=True) |
+                Q(entity_ct=entity_ct, entity_id__isnull=True) |
+                Q(entity_ct=entity_ct, entity_id=entity.pk)
+            )
+        return qs
 
 
 class Registry(object):
