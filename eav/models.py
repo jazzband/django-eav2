@@ -38,8 +38,8 @@ from . import register
 class EnumValue(models.Model):
     """
     *EnumValue* objects are the value 'choices' to multiple choice *TYPE_ENUM*
-    :class:`Attribute` objects. They have only one field, *value*, a
-    ``CharField`` that must be unique.
+    and *TYPE_ENUM_MULTI* :class:`Attribute` objects. They have only one field,
+    *value*, a ``CharField`` that must be unique.
 
     For example::
 
@@ -72,7 +72,8 @@ class EnumGroup(models.Model):
     """
     *EnumGroup* objects have two fields - a *name* ``CharField`` and *values*,
     a ``ManyToManyField`` to :class:`EnumValue`. :class:`Attribute` classes
-    with datatype *TYPE_ENUM* have a ``ForeignKey`` field to *EnumGroup*.
+    with datatype *TYPE_ENUM* or *TYPE_ENUM_MULTI* have a ``ForeignKey``
+    field to *EnumGroup*.
 
     See :class:`EnumValue` for an example.
     """
@@ -101,15 +102,17 @@ class Attribute(models.Model):
        to save or create any entity object for which this attribute applies,
        without first setting this EAV attribute.
 
-    There are 7 possible values for datatype:
+    There are 9 possible values for datatype:
 
         * int (TYPE_INT)
         * float (TYPE_FLOAT)
+        * decimal (TYPE_DECIMAL)
         * text (TYPE_TEXT)
         * date (TYPE_DATE)
         * bool (TYPE_BOOLEAN)
         * object (TYPE_OBJECT)
         * enum (TYPE_ENUM)
+        * enum_multi (TYPE_ENUM_MULTI)
 
     Examples::
 
@@ -280,8 +283,14 @@ class Attribute(models.Model):
                 value = value.value
             if not self.enum_group.values.filter(value=value).exists():
                 raise ValidationError(
-                    _('%(val)s is not a valid choice for %(attr)s')
-                    % dict(val = value, attr = self)
+                    _('{val} is not a valid choice for {attr}').format(val = value, attr = self)
+                )
+
+        if self.datatype == self.TYPE_ENUM_MULTI:
+            value = [v.value if isinstance(value, EnumValue) else v for v in value]
+            if self.enum_group.values.filter(value__in=value).count() != len(value):
+                raise ValidationError(
+                    _('{val} is not a valid choice for {attr}').format(val = value, attr = self)
                 )
 
     def save(self, *args, **kwargs):
@@ -298,15 +307,16 @@ class Attribute(models.Model):
     def clean(self):
         """
         Validates the attribute.  Will raise ``ValidationError`` if the
-        attribute's datatype is *TYPE_ENUM* and enum_group is not set, or if
-        the attribute is not *TYPE_ENUM* and the enum group is set.
+        attribute's datatype is *TYPE_ENUM* or *TYPE_ENUM_MULTI* and
+        enum_group is not set, or if the attribute is not *TYPE_ENUM*
+        or *TYPE_ENUM_MULTI* and the enum group is set.
         """
-        if self.datatype == self.TYPE_ENUM and not self.enum_group:
+        if self.datatype in (self.TYPE_ENUM, self.TYPE_ENUM_MULTI) and not self.enum_group:
             raise ValidationError(
                 _('You must set the choice group for multiple choice attributes')
             )
 
-        if self.datatype != self.TYPE_ENUM and self.enum_group:
+        if self.datatype not in (self.TYPE_ENUM, self.TYPE_ENUM_MULTI) and self.enum_group:
             raise ValidationError(
                 _('You can only assign a choice group to multiple choice attributes')
             )
@@ -314,9 +324,10 @@ class Attribute(models.Model):
     def get_choices(self):
         """
         Returns a query set of :class:`EnumValue` objects for this attribute.
-        Returns None if the datatype of this attribute is not *TYPE_ENUM*.
+        Returns None if the datatype of this attribute is not *TYPE_ENUM* or
+        *TYPE_ENUM_MULTI*.
         """
-        return self.enum_group.values.all() if self.datatype == Attribute.TYPE_ENUM else None
+        return self.enum_group.values.all() if self.datatype in (self.TYPE_ENUM, self.TYPE_ENUM_MULTI) else None
 
     def save_value(self, entity, value):
         """
@@ -340,7 +351,7 @@ class Attribute(models.Model):
                 attribute = self
             )
         except Value.DoesNotExist:
-            if value == None or value == '':
+            if value in (None, '', []):
                 return
 
             value_obj = Value.objects.create(
@@ -349,13 +360,17 @@ class Attribute(models.Model):
                 attribute = self
             )
 
-        if value == None or value == '':
+        if value in (None, '', []):
             value_obj.delete()
             return
 
         if value != value_obj.value:
-            value_obj.value = value
-            value_obj.save()
+            if self.datatype == self.TYPE_ENUM_MULTI:
+                value_obj.value.clear()
+                value_obj.value.add(*value)
+            else:
+                value_obj.value = value
+                value_obj.save()
 
     def __str__(self):
         return '{} ({})'.format(self.name, self.get_datatype_display())
@@ -559,6 +574,11 @@ class Entity(object):
                 attribute_value = self._getattr(attribute.slug)
                 if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue):
                     attribute_value = EnumValue.objects.get(value=attribute_value)
+                if attribute.datatype == Attribute.TYPE_ENUM_MULTI:
+                    attribute_value = [
+                        EnumValue.objects.get(value=v) if not isinstance(attribute_value, EnumValue) else v
+                        for v in attribute_value
+                    ]
                 attribute.save_value(self.instance, attribute_value)
 
     def validate_attributes(self):
