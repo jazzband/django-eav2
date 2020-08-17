@@ -103,6 +103,6 @@ def validate_enum_multi(value):
     """
     from .models import EnumValue
 
-    for single_value in value:
+    for single_value in value.all():
         if isinstance(single_value, EnumValue) and not single_value.pk:
             raise ValidationError(_(u"EnumValue has not been saved yet"))

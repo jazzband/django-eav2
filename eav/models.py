@@ -287,7 +287,7 @@ class Attribute(models.Model):
                 )
 
         if self.datatype == self.TYPE_ENUM_MULTI:
-            value = [v.value if isinstance(value, EnumValue) else v for v in value]
+            value = [v.value if isinstance(v, EnumValue) else v for v in value.all()]
             if self.enum_group.values.filter(value__in=value).count() != len(value):
                 raise ValidationError(
                     _('{val} is not a valid choice for {attr}').format(val = value, attr = self)
