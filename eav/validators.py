@@ -9,6 +9,7 @@ These validators are called by the
 :meth:`~eav.models.Attribute.validate_value` method in the
 :class:`~eav.models.Attribute` model.
 """
+from decimal import Decimal
 
 import datetime
 
@@ -33,6 +34,16 @@ def validate_float(value):
         float(value)
     except ValueError:
         raise ValidationError(_(u"Must be a float"))
+
+
+def validate_decimal(value):
+    """
+    Raises ``ValidationError`` unless *value* can be cast as a ``Decimal``
+    """
+    try:
+        Decimal(value)
+    except ValueError:
+        raise ValidationError(_(u"Must be a Decimal"))
 
 
 def validate_int(value):
@@ -83,3 +94,15 @@ def validate_enum(value):
 
     if isinstance(value, EnumValue) and not value.pk:
         raise ValidationError(_(u"EnumValue has not been saved yet"))
+
+
+def validate_enum_multi(value):
+    """
+    Raises ``ValidationError`` unless *value* is a saved
+    :class:`~eav.models.EnumValue` model instance.
+    """
+    from .models import EnumValue
+
+    for single_value in value.all():
+        if isinstance(single_value, EnumValue) and not single_value.pk:
+            raise ValidationError(_(u"EnumValue has not been saved yet"))

@@ -19,6 +19,8 @@ from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from .validators import validate_decimal
+from .validators import validate_enum_multi
 from .validators import (
     validate_text,
     validate_float,
@@ -36,8 +38,8 @@ from . import register
 class EnumValue(models.Model):
     """
     *EnumValue* objects are the value 'choices' to multiple choice *TYPE_ENUM*
-    :class:`Attribute` objects. They have only one field, *value*, a
-    ``CharField`` that must be unique.
+    and *TYPE_ENUM_MULTI* :class:`Attribute` objects. They have only one field,
+    *value*, a ``CharField`` that must be unique.
 
     For example::
 
@@ -59,7 +61,8 @@ class EnumValue(models.Model):
        only have a total of four *EnumValues* objects, as you should have used
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
-    value = models.CharField(_('Value'), db_index=True, unique=True, max_length=50)
+    value = models.CharField(_('Value'), db_index=True, max_length=100)
+    legacy_value = models.CharField(_('Legacy Value'), blank=True, null=True, db_index=True, max_length=100)
 
     def __str__(self):
         return '<EnumValue {}>'.format(self.value)
@@ -69,11 +72,12 @@ class EnumGroup(models.Model):
     """
     *EnumGroup* objects have two fields - a *name* ``CharField`` and *values*,
     a ``ManyToManyField`` to :class:`EnumValue`. :class:`Attribute` classes
-    with datatype *TYPE_ENUM* have a ``ForeignKey`` field to *EnumGroup*.
+    with datatype *TYPE_ENUM* or *TYPE_ENUM_MULTI* have a ``ForeignKey``
+    field to *EnumGroup*.
 
     See :class:`EnumValue` for an example.
     """
-    name = models.CharField(_('Name'), unique = True, max_length = 100)
+    name = models.CharField(_('Name'), max_length = 100)
     values = models.ManyToManyField(EnumValue, verbose_name = _('Enum group'))
 
     def __str__(self):
@@ -98,15 +102,17 @@ class Attribute(models.Model):
        to save or create any entity object for which this attribute applies,
        without first setting this EAV attribute.
 
-    There are 7 possible values for datatype:
+    There are 9 possible values for datatype:
 
         * int (TYPE_INT)
         * float (TYPE_FLOAT)
+        * decimal (TYPE_DECIMAL)
         * text (TYPE_TEXT)
         * date (TYPE_DATE)
         * bool (TYPE_BOOLEAN)
         * object (TYPE_OBJECT)
         * enum (TYPE_ENUM)
+        * enum_multi (TYPE_ENUM_MULTI)
 
     Examples::
 
@@ -131,30 +137,49 @@ class Attribute(models.Model):
     class Meta:
         ordering = ['name']
 
-    TYPE_TEXT    = 'text'
-    TYPE_FLOAT   = 'float'
-    TYPE_INT     = 'int'
-    TYPE_DATE    = 'date'
-    TYPE_BOOLEAN = 'bool'
-    TYPE_OBJECT  = 'object'
-    TYPE_ENUM    = 'enum'
+    TYPE_TEXT       = 'text'
+    TYPE_FLOAT      = 'float'
+    TYPE_DECIMAL    = 'decimal'
+    TYPE_INT        = 'int'
+    TYPE_DATE       = 'date'
+    TYPE_BOOLEAN    = 'bool'
+    TYPE_OBJECT     = 'object'
+    TYPE_ENUM       = 'enum'
+    TYPE_ENUM_MULTI = 'enum_multi'
 
     DATATYPE_CHOICES = (
-        (TYPE_TEXT,    _('Text')),
-        (TYPE_DATE,    _('Date')),
-        (TYPE_FLOAT,   _('Float')),
-        (TYPE_INT,     _('Integer')),
-        (TYPE_BOOLEAN, _('True / False')),
-        (TYPE_OBJECT,  _('Django Object')),
-        (TYPE_ENUM,    _('Multiple Choice')),
+        (TYPE_TEXT,       _('Text')),
+        (TYPE_DATE,       _('Date')),
+        (TYPE_FLOAT,      _('Float')),
+        (TYPE_DECIMAL,    _('Decimal')),
+        (TYPE_INT,        _('Integer')),
+        (TYPE_BOOLEAN,    _('True / False')),
+        (TYPE_OBJECT,     _('Django Object')),
+        (TYPE_ENUM,       _('Choice')),
+        (TYPE_ENUM_MULTI, _('Multiple Choice')),
     )
 
     # Core attributes
+    entity_ct = models.ForeignKey(
+        ContentType,
+        on_delete    = models.PROTECT,
+        related_name = 'attribute_entities',
+        blank=True,
+        null=True,
+    )
+    entity_id = models.UUIDField(
+        blank=True,
+        null=True,
+    )
+    entity = generic.GenericForeignKey(
+        ct_field = 'entity_ct',
+        fk_field = 'entity_id'
+    )
 
     datatype = EavDatatypeField(
         verbose_name = _('Data Type'),
         choices      = DATATYPE_CHOICES,
-        max_length   = 6
+        max_length   = 10
     )
 
     name = models.CharField(
@@ -172,8 +197,7 @@ class Attribute(models.Model):
         verbose_name = _('Slug'),
         max_length   = 50,
         db_index     = True,
-        unique       = True,
-        help_text    = _('Short unique attribute label')
+        help_text    = _('Short attribute label')
     )
 
     """
@@ -233,13 +257,15 @@ class Attribute(models.Model):
            validators to return as well as the default, built-in one.
         """
         DATATYPE_VALIDATORS = {
-            'text':   validate_text,
-            'float':  validate_float,
-            'int':    validate_int,
-            'date':   validate_date,
-            'bool':   validate_bool,
-            'object': validate_object,
-            'enum':   validate_enum,
+            'text':        validate_text,
+            'float':       validate_float,
+            'decimal':     validate_decimal,
+            'int':         validate_int,
+            'date':        validate_date,
+            'bool':        validate_bool,
+            'object':      validate_object,
+            'enum':        validate_enum,
+            'enum_multi':  validate_enum_multi,
         }
 
         return [DATATYPE_VALIDATORS[self.datatype]]
@@ -257,8 +283,14 @@ class Attribute(models.Model):
                 value = value.value
             if not self.enum_group.values.filter(value=value).exists():
                 raise ValidationError(
-                    _('%(val)s is not a valid choice for %(attr)s')
-                    % dict(val = value, attr = self)
+                    _('{val} is not a valid choice for {attr}').format(val = value, attr = self)
+                )
+
+        if self.datatype == self.TYPE_ENUM_MULTI:
+            value = [v.value if isinstance(v, EnumValue) else v for v in value.all()]
+            if self.enum_group.values.filter(value__in=value).count() != len(value):
+                raise ValidationError(
+                    _('{val} is not a valid choice for {attr}').format(val = value, attr = self)
                 )
 
     def save(self, *args, **kwargs):
@@ -275,15 +307,16 @@ class Attribute(models.Model):
     def clean(self):
         """
         Validates the attribute.  Will raise ``ValidationError`` if the
-        attribute's datatype is *TYPE_ENUM* and enum_group is not set, or if
-        the attribute is not *TYPE_ENUM* and the enum group is set.
+        attribute's datatype is *TYPE_ENUM* or *TYPE_ENUM_MULTI* and
+        enum_group is not set, or if the attribute is not *TYPE_ENUM*
+        or *TYPE_ENUM_MULTI* and the enum group is set.
         """
-        if self.datatype == self.TYPE_ENUM and not self.enum_group:
+        if self.datatype in (self.TYPE_ENUM, self.TYPE_ENUM_MULTI) and not self.enum_group:
             raise ValidationError(
                 _('You must set the choice group for multiple choice attributes')
             )
 
-        if self.datatype != self.TYPE_ENUM and self.enum_group:
+        if self.datatype not in (self.TYPE_ENUM, self.TYPE_ENUM_MULTI) and self.enum_group:
             raise ValidationError(
                 _('You can only assign a choice group to multiple choice attributes')
             )
@@ -291,9 +324,10 @@ class Attribute(models.Model):
     def get_choices(self):
         """
         Returns a query set of :class:`EnumValue` objects for this attribute.
-        Returns None if the datatype of this attribute is not *TYPE_ENUM*.
+        Returns None if the datatype of this attribute is not *TYPE_ENUM* or
+        *TYPE_ENUM_MULTI*.
         """
-        return self.enum_group.values.all() if self.datatype == Attribute.TYPE_ENUM else None
+        return self.enum_group.values.all() if self.datatype in (self.TYPE_ENUM, self.TYPE_ENUM_MULTI) else None
 
     def save_value(self, entity, value):
         """
@@ -317,7 +351,7 @@ class Attribute(models.Model):
                 attribute = self
             )
         except Value.DoesNotExist:
-            if value == None or value == '':
+            if value in (None, '', []):
                 return
 
             value_obj = Value.objects.create(
@@ -326,13 +360,17 @@ class Attribute(models.Model):
                 attribute = self
             )
 
-        if value == None or value == '':
+        if value in (None, '', []):
             value_obj.delete()
             return
 
         if value != value_obj.value:
-            value_obj.value = value
-            value_obj.save()
+            if self.datatype == self.TYPE_ENUM_MULTI:
+                value_obj.value.clear()
+                value_obj.value.add(*value)
+            else:
+                value_obj.value = value
+                value_obj.save()
 
     def __str__(self):
         return '{} ({})'.format(self.name, self.get_datatype_display())
@@ -369,11 +407,12 @@ class Value(models.Model):
     entity_id = models.IntegerField()
     entity = generic.GenericForeignKey(ct_field = 'entity_ct', fk_field = 'entity_id')
 
-    value_text  = models.TextField(blank = True, null = True)
-    value_float = models.FloatField(blank = True, null = True)
-    value_int   = models.IntegerField(blank = True, null = True)
-    value_date  = models.DateTimeField(blank = True, null = True)
-    value_bool  = models.NullBooleanField(blank = True, null = True)
+    value_text    = models.TextField(blank = True, null = True)
+    value_float   = models.FloatField(blank = True, null = True)
+    value_decimal = models.DecimalField(blank = True, null = True, max_digits = 14, decimal_places = 2)
+    value_int     = models.IntegerField(blank = True, null = True)
+    value_date    = models.DateTimeField(blank = True, null = True)
+    value_bool    = models.NullBooleanField(blank = True, null = True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
@@ -381,6 +420,11 @@ class Value(models.Model):
         null         = True,
         on_delete    = models.PROTECT,
         related_name = 'eav_values'
+    )
+
+    value_enum_multi = models.ManyToManyField(
+        EnumValue,
+        related_name = 'eav_multi_values'
     )
 
     generic_value_id = models.IntegerField(blank=True, null=True)
@@ -503,7 +547,7 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         """
-        return self.instance._eav_config_cls.get_attributes().order_by('display_order')
+        return self.instance._eav_config_cls.get_attributes(self.instance).order_by('display_order')
 
     def _hasattr(self, attribute_slug):
         """
@@ -528,8 +572,13 @@ class Entity(object):
         for attribute in self.get_all_attributes():
             if self._hasattr(attribute.slug):
                 attribute_value = self._getattr(attribute.slug)
-                if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue):
+                if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue) and attribute_value:
                     attribute_value = EnumValue.objects.get(value=attribute_value)
+                if attribute.datatype == Attribute.TYPE_ENUM_MULTI:
+                    attribute_value = [
+                        EnumValue.objects.get(value=v) if not isinstance(v, EnumValue) else v
+                        for v in attribute_value
+                    ]
                 attribute.save_value(self.instance, attribute_value)
 
     def validate_attributes(self):
