@@ -572,11 +572,11 @@ class Entity(object):
         for attribute in self.get_all_attributes():
             if self._hasattr(attribute.slug):
                 attribute_value = self._getattr(attribute.slug)
-                if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue):
+                if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue) and attribute_value:
                     attribute_value = EnumValue.objects.get(value=attribute_value)
                 if attribute.datatype == Attribute.TYPE_ENUM_MULTI:
                     attribute_value = [
-                        EnumValue.objects.get(value=v) if not isinstance(attribute_value, EnumValue) else v
+                        EnumValue.objects.get(value=v) if not isinstance(v, EnumValue) else v
                         for v in attribute_value
                     ]
                 attribute.save_value(self.instance, attribute_value)

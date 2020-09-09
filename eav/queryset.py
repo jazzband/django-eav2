@@ -376,3 +376,23 @@ class EavQuerySet(QuerySet):
                 order_clauses.append(term[0])
 
         return QuerySet.order_by(query_clause, *order_clauses)
+
+    def update(self, **kwargs):
+        config_cls = getattr(self.model, '_eav_config_cls', None)
+
+        prefix = '%s__' % config_cls.eav_attr
+        new_kwargs = {}
+        eav_kwargs = {}
+
+        for key, value in kwargs.items():
+            if key.startswith(prefix):
+                eav_kwargs.update({key[len(prefix):]: value})
+            else:
+                new_kwargs.update({key: value})
+
+        obj = self.first()
+        obj_eav = getattr(obj, config_cls.eav_attr)
+        for key, value in eav_kwargs.items():
+            setattr(obj_eav, key, value)
+        obj.save()
+        return super(EavQuerySet, self).update(**new_kwargs)
