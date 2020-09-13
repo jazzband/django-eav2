@@ -380,6 +380,9 @@ class EavQuerySet(QuerySet):
     def update(self, **kwargs):
         config_cls = getattr(self.model, '_eav_config_cls', None)
 
+        if not config_cls or config_cls.manager_only:
+            return super(EavQuerySet, self).update(**kwargs)
+
         prefix = '%s__' % config_cls.eav_attr
         new_kwargs = {}
         eav_kwargs = {}
@@ -390,9 +393,17 @@ class EavQuerySet(QuerySet):
             else:
                 new_kwargs.update({key: value})
 
-        obj = self.first()
-        obj_eav = getattr(obj, config_cls.eav_attr)
-        for key, value in eav_kwargs.items():
-            setattr(obj_eav, key, value)
-        obj.save()
-        return super(EavQuerySet, self).update(**new_kwargs)
+        return_value = 0
+
+        if new_kwargs:
+            return_value = super(EavQuerySet, self).update(**new_kwargs)
+
+        if eav_kwargs:
+            for obj in self:
+                obj_eav = getattr(obj, config_cls.eav_attr)
+                for key, value in eav_kwargs.items():
+                    setattr(obj_eav, key, value)
+                obj_eav.save()
+            return_value = 1
+
+        return return_value
