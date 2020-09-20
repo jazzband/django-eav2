@@ -33,6 +33,7 @@ class EavConfig(object):
     eav_attr = 'eav'
     generic_relation_attr = 'eav_values'
     generic_relation_related_name = None
+    pre_save_validation_enabled = True
 
     @classmethod
     def get_attributes(cls, entity=None):

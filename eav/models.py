@@ -344,33 +344,28 @@ class Attribute(models.Model):
         """
         ct = ContentType.objects.get_for_model(entity)
 
-        try:
-            value_obj = self.value_set.get(
-                entity_ct = ct,
-                entity_id = entity.pk,
-                attribute = self
-            )
-        except Value.DoesNotExist:
-            if value in (None, '', []):
-                return
-
-            value_obj = Value.objects.create(
-                entity_ct = ct,
-                entity_id = entity.pk,
-                attribute = self
-            )
-
         if value in (None, '', []):
-            value_obj.delete()
-            return
-
-        if value != value_obj.value:
+            self.value_set.filter(
+                entity_ct=ct,
+                entity_id=entity.pk,
+            ).delete()
+        else:
             if self.datatype == self.TYPE_ENUM_MULTI:
-                value_obj.value.clear()
+                value_obj, created = self.value_set.get_or_create(
+                    entity_ct=ct,
+                    entity_id=entity.pk,
+                )
+                if not created:
+                    value_obj.value.clear()
                 value_obj.value.add(*value)
             else:
-                value_obj.value = value
-                value_obj.save()
+                value_obj, _ = self.value_set.update_or_create(
+                    entity_ct=ct,
+                    entity_id=entity.pk,
+                    defaults={
+                        'value_{datatype}'.format(datatype=self.datatype): value,
+                    }
+                )
 
     def __str__(self):
         return '{} ({})'.format(self.name, self.get_datatype_display())
@@ -397,6 +392,11 @@ class Value(models.Model):
         Value.objects.create(entity = u, attribute = a, value_text = 'red bull')
         # = <Value: crazy_dev_user - Fav Drink: "red bull">
     """
+
+    class Meta:
+        unique_together = [
+            ['entity_ct', 'entity_id', 'attribute_id'],
+        ]
 
     entity_ct = models.ForeignKey(
         ContentType,
@@ -494,7 +494,8 @@ class Entity(object):
         """
         instance = kwargs['instance']
         entity = getattr(kwargs['instance'], instance._eav_config_cls.eav_attr)
-        entity.validate_attributes()
+        if instance._eav_config_cls.pre_save_validation_enabled:
+            entity.validate_attributes()
 
     @staticmethod
     def post_save_handler(sender, *args, **kwargs):
@@ -547,7 +548,11 @@ class Entity(object):
         Return a query set of all :class:`Attribute` objects that can be set
         for this entity.
         """
-        return self.instance._eav_config_cls.get_attributes(self.instance).order_by('display_order')
+        attributes = getattr(self, '_attributes', None)
+        if attributes is None:
+            attributes = self.instance._eav_config_cls.get_attributes(self.instance).order_by('display_order')
+        setattr(self, '_attributes', attributes)
+        return attributes
 
     def _hasattr(self, attribute_slug):
         """
