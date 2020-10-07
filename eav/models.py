@@ -452,13 +452,6 @@ class Value(models.Model):
         verbose_name = _('Attribute')
     )
 
-    def save(self, *args, **kwargs):
-        """
-        Validate and save this value.
-        """
-        self.full_clean()
-        super(Value, self).save(*args, **kwargs)
-
     def _get_value(self):
         """
         Return the python object this value is holding
