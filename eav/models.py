@@ -184,6 +184,15 @@ class Attribute(models.Model):
     """
     required = models.BooleanField(verbose_name = _('Required'), default = False)
 
+    entity_ct = models.ForeignKey(
+        ContentType,
+        null         = True,
+        blank        = True,
+        on_delete    = models.PROTECT,
+        related_name = 'attribute_entities',
+        verbose_name = _('Belongs to')
+    )
+
     enum_group = models.ForeignKey(
         EnumGroup,
         verbose_name = _('Choice Group'),
