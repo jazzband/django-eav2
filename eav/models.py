@@ -189,9 +189,14 @@ class Attribute(models.Model):
         null         = True,
         blank        = True,
         on_delete    = models.PROTECT,
-        related_name = 'attribute_entities',
-        verbose_name = _('Belongs to')
+        related_name = 'attribute_entities'
     )
+    """
+    This field allows you to specify a foreign key to a content type.
+    This would be useful, for example, if you wanted an attribute to apply only to one entity.
+    In that case, you could filter by content type in the :meth:`~eav.registry.EavConfig.get_attributes`
+    method of that entity's config.
+    """
 
     enum_group = models.ForeignKey(
         EnumGroup,
