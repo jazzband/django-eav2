@@ -184,18 +184,12 @@ class Attribute(models.Model):
     """
     required = models.BooleanField(verbose_name = _('Required'), default = False)
 
-    entity_ct = models.ForeignKey(
-        ContentType,
-        null         = True,
-        blank        = True,
-        on_delete    = models.PROTECT,
-        related_name = 'attribute_entities'
-    )
+    entity_ct = models.ManyToManyField(ContentType, blank=True)
     """
-    This field allows you to specify a foreign key to a content type.
-    This would be useful, for example, if you wanted an attribute to apply only to one entity.
-    In that case, you could filter by content type in the :meth:`~eav.registry.EavConfig.get_attributes`
-    method of that entity's config.
+    This field allows you to specify a relationship with any number of content types.
+    This would be useful, for example, if you wanted an attribute to apply only to
+    a subset of entities. In that case, you could filter by content type in the
+    :meth:`~eav.registry.EavConfig.get_attributes` method of that entity's config.
     """
 
     enum_group = models.ForeignKey(

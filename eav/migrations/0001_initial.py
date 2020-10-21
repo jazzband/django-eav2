@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(auto_now=True, verbose_name='Modified')),
                 ('required', models.BooleanField(default=False, verbose_name='Required')),
                 ('display_order', models.PositiveIntegerField(default=1, verbose_name='Display order')),
-                ('entity_ct', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='attribute_entities', to='contenttypes.ContentType')),
+                ('entity_ct', models.ManyToManyField(to='contenttypes.ContentType', blank=True)),
             ],
             options={
                 'ordering': ['name'],
