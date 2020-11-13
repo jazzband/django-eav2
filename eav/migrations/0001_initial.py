@@ -27,6 +27,7 @@ class Migration(migrations.Migration):
                 ('modified', models.DateTimeField(auto_now=True, verbose_name='Modified')),
                 ('required', models.BooleanField(default=False, verbose_name='Required')),
                 ('display_order', models.PositiveIntegerField(default=1, verbose_name='Display order')),
+                ('entity_ct', models.ManyToManyField(to='contenttypes.ContentType', blank=True)),
             ],
             options={
                 'ordering': ['name'],
