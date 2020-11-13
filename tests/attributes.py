@@ -24,7 +24,7 @@ class Attributes(TestCase):
             generic_relation_related_name = 'encounters'
 
             @classmethod
-            def get_attributes(cls):
+            def get_attributes(cls, instance=None):
                 return Attribute.objects.filter(slug__contains='a')
 
         eav.register(Encounter, EncounterEavConfig)
@@ -76,7 +76,7 @@ class Attributes(TestCase):
     def test_illegal_assignemnt(self):
         class EncounterEavConfig(EavConfig):
             @classmethod
-            def get_attributes(cls):
+            def get_attributes(cls, instance=None):
                 return Attribute.objects.filter(datatype=Attribute.TYPE_INT)
 
         eav.unregister(Encounter)

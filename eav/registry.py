@@ -33,7 +33,7 @@ class EavConfig(object):
     generic_relation_related_name = None
 
     @classmethod
-    def get_attributes(cls):
+    def get_attributes(cls, instance=None):
         """
         By default, all :class:`~eav.models.Attribute` object apply to an
         entity, unless you provide a custom EavConfig class overriding this.
