@@ -30,7 +30,8 @@ from .validators import (
     validate_date,
     validate_bool,
     validate_object,
-    validate_enum
+    validate_enum,
+    validate_json,
 )
 from .exceptions import IllegalAssignmentException
 from .fields import EavDatatypeField, EavSlugField
@@ -270,7 +271,7 @@ class Attribute(models.Model):
             'object':      validate_object,
             'enum':        validate_enum,
             'enum_multi':  validate_enum_multi,
-            'json':        value_json,
+            'json':        validate_json,
         }
 
         return [DATATYPE_VALIDATORS[self.datatype]]

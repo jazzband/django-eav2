@@ -26,6 +26,14 @@ def validate_text(value):
         raise ValidationError(_(u"Must be str or unicode"))
 
 
+def validate_json(value):
+    """
+    Raises ``ValidationError`` unless *value* can be cast as a ``dict``
+    """
+    if not isinstance(value, dict):
+        raise ValidationError(_(u"Must be dict"))
+
+
 def validate_float(value):
     """
     Raises ``ValidationError`` unless *value* can be cast as a ``float``
