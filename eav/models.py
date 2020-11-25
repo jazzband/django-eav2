@@ -9,6 +9,8 @@ Along with the :class:`Entity` helper class and :class:`EAVModelMeta`
 optional metaclass for each eav model class.
 """
 
+import json
+
 from copy import copy
 
 from django.contrib.contenttypes import fields as generic
@@ -28,7 +30,8 @@ from .validators import (
     validate_date,
     validate_bool,
     validate_object,
-    validate_enum
+    validate_enum,
+    validate_json,
 )
 from .exceptions import IllegalAssignmentException
 from .fields import EavDatatypeField, EavSlugField
@@ -146,6 +149,7 @@ class Attribute(models.Model):
     TYPE_OBJECT     = 'object'
     TYPE_ENUM       = 'enum'
     TYPE_ENUM_MULTI = 'enum_multi'
+    TYPE_JSON       = 'json'
 
     DATATYPE_CHOICES = (
         (TYPE_TEXT,       _('Text')),
@@ -157,6 +161,7 @@ class Attribute(models.Model):
         (TYPE_OBJECT,     _('Django Object')),
         (TYPE_ENUM,       _('Choice')),
         (TYPE_ENUM_MULTI, _('Multiple Choice')),
+        (TYPE_JSON, _('Text')),
     )
 
     # Core attributes
@@ -266,6 +271,7 @@ class Attribute(models.Model):
             'object':      validate_object,
             'enum':        validate_enum,
             'enum_multi':  validate_enum_multi,
+            'json':        validate_json,
         }
 
         return [DATATYPE_VALIDATORS[self.datatype]]
@@ -451,6 +457,18 @@ class Value(models.Model):
         on_delete    = models.PROTECT,
         verbose_name = _('Attribute')
     )
+
+    @property
+    def value_json(self):
+        if self.value_text:
+            return json.loads(self.value_text)
+        else:
+            return {}
+
+    @value_json.setter
+    def value_json(self, new_value):
+        self.value_text = json.dumps(new_value)
+
 
     def _get_value(self):
         """
