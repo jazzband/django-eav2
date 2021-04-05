@@ -194,11 +194,24 @@ The attribute type *json* allows to store them in JSON format, which internally 
 	"it": "Scopa Verde"
     })
 
+    prod2 = Product.objects.create(sku='PRD00002', eav__name_intl={
+	"es": "Escoba Roja",
+	"en": "Red Broom"
+    })
+
+    prod3 = Product.objects.create(sku='PRD00003', eav__name_intl={
+	"es": "Escoba Azul",
+	"it": "Scopa Blu"
+    })
+
     prod.eav.name_intl
     {'es': 'Escoba Verde', 'en': 'Green Broom', 'it': 'Scopa Verde'}
 
     type(prod.eav.name_intl)
     dict
+
+    Product.objects.filter(eav__name_intl__has_key="it")
+    <EavQuerySet [<Product: PRD00001>, <Product: PRD00003>]>
 
 
 Finally, attribute type *object* allows to relate Django model instances
