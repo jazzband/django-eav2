@@ -160,6 +160,7 @@ stored in :class:`~eav.models.Value`). Available choices are:
 *bool*    ``TYPE_BOOLEAN``
 *object*  ``TYPE_OBJECT``
 *enum*    ``TYPE_ENUM``
+*json*    ``TYPE_JSON``
 ========= ==================
 
 If you want to create an attribute with data-type *enum*, you need to provide
