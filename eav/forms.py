@@ -8,6 +8,12 @@ from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
 from django.utils.translation import ugettext_lazy as _
 
 
+try:
+    from django.forms import JSONField
+except:
+    JSONField = CharField
+
+
 class BaseDynamicEntityForm(ModelForm):
     """
     ``ModelForm`` for entity with support for EAV attributes. Form fields are
@@ -28,6 +34,7 @@ class BaseDynamicEntityForm(ModelForm):
     int    DateTimeField
     bool   BooleanField
     enum   ChoiceField
+    json   JSONField
     =====  =============
     """
     FIELD_CLASSES = {
@@ -37,6 +44,7 @@ class BaseDynamicEntityForm(ModelForm):
         'date': DateTimeField,
         'bool': BooleanField,
         'enum': ChoiceField,
+        'json': JSONField,
     }
 
     def __init__(self, data=None, *args, **kwargs):
