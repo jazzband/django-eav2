@@ -381,7 +381,7 @@ class Value(models.Model):
     value_float = models.FloatField(blank = True, null = True)
     value_int   = models.IntegerField(blank = True, null = True)
     value_date  = models.DateTimeField(blank = True, null = True)
-    value_bool  = models.NullBooleanField(blank = True, null = True)
+    value_bool  = models.BooleanField(blank = True, null = True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
