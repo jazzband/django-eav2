@@ -182,6 +182,25 @@ it with ``enum_group``:
     )
     # = <Attribute: hungry? (Multiple Choice)>
 
+The attribute type *json* allows to store them in JSON format, which internally use JSONField:
+
+.. code-block:: python
+
+    Attribute.objects.create(name='name_intl', datatype=Attribute.TYPE_JSON)
+
+    prod = Product.objects.create(sku='PRD00001', eav__name_intl={
+	"es": "Escoba Verde",
+	"en": "Green Broom",
+	"it": "Scopa Verde"
+    })
+
+    prod.eav.name_intl
+    {'es': 'Escoba Verde', 'en': 'Green Broom', 'it': 'Scopa Verde'}
+
+    type(prod.eav.name_intl)
+    dict
+
+
 Finally, attribute type *object* allows to relate Django model instances
 via generic foreign keys:
 
