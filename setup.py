@@ -4,13 +4,13 @@ setup(
     name             = 'django-eav2',
     version          = __import__('eav').__version__,
     license          = 'GNU Lesser General Public License (LGPL), Version 3',
-    requires         = ['python (>= 3.5)', 'django (>= 1.11.14)'],
+    requires         = ['python (>= 3.6)', 'django (>= 3.1)'],
     provides         = ['eav'],
     description      = 'Entity-Attribute-Value storage for Django',
-    url              = 'http://github.com/makimo/django-eav2',
+    url              = 'http://github.com/lvm/django-eav2',
     packages         = find_packages(),
-    maintainer       = 'Iwo Herka',
-    maintainer_email = 'hi@iwoherka.eu',
+    maintainer       = 'Mauro Lizaur',
+    maintainer_email = 'mauro@sdf.org',
 
     classifiers  = [
         'Development Status :: 3 - Alpha',
