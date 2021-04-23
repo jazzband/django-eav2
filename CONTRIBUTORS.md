@@ -9,6 +9,7 @@ Contributors, alphabetically:
  * IwoHerka (Iwo Herka)
  * jpwhite3
  * katembu (Moses Katembu)
+ * lvm (Mauro Lizaur)
  * madEng84
  * MajekX (Adam Majczyk)
  * nicpottier (Nic Pottier)
