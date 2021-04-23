@@ -21,6 +21,7 @@ class DataValidation(TestCase):
         Attribute.objects.create(name='City', datatype=Attribute.TYPE_TEXT)
         Attribute.objects.create(name='Pregnant?', datatype=Attribute.TYPE_BOOLEAN)
         Attribute.objects.create(name='User', datatype=Attribute.TYPE_OBJECT)
+        Attribute.objects.create(name='Extra', datatype=Attribute.TYPE_JSON)
 
     def tearDown(self):
         eav.unregister(Patient)
@@ -186,3 +187,11 @@ class DataValidation(TestCase):
         ynu.values.add(unkown)
         a = Attribute(name='color', datatype=Attribute.TYPE_TEXT, enum_group=ynu)
         self.assertRaises(ValidationError, a.save)
+
+    def test_json_validation(self):
+        p = Patient.objects.create(name='Joe')
+        p.eav.extra = 5
+        self.assertRaises(ValidationError, p.save)
+        p.eav.extra = {"eyes": "blue", "hair": "brown"}
+        p.save()
+        self.assertEqual(Patient.objects.get(pk=p.pk).eav.extra.get("eyes", ""), "blue")

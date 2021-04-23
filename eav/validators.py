@@ -10,6 +10,7 @@ These validators are called by the
 :class:`~eav.models.Attribute` model.
 """
 
+import json
 import datetime
 
 from django.core.exceptions import ValidationError
@@ -83,3 +84,16 @@ def validate_enum(value):
 
     if isinstance(value, EnumValue) and not value.pk:
         raise ValidationError(_(u"EnumValue has not been saved yet"))
+
+
+def validate_json(value):
+    """
+    Raises ``ValidationError`` unless *value* can be cast as an ``json object`` (a dict)
+    """
+    try:
+        if isinstance(value, str):
+            value = json.loads(value)
+        if not isinstance(value, dict):
+            raise ValidationError(_(u"Must be a JSON Serializable object"))
+    except ValueError:
+        raise ValidationError(_(u"Must be a JSON Serializable object"))

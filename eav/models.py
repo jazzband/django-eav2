@@ -19,6 +19,16 @@ from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from django.core.serializers.json import DjangoJSONEncoder
+if hasattr(models, "JSONField"):
+    JSONField = models.JSONField
+else:
+   try:
+       from django.contrib.postgres.fields import JSONField
+   except:
+       JSONField = models.TextField
+
+
 from .validators import (
     validate_text,
     validate_float,
@@ -26,7 +36,8 @@ from .validators import (
     validate_date,
     validate_bool,
     validate_object,
-    validate_enum
+    validate_enum,
+    validate_json
 )
 from .exceptions import IllegalAssignmentException
 from .fields import EavDatatypeField, EavSlugField
@@ -107,6 +118,7 @@ class Attribute(models.Model):
         * bool (TYPE_BOOLEAN)
         * object (TYPE_OBJECT)
         * enum (TYPE_ENUM)
+        * json (TYPE_JSON)
 
     Examples::
 
@@ -138,6 +150,7 @@ class Attribute(models.Model):
     TYPE_BOOLEAN = 'bool'
     TYPE_OBJECT  = 'object'
     TYPE_ENUM    = 'enum'
+    TYPE_JSON    = 'json'
 
     DATATYPE_CHOICES = (
         (TYPE_TEXT,    _('Text')),
@@ -147,6 +160,7 @@ class Attribute(models.Model):
         (TYPE_BOOLEAN, _('True / False')),
         (TYPE_OBJECT,  _('Django Object')),
         (TYPE_ENUM,    _('Multiple Choice')),
+        (TYPE_JSON,    _('JSON Object')),
     )
 
     # Core attributes
@@ -248,6 +262,7 @@ class Attribute(models.Model):
             'bool':   validate_bool,
             'object': validate_object,
             'enum':   validate_enum,
+            'json':   validate_json,
         }
 
         return [DATATYPE_VALIDATORS[self.datatype]]
@@ -382,6 +397,7 @@ class Value(models.Model):
     value_int   = models.IntegerField(blank = True, null = True)
     value_date  = models.DateTimeField(blank = True, null = True)
     value_bool  = models.BooleanField(blank = True, null = True)
+    value_json  = JSONField(default=dict, encoder=DjangoJSONEncoder, blank = True, null = True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
