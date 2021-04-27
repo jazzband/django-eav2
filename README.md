@@ -5,7 +5,7 @@
 ## Django EAV 2 - Entity-Attribute-Value storage for Django
 
 Django EAV 2 is a fork of django-eav (which itself was derived from eav-django).
-You can find documentation <a href="https://django-eav-2.rtfd.io">here</a>.
+You can find documentation <a href="https://django-eav2.rtfd.io">here</a>.
 
 ## What is EAV anyway?
 
@@ -136,7 +136,7 @@ Supplier.objects.filter(eav__city='London')
 # = <EavQuerySet [<Supplier: Supplier object (1)>]>
 ```
 
-### What next? Check out <a href="https://django-eav-2.readthedocs.io/en/improvement-docs/">documentation</a>.
+### What next? Check out <a href="https://django-eav2.readthedocs.io/en/improvement-docs/">documentation</a>.
 
 <hr>
 <br>
