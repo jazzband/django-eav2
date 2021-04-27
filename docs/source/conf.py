@@ -26,7 +26,8 @@ settings.configure(
         'django.contrib.messages',
         'django.contrib.staticfiles',
         'eav'
-    ]
+    ],
+    SECRET_KEY=os.environ.get("DJANGO_SECRET_KEY", "this-is-not-s3cur3")
 )
 
 # Call django.setup to load installed apps and other stuff.
