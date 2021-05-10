@@ -21,6 +21,7 @@ class Queries(TestCase):
         Attribute.objects.create(name='city', datatype=Attribute.TYPE_TEXT)
         Attribute.objects.create(name='country', datatype=Attribute.TYPE_TEXT)
         Attribute.objects.create(name='extras', datatype=Attribute.TYPE_JSON)
+        Attribute.objects.create(name='illness', datatype=Attribute.TYPE_CSV)
 
         self.yes = EnumValue.objects.create(value='yes')
         self.no = EnumValue.objects.create(value='no')
@@ -42,12 +43,29 @@ class Queries(TestCase):
         no = self.no
 
         data = [
-            # Name,    age, fever, city,       country,   extras
-            ['Anne',   3,   no,    'New York', 'USA',     {"chills": "yes"}],
-            ['Bob',    15,  no,    'Bamako',   'Mali',    {}],
-            ['Cyrill', 15,  yes,   'Kisumu',   'Kenya',   {"chills": "yes", "headache": "no"}],
-            ['Daniel', 3,   no,    'Nice',     'France',  {"headache": "yes"}],
-            ['Eugene', 2,   yes,   'France',   'Nice',    {"chills": "no", "headache": "yes"}]
+            # Name, age, fever,
+            # city, country, extras
+            # possible illness
+            ['Anne',   3,   no,
+             'New York', 'USA',     {"chills": "yes"},
+             "cold"
+             ],
+            ['Bob',    15,  no,
+             'Bamako',   'Mali',    {},
+             ""
+             ],
+            ['Cyrill', 15,  yes,
+             'Kisumu',   'Kenya',   {"chills": "yes", "headache": "no"},
+             "flu"
+             ],
+            ['Daniel', 3,   no,
+             'Nice',     'France',  {"headache": "yes"},
+             "cold"
+             ],
+            ['Eugene', 2,   yes,
+             'France',   'Nice',    {"chills": "no", "headache": "yes"},
+             "flu;cold"
+             ]
         ]
 
         for row in data:
@@ -57,7 +75,8 @@ class Queries(TestCase):
                 eav__fever=row[2],
                 eav__city=row[3],
                 eav__country=row[4],
-                eav__extras=row[5]
+                eav__extras=row[5],
+                eav__illness=row[6]
             )
 
     def test_get_or_create_with_eav(self):
@@ -83,7 +102,7 @@ class Queries(TestCase):
 
         # Check number of objects in DB.
         self.assertEqual(Patient.objects.count(), 5)
-        self.assertEqual(Value.objects.count(), 25)
+        self.assertEqual(Value.objects.count(), 29)
 
         # Nobody
         q1 = Q(eav__fever=self.yes) & Q(eav__fever=self.no)
@@ -182,6 +201,23 @@ class Queries(TestCase):
         q1 = Q(eav__extras={})
         p = Patient.objects.exclude(q1)
         self.assertEqual(p.count(), 4)
+
+        # Illness:
+        # Cold
+        q1 = Q(eav__illness__icontains="cold")
+        p = Patient.objects.exclude(q1)
+        self.assertEqual(p.count(), 2)
+
+        # Flu
+        q1 = Q(eav__illness__icontains="flu")
+        p = Patient.objects.exclude(q1)
+        self.assertEqual(p.count(), 3)
+
+        # Empty
+        q1 = Q(eav__illness__isnull=False)
+        p = Patient.objects.filter(~q1)
+        self.assertEqual(p.count(), 1)
+
 
     def _order(self, ordering):
         query = Patient.objects.all().order_by(*ordering)
