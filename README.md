@@ -89,10 +89,10 @@ You can install **django-eav2** from three sources:
 pip install django-eav2
 
 # From source via pip
-pip install git+https://github.com/makimo/django-eav2@master
+pip install git+https://github.com/lvm/django-eav2@master
 
 # From source via setuptools
-git clone git@github.com:makimo/django-eav2.git
+git clone git@github.com:lvm/django-eav2.git
 cd django-eav2
 python setup.py install
 

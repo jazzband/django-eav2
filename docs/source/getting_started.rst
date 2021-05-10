@@ -16,13 +16,13 @@ With pip via git
 ^^^^^^^^^^^^^^^^
 ::
 
-    pip install git+https://github.com/makimo/django-eav2@master
+    pip install git+https://github.com/lvm/django-eav2@master
 
 From source
 ^^^^^^^^^^^
 ::
 
-    git clone git@github.com:makimo/django-eav2.git
+    git clone git@github.com:lvm/django-eav2.git
     cd django-eav2
     python setup.py install
 
