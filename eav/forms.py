@@ -2,16 +2,38 @@
 
 from copy import deepcopy
 
+from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
 from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
                           FloatField, IntegerField, ModelForm)
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-
 
 try:
     from django.forms import JSONField
 except:
     JSONField = CharField
+
+from .widgets import CSVWidget
+
+
+class CSVFormField(forms.Field):
+    message = _('Enter comma-separated-values. eg: one;two;three.')
+    code = 'invalid'
+    widget = CSVWidget
+    default_separator = ";"
+
+    def to_python(self, value):
+        if not value:
+            return []
+        return [v.strip() for v in value.split(self.separator) if v]
+
+    def validate(self, value):
+        super().validate(value)
+        try:
+            isinstance(value.split(self.separator), list)
+        except ValidationError:
+            raise ValidationError(self.message, code=self.code)
 
 
 class BaseDynamicEntityForm(ModelForm):
@@ -35,16 +57,18 @@ class BaseDynamicEntityForm(ModelForm):
     bool   BooleanField
     enum   ChoiceField
     json   JSONField
+    csv    CSVField
     =====  =============
     """
     FIELD_CLASSES = {
-        'text': CharField,
+        'text':  CharField,
         'float': FloatField,
-        'int': IntegerField,
-        'date': DateTimeField,
-        'bool': BooleanField,
-        'enum': ChoiceField,
-        'json': JSONField,
+        'int':   IntegerField,
+        'date':  DateTimeField,
+        'bool':  BooleanField,
+        'enum':  ChoiceField,
+        'json':  JSONField,
+        'csv':   CSVFormField,
     }
 
     def __init__(self, data=None, *args, **kwargs):

@@ -97,3 +97,13 @@ def validate_json(value):
             raise ValidationError(_(u"Must be a JSON Serializable object"))
     except ValueError:
         raise ValidationError(_(u"Must be a JSON Serializable object"))
+
+
+def validate_csv(value):
+    """
+    Raises ``ValidationError`` unless *value* is a c-s-v value.
+    """
+    if isinstance(value, str):
+        value = value.split(";")
+    if not isinstance(value, list):
+        raise ValidationError(_(u"Must be Comma-Separated-Value."))

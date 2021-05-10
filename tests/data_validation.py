@@ -22,6 +22,7 @@ class DataValidation(TestCase):
         Attribute.objects.create(name='Pregnant?', datatype=Attribute.TYPE_BOOLEAN)
         Attribute.objects.create(name='User', datatype=Attribute.TYPE_OBJECT)
         Attribute.objects.create(name='Extra', datatype=Attribute.TYPE_JSON)
+        Attribute.objects.create(name='Multi', datatype=Attribute.TYPE_CSV)
 
     def tearDown(self):
         eav.unregister(Patient)
@@ -195,3 +196,12 @@ class DataValidation(TestCase):
         p.eav.extra = {"eyes": "blue", "hair": "brown"}
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.extra.get("eyes", ""), "blue")
+
+    def test_csv_validation(self):
+        yes = EnumValue.objects.create(value='yes')
+        p = Patient.objects.create(name='Mike')
+        p.eav.multi = yes
+        self.assertRaises(ValidationError, p.save)
+        p.eav.multi = "one;two;three"
+        p.save()
+        self.assertEqual(Patient.objects.get(pk=p.pk).eav.multi, ["one","two","three"])

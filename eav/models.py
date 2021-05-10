@@ -37,10 +37,11 @@ from .validators import (
     validate_bool,
     validate_object,
     validate_enum,
-    validate_json
+    validate_json,
+    validate_csv,
 )
 from .exceptions import IllegalAssignmentException
-from .fields import EavDatatypeField, EavSlugField
+from .fields import EavDatatypeField, EavSlugField, CSVField
 from . import register
 
 
@@ -119,6 +120,8 @@ class Attribute(models.Model):
         * object (TYPE_OBJECT)
         * enum (TYPE_ENUM)
         * json (TYPE_JSON)
+        * csv (TYPE_CSV)
+
 
     Examples::
 
@@ -151,6 +154,7 @@ class Attribute(models.Model):
     TYPE_OBJECT  = 'object'
     TYPE_ENUM    = 'enum'
     TYPE_JSON    = 'json'
+    TYPE_CSV     = 'csv'
 
     DATATYPE_CHOICES = (
         (TYPE_TEXT,    _('Text')),
@@ -161,6 +165,7 @@ class Attribute(models.Model):
         (TYPE_OBJECT,  _('Django Object')),
         (TYPE_ENUM,    _('Multiple Choice')),
         (TYPE_JSON,    _('JSON Object')),
+        (TYPE_CSV,     _('Comma-Separated-Value')),
     )
 
     # Core attributes
@@ -263,6 +268,7 @@ class Attribute(models.Model):
             'object': validate_object,
             'enum':   validate_enum,
             'json':   validate_json,
+            'csv':    validate_csv,
         }
 
         return [DATATYPE_VALIDATORS[self.datatype]]
@@ -398,6 +404,7 @@ class Value(models.Model):
     value_date  = models.DateTimeField(blank = True, null = True)
     value_bool  = models.BooleanField(blank = True, null = True)
     value_json  = JSONField(default=dict, encoder=DjangoJSONEncoder, blank = True, null = True)
+    value_csv   = CSVField(blank = True, null = True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
@@ -555,7 +562,7 @@ class Entity(object):
             if self._hasattr(attribute.slug):
                 attribute_value = self._getattr(attribute.slug)
                 if attribute.datatype == Attribute.TYPE_ENUM and not isinstance(attribute_value, EnumValue):
-                    if attribute_value is not None: 
+                    if attribute_value is not None:
                         attribute_value = EnumValue.objects.get(value=attribute_value)
                 attribute.save_value(self.instance, attribute_value)
 
