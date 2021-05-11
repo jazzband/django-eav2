@@ -105,7 +105,7 @@ html_static_path = ['_static']
 
 
 def setup(app):
-    app.add_stylesheet('styles.css')
+    app.add_css_file('styles.css')
     app.connect('autodoc-process-docstring', between('^.*IGNORE.*$', exclude=True))
     return app
 
