@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='value',
             name='value_csv',
-            field=eav.fields.CSVField(blank=True, default=[], null=True),
+            field=eav.fields.CSVField(blank=True, default="", null=True),
         ),
         migrations.AlterField(
             model_name='attribute',
