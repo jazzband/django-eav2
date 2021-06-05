@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/lvm/django-eav2.svg?branch=master)](https://travis-ci.org/lvm/django-eav2)
 ![Python Version](https://img.shields.io/badge/Python-3.6,%203.7,%203.8,%203.9-blue.svg)
 ![Django Version](https://img.shields.io/badge/Django-3.1,%203.2-green.svg)
+[![Jazzband](https://jazzband.co/static/img/badge.svg)](https://jazzband.co/)
 
 ## Django EAV 2 - Entity-Attribute-Value storage for Django
 
