@@ -1,18 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-import sys
 import eav
 from eav.exceptions import IllegalAssignmentException
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
-
-from .models import Encounter, Patient
-
-if sys.version_info[0] > 2:
-    from .metaclass_models3 import RegisterTestModel
-else:
-    from .metaclass_models2 import RegisterTestModel
+from main_app.models import Encounter, Patient, RegisterTestModel
 
 
 class Attributes(TestCase):

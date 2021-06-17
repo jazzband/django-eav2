@@ -1,16 +1,16 @@
-from django.test import TestCase
+import sys
+
 from django.contrib.admin.sites import AdminSite
+from django.core.handlers.base import BaseHandler
+from django.forms import ModelForm
+from django.test import TestCase
+from django.test.client import RequestFactory
 
 import eav
-import sys
 from eav.admin import *
-from .models import Patient, M2MModel, ExampleModel
-from eav.models import Attribute
 from eav.forms import BaseDynamicEntityForm
-from django.contrib import admin
-from django.core.handlers.base import BaseHandler
-from django.test.client import RequestFactory
-from django.forms import ModelForm
+from eav.models import Attribute
+from main_app.models import ExampleModel, M2MModel, Patient
 
 
 class MockRequest(RequestFactory):
@@ -24,8 +24,10 @@ class MockRequest(RequestFactory):
         if sys.version_info[0] < 2:
             for middleware_method in handler._request_middleware:
                 if middleware_method(request):
-                    raise Exception("Couldn't create request mock object - "
-                                    "request middleware returned a response")
+                    raise Exception(
+                        "Couldn't create request mock object - "
+                        "request middleware returned a response"
+                    )
         return request
 
 
@@ -66,9 +68,7 @@ class Forms(TestCase):
         gender_group.values.add(self.female, self.male)
 
         Attribute.objects.create(
-            name='gender',
-            datatype=Attribute.TYPE_ENUM,
-            enum_group=gender_group
+            name='gender', datatype=Attribute.TYPE_ENUM, enum_group=gender_group
         )
 
         self.instance = Patient.objects.create(name='Jim Morrison')
