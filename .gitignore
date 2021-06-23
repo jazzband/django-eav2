@@ -126,3 +126,6 @@ tags
 
 ## Mac
 .DS_Store
+
+# PyCharm files
+.idea/
