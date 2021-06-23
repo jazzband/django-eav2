@@ -11,6 +11,7 @@ setup(
     packages         = find_packages(),
     maintainer       = 'Mauro Lizaur',
     maintainer_email = 'mauro@sdf.org',
+    include_package_data=True,
 
     classifiers  = [
         'Development Status :: 3 - Alpha',
