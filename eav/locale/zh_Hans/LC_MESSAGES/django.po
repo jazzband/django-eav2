@@ -1,0 +1,205 @@
+# Russian translation for django-eav2.
+# Copyright (C) 2021
+# This file is distributed under the same license as the django-eav2 package.
+# zengqiu <zengqiu@qq.com>, 2021.
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-23 11:05+0800\n"
+"PO-Revision-Date: 2021-06-23 11:05+0800\n"
+"Last-Translator: zengqiu <zengqiu@qq.com>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\fields.py:26
+msgid ""
+"Must be all lower case, start with a letter, and contain only letters, "
+"numbers, or underscores."
+msgstr ""
+"必须是小写字母，以字母开头，且只能包含字母、"
+"数字和下划线。"
+
+#: .\fields.py:63
+msgid "You cannot change the datatype of an attribute that is already in use."
+msgstr "你不能修改已在使用的属性的数据类型。"
+
+#: .\fields.py:68
+msgid "A Comma-Separated-Value field."
+msgstr "符号分隔值字段"
+
+#: .\forms.py:21
+msgid "Enter comma-separated-values. eg: one;two;three."
+msgstr "输入符号分隔值，例如：one;two;three。"
+
+#: .\forms.py:123
+#, python-format
+msgid "The %s could not be saved because the datadidn't validate."
+msgstr "数据 %s 未通过验证，无法保存。"
+
+#: .\models.py:74
+msgid "Value"
+msgstr "值"
+
+#: .\models.py:88 .\models.py:180
+msgid "Name"
+msgstr "名称"
+
+#: .\models.py:89
+msgid "Enum group"
+msgstr "枚举组"
+
+#: .\models.py:160
+msgid "Text"
+msgstr "文本"
+
+#: .\models.py:161
+msgid "Date"
+msgstr "日期"
+
+#: .\models.py:162
+msgid "Float"
+msgstr "浮点型"
+
+#: .\models.py:163
+msgid "Integer"
+msgstr "整形"
+
+#: .\models.py:164
+msgid "True / False"
+msgstr "真 / 假"
+
+#: .\models.py:165
+msgid "Django Object"
+msgstr "Django 对象"
+
+#: .\models.py:166
+msgid "Multiple Choice"
+msgstr "多选"
+
+#: .\models.py:167
+msgid "JSON Object"
+msgstr "JSON 对象"
+
+#: .\models.py:168
+msgid "Comma-Separated-Value"
+msgstr "符号分隔值"
+
+#: .\models.py:174
+msgid "Data Type"
+msgstr "数据类型"
+
+#: .\models.py:182
+msgid "User-friendly attribute name"
+msgstr "用户友好的属性名称"
+
+#: .\models.py:191
+msgid "Slug"
+msgstr "别名"
+
+#: .\models.py:195
+msgid "Short unique attribute label"
+msgstr "简短的唯一属性标记"
+
+#: .\models.py:204
+msgid "Required"
+msgstr "必需"
+
+#: .\models.py:216
+msgid "Choice Group"
+msgstr "选择组"
+
+#: .\models.py:223
+msgid "Description"
+msgstr "描述"
+
+#: .\models.py:227
+msgid "Short description"
+msgstr "简短描述"
+
+#: .\models.py:233
+msgid "Display order"
+msgstr "显示顺序"
+
+#: .\models.py:238 .\models.py:433
+msgid "Modified"
+msgstr "修改"
+
+#: .\models.py:243 .\models.py:432
+msgid "Created"
+msgstr "创建"
+
+#: .\models.py:289
+#, python-format
+msgid "%(val)s is not a valid choice for %(attr)s"
+msgstr "%(val)s 不是 %(attr)s 的正确选择"
+
+#: .\models.py:312
+msgid "You must set the choice group for multiple choice attributes"
+msgstr "你必须为多个选择属性设置选择组"
+
+#: .\models.py:317
+msgid "You can only assign a choice group to multiple choice attributes"
+msgstr "你可以将选择组仅分配给多个选择属性"
+
+#: .\models.py:439
+msgid "Attribute"
+msgstr "属性"
+
+#: .\models.py:521
+#, python-format
+msgid "%(obj)s has no EAV attribute named %(attr)s"
+msgstr "%(obj)s 没有名称为 %(attr)s 的 EAV 属性"
+
+#: .\models.py:591
+msgid "{} EAV field cannot be blank"
+msgstr "EAV 字段不能为空"
+
+#: .\models.py:598
+#, python-format
+msgid "%(attr)s EAV field %(err)s"
+msgstr "EAV 字段 %(attr)s %(err)s"
+
+#: .\validators.py:26
+msgid "Must be str or unicode"
+msgstr "必须是字符串或 Unicode 字符"
+
+#: .\validators.py:36
+msgid "Must be a float"
+msgstr "必须是浮点型"
+
+#: .\validators.py:46
+msgid "Must be an integer"
+msgstr "必须是整形"
+
+#: .\validators.py:55
+msgid "Must be a date or datetime"
+msgstr "必须是日期或日期与时间"
+
+#: .\validators.py:63
+msgid "Must be a boolean"
+msgstr "必须是布尔值"
+
+#: .\validators.py:72
+msgid "Must be a django model object instance"
+msgstr "必须是 Django 模型对象的实例"
+
+#: .\validators.py:75
+msgid "Model has not been saved yet"
+msgstr "模型尚未保存"
+
+#: .\validators.py:86
+msgid "EnumValue has not been saved yet"
+msgstr "EnumValue 尚未保存"
+
+#: .\validators.py:97 .\validators.py:99
+msgid "Must be a JSON Serializable object"
+msgstr "必须是一个 JSON 序列号对象"
+
+#: .\validators.py:109
+msgid "Must be Comma-Separated-Value."
+msgstr "必须是以符号分隔的值。"
