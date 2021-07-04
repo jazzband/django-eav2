@@ -2,7 +2,7 @@ from django.test import TestCase
 
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
-from main_app.models import Patient
+from test_project.models import Patient
 
 
 class MiscModels(TestCase):

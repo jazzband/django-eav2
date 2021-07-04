@@ -10,7 +10,7 @@ import eav
 from eav.admin import *
 from eav.forms import BaseDynamicEntityForm
 from eav.models import Attribute
-from main_app.models import ExampleModel, M2MModel, Patient
+from test_project.models import ExampleModel, M2MModel, Patient
 
 
 class MockRequest(RequestFactory):

@@ -5,7 +5,7 @@ from django.utils import timezone
 
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
-from main_app.models import Patient
+from test_project.models import Patient
 
 
 class DataValidation(TestCase):

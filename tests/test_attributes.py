@@ -5,7 +5,7 @@ import eav
 from eav.exceptions import IllegalAssignmentException
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
-from main_app.models import Encounter, Patient, RegisterTestModel
+from test_project.models import Encounter, Patient, RegisterTestModel
 
 
 class Attributes(TestCase):

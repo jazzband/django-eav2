@@ -6,7 +6,7 @@ from django.test import TestCase
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 from eav.registry import EavConfig
-from main_app.models import Encounter, Patient
+from test_project.models import Encounter, Patient
 
 
 class Queries(TestCase):
