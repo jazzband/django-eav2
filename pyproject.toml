@@ -8,15 +8,15 @@ style = "https://raw.githubusercontent.com/wemake-services/wemake-python-stylegu
 
 
 [tool.black]
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py36', 'py37', 'py38', 'py39']
 skip-string-normalization = true
 include = '\.pyi?$'
 
 
 [tool.poetry]
 name = "eav"
-description = "This is a Python package to learn Github actions!"
-version = "0.15.0"
+description = "Entity-Attribute-Value storage for Django"
+version = "0.14.1"
 license = "GNU Lesser General Public License (LGPL), Version 3"
 
 authors = [
@@ -46,8 +46,8 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Framework :: Django",
   "Framework :: Django :: 2.2",
-  "Framework :: Django :: 3.0",
   "Framework :: Django :: 3.1",
+  "Framework :: Django :: 3.2",
 ]
 
 [tool.poetry.dependencies]
