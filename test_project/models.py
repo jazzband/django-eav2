@@ -1,11 +1,24 @@
 from django.db import models
+
 from eav.decorators import register_eav
+from eav.models import EAVModelMeta
 
 
-class Patient(models.Model):
+class TestBase(models.Model):
+    """Base class for test models."""
+
+    class Meta(object):
+        """Define common options."""
+
+        app_label = 'test_project'
+        abstract = True
+
+
+class Patient(TestBase):
     name = models.CharField(max_length=12)
     example = models.ForeignKey(
-        'ExampleModel', null=True, blank=True, on_delete=models.PROTECT)
+        'ExampleModel', null=True, blank=True, on_delete=models.PROTECT
+    )
 
     def __str__(self):
         return self.name
@@ -14,7 +27,7 @@ class Patient(models.Model):
         return self.name
 
 
-class Encounter(models.Model):
+class Encounter(TestBase):
     num = models.PositiveSmallIntegerField()
     patient = models.ForeignKey(Patient, on_delete=models.PROTECT)
 
@@ -26,7 +39,7 @@ class Encounter(models.Model):
 
 
 @register_eav()
-class ExampleModel(models.Model):
+class ExampleModel(TestBase):
     name = models.CharField(max_length=12)
 
     def __unicode__(self):
@@ -34,9 +47,23 @@ class ExampleModel(models.Model):
 
 
 @register_eav()
-class M2MModel(models.Model):
+class M2MModel(TestBase):
     name = models.CharField(max_length=12)
     models = models.ManyToManyField(ExampleModel)
 
     def __unicode__(self):
+        return self.name
+
+
+class ExampleMetaclassModel(TestBase, metaclass=EAVModelMeta):
+    name = models.CharField(max_length=12)
+
+    def __str__(self):
+        return self.name
+
+
+class RegisterTestModel(TestBase, metaclass=EAVModelMeta):
+    name = models.CharField(max_length=12)
+
+    def __str__(self):
         return self.name

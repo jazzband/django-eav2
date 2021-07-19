@@ -1,0 +1,79 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.nitpick]
+style = "https://raw.githubusercontent.com/wemake-services/wemake-python-styleguide/master/styles/nitpick-style-wemake.toml"
+
+
+[tool.black]
+target-version = ['py36', 'py37', 'py38', 'py39']
+skip-string-normalization = true
+include = '\.pyi?$'
+
+
+[tool.poetry]
+name = "eav"
+description = "Entity-Attribute-Value storage for Django"
+version = "0.14.1"
+license = "GNU Lesser General Public License (LGPL), Version 3"
+
+authors = [
+  "Mauro Lizaur <mauro@sdf.org>",
+]
+
+readme = "README.md"
+
+repository = "https://github.com/jazzband/django-eav2"
+
+keywords = [
+  "django",
+  "django-eav2",
+  "database",
+  "eav",
+  "sql",
+]
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Web Environment",
+  "Framework :: Django",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
+  "Programming Language :: Python",
+  "Topic :: Database",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Framework :: Django",
+  "Framework :: Django :: 2.2",
+  "Framework :: Django :: 3.1",
+  "Framework :: Django :: 3.2",
+]
+
+[tool.poetry.dependencies]
+python = "^3.6.2"
+
+[tool.poetry.dev-dependencies]
+django = "^3.2"
+
+mypy = "^0.902"
+
+wemake-python-styleguide = "^0.15"
+flake8-pytest-style = "^1.4"
+nitpick = "^0.26"
+
+safety = "^1.10"
+
+pytest = "^6.2"
+pytest-cov = "^2.12"
+pytest-randomly = "^3.0"
+
+sphinx = "^4.0"
+sphinx-autodoc-typehints = "^1.12"
+doc8 = "^0.8"
+m2r2 = "^0.2"
+tomlkit = "^0.7"
+pytest-pythonpath = "^0.7.3"
+pytest-django = "^4.4.0"
+tox-poetry-installer = "^0.8.1"
+black = "^21.6b0"

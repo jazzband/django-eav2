@@ -1,15 +1,13 @@
 from django.test import TestCase
 
-import sys
 import eav
 from eav.registry import EavConfig
-
-from .models import Encounter, ExampleModel, Patient
-
-if sys.version_info[0] > 2:
-    from .metaclass_models3 import ExampleMetaclassModel
-else:
-    from .metaclass_models2 import ExampleMetaclassModel
+from test_project.models import (
+    Encounter,
+    ExampleMetaclassModel,
+    ExampleModel,
+    Patient,
+)
 
 
 class RegistryTests(TestCase):
@@ -81,9 +79,13 @@ class RegistryTests(TestCase):
         self.assertFalse(ExampleModel.objects.__class__.__name__ == 'EntityManager')
 
     def test_unregistering_via_metaclass(self):
-        self.assertTrue(ExampleMetaclassModel.objects.__class__.__name__ == 'EntityManager')
+        self.assertTrue(
+            ExampleMetaclassModel.objects.__class__.__name__ == 'EntityManager'
+        )
         eav.unregister(ExampleMetaclassModel)
-        self.assertFalse(ExampleMetaclassModel.objects.__class__.__name__ == 'EntityManager')
+        self.assertFalse(
+            ExampleMetaclassModel.objects.__class__.__name__ == 'EntityManager'
+        )
 
     def test_unregistering_unregistered_model_proceeds_silently(self):
         eav.unregister(Patient)
@@ -94,6 +96,7 @@ class RegistryTests(TestCase):
 
     def test_doesnt_register_nonmodel(self):
         with self.assertRaises(ValueError):
+
             @eav.decorators.register_eav()
             class Foo(object):
                 pass

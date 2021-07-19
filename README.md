@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/lvm/django-eav2.svg?branch=master)](https://travis-ci.org/lvm/django-eav2)
 ![Python Version](https://img.shields.io/badge/Python-3.6,%203.7,%203.8,%203.9-blue.svg)
-![Django Version](https://img.shields.io/badge/Django-3.1,%203.2-green.svg)
+![Django Version](https://img.shields.io/badge/Django-2.2,%20,3.1,%203.2-green.svg)
 [![Jazzband](https://jazzband.co/static/img/badge.svg)](https://jazzband.co/)
 
 ## Django EAV 2 - Entity-Attribute-Value storage for Django
@@ -14,16 +14,16 @@ You can find documentation <a href="https://django-eav2.rtfd.io">here</a>.
 
 Data in EAV is stored as a 3-tuple (typically corresponding to three distinct tables):
 
-* The entity: the item being described, e.g. `Person(name='Mike')`.
-* The attribute: often a foreign key into a table of attributes, e.g. `Attribute(slug='height', datatype=FLOAT)`.
-* The value of the attribute, with links both an attribute and an entity, e.g. `Value(value_float=15.5, person=mike, attr=height)`.
+- The entity: the item being described, e.g. `Person(name='Mike')`.
+- The attribute: often a foreign key into a table of attributes, e.g. `Attribute(slug='height', datatype=FLOAT)`.
+- The value of the attribute, with links both an attribute and an entity, e.g. `Value(value_float=15.5, person=mike, attr=height)`.
 
 Entities in **django-eav2** are your typical Django model instances. Attributes (name and type) are stored in their own table, which makes it easy to manipulate the list of available attributes in the system. Values are an intermediate table between attributes and entities, each instance holding a single value.
 This implementation also makes it easy to edit attributes in Django Admin and form instances.
 
 You will find detailed description of the EAV here:
 
-* [Wikipedia - Entity–attribute–value model](https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model)
+- [Wikipedia - Entity–attribute–value model](https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model)
 
 ## EAV - The Good, the Bad or the Ugly?
 
@@ -35,24 +35,24 @@ Originally, EAV was introduced to workaround a problem which cannot be easily so
 
 Typical application of the EAV model sets to solve the problem of sparse data with a large number of applicable attributes, but only a small fraction that applies to a given entity that may not be known beforehand. Consider the classic example:
 
- > A problem that data modelers commonly encounter in the biomedical domain is organizing and storing highly diverse and heterogeneous data. For example, a single patient may have thousands of applicable descriptive parameters, all of which need to be easily accessible in an electronic patient record system. These requirements pose significant modeling and implementation challenges. [1]
+> A problem that data modelers commonly encounter in the biomedical domain is organizing and storing highly diverse and heterogeneous data. For example, a single patient may have thousands of applicable descriptive parameters, all of which need to be easily accessible in an electronic patient record system. These requirements pose significant modeling and implementation challenges. [1]
 
- And:
+And:
 
- > [...] what do you do when you have customers that demand real-time, on-demand addition of attributes that they want to store?  In one of the systems I manage, our customers wanted to do exactly this.  Since we run a SaaS (software as a service) application, we have many customers across several different industries, who in turn want to use our system to store different types of information about *their* customers.  A salon chain might want to record facts such as 'hair color,' 'hair type,' and 'haircut frequency'; while an investment company might want to record facts such as 'portfolio name,' 'last portfolio adjustment date,' and 'current portfolio balance.' [2]
+> [...] what do you do when you have customers that demand real-time, on-demand addition of attributes that they want to store? In one of the systems I manage, our customers wanted to do exactly this. Since we run a SaaS (software as a service) application, we have many customers across several different industries, who in turn want to use our system to store different types of information about _their_ customers. A salon chain might want to record facts such as 'hair color,' 'hair type,' and 'haircut frequency'; while an investment company might want to record facts such as 'portfolio name,' 'last portfolio adjustment date,' and 'current portfolio balance.' [2]
 
- In both of these problems we have to deal with sparse and heterogeneous properties that apply only to potentially different subsets of particular entities. Applying EAV to a sub-schema of the database allows to model the desired behaviour. Traditional solution would involves wide tables with many columns storing NULL values for attributes that don't apply to an entity.
+In both of these problems we have to deal with sparse and heterogeneous properties that apply only to potentially different subsets of particular entities. Applying EAV to a sub-schema of the database allows to model the desired behaviour. Traditional solution would involves wide tables with many columns storing NULL values for attributes that don't apply to an entity.
 
 Very common use case for EAV are custom product attributes in E-commerce implementations, such as Magento. [3]
 
- As a rule of thumb, EAV can be used when:
- 
- * Model attributes are to be added and removed by end users (or are unknowable in some different way). EAV supports these without ALTER TABLE statements and allows the attributes to be strongly typed and easily searchable.
- * There will be many attributes and values are sparse, in contrast to having tables with mostly-null columns.
- * The data is highly dynamic/volatile/vulnerable to change. This problem is present in the second example given above. Other example would be rapidly evolving system, such as a prototype with constantly changing requirements.
- * We want to store meta-data or supporting information, e.g. to customize system's behavior.
- * Numerous classes of data need to be represented, each class has a limited number of attributes, but the number of instances of each class is very small.
-* We want to minimise programmer's input when changing the data model.
+As a rule of thumb, EAV can be used when:
+
+- Model attributes are to be added and removed by end users (or are unknowable in some different way). EAV supports these without ALTER TABLE statements and allows the attributes to be strongly typed and easily searchable.
+- There will be many attributes and values are sparse, in contrast to having tables with mostly-null columns.
+- The data is highly dynamic/volatile/vulnerable to change. This problem is present in the second example given above. Other example would be rapidly evolving system, such as a prototype with constantly changing requirements.
+- We want to store meta-data or supporting information, e.g. to customize system's behavior.
+- Numerous classes of data need to be represented, each class has a limited number of attributes, but the number of instances of each class is very small.
+- We want to minimise programmer's input when changing the data model.
 
 For more throughout discussion on the appriopriate use-cases see:
 
@@ -85,6 +85,7 @@ In some use-cases, JSONB (binary JSON data) datatype (Postgres 9.4+ and analogou
 ## Installation
 
 You can install **django-eav2** from three sources:
+
 ```bash
 # From PyPI via pip
 pip install django-eav2

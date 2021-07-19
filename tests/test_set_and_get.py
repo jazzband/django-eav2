@@ -2,8 +2,7 @@ from django.test import TestCase
 
 import eav
 from eav.registry import EavConfig
-
-from .models import Patient, Encounter
+from test_project.models import Encounter, Patient
 
 
 class RegistryTests(TestCase):
@@ -19,8 +18,8 @@ class RegistryTests(TestCase):
             eav_attr = 'eav_field'
             generic_relation_attr = 'encounter_eav_values'
             generic_relation_related_name = 'encounters'
-        eav.register(Encounter, EncounterEav)
 
+        eav.register(Encounter, EncounterEav)
 
     def test_registering_with_defaults(self):
         eav.register(Patient)
@@ -28,10 +27,8 @@ class RegistryTests(TestCase):
         self.assertEqual(Patient._eav_config_cls.manager_attr, 'objects')
         self.assertFalse(Patient._eav_config_cls.manager_only)
         self.assertEqual(Patient._eav_config_cls.eav_attr, 'eav')
-        self.assertEqual(Patient._eav_config_cls.generic_relation_attr,
-                         'eav_values')
-        self.assertEqual(Patient._eav_config_cls.generic_relation_related_name,
-                         None)
+        self.assertEqual(Patient._eav_config_cls.generic_relation_attr, 'eav_values')
+        self.assertEqual(Patient._eav_config_cls.generic_relation_related_name, None)
         eav.unregister(Patient)
 
     def test_registering_overriding_defaults(self):
