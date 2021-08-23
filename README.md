@@ -138,10 +138,9 @@ Supplier.objects.filter(eav__city='London')
 # = <EavQuerySet [<Supplier: Supplier object (1)>]>
 ```
 
-### What next? Check out <a href="https://django-eav2.readthedocs.io/en/improvement-docs/">documentation</a>.
+**What next? Check out the <a href="https://django-eav2.readthedocs.io/en/latest/#documentation">documentation</a>.**
 
-<hr>
-<br>
+---
 
 ### References
 
