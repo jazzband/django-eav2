@@ -23,6 +23,10 @@ class CSVFormField(forms.Field):
     widget = CSVWidget
     default_separator = ";"
 
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('max_length', None)
+        super().__init__(*args, **kwargs)
+
     def to_python(self, value):
         if not value:
             return []
