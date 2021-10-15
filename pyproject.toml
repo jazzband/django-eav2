@@ -18,6 +18,10 @@ name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django"
 version = "0.14.1"
 license = "GNU Lesser General Public License (LGPL), Version 3"
+packages = [
+  { include = "eav" }
+]
+
 
 authors = [
   "Mauro Lizaur <mauro@sdf.org>",
