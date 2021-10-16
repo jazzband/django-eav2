@@ -14,35 +14,31 @@ from copy import copy
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from django.core.serializers.json import DjangoJSONEncoder
-if hasattr(models, "JSONField"):
-    JSONField = models.JSONField
-else:
-   try:
-       from django.contrib.postgres.fields import JSONField
-   except:
-       JSONField = models.TextField
+try:
+    from django.db.models import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 
-
+from . import register
+from .exceptions import IllegalAssignmentException
+from .fields import CSVField, EavDatatypeField, EavSlugField
 from .validators import (
-    validate_text,
+    validate_bool,
+    validate_csv,
+    validate_date,
+    validate_enum,
     validate_float,
     validate_int,
-    validate_date,
-    validate_bool,
-    validate_object,
-    validate_enum,
     validate_json,
-    validate_csv,
+    validate_object,
+    validate_text,
 )
-from .exceptions import IllegalAssignmentException
-from .fields import EavDatatypeField, EavSlugField, CSVField
-from . import register
 
 
 class EnumValue(models.Model):

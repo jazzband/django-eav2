@@ -29,7 +29,7 @@ python-versions = "*"
 name = "asgiref"
 version = "3.3.4"
 description = "ASGI specs, helper code, and adapters"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -270,7 +270,7 @@ python-versions = "*"
 name = "django"
 version = "3.2.4"
 description = "A high-level Python Web framework that encourages rapid development and clean, pragmatic design."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -282,6 +282,17 @@ sqlparse = ">=0.2.2"
 [package.extras]
 argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
+
+[[package]]
+name = "django-jsonfield-backport"
+version = "1.0.4"
+description = "Backport of the cross-DB JSONField model and form fields from Django 3.1."
+category = "main"
+optional = false
+python-versions = ">=3.5"
+
+[package.dependencies]
+Django = ">=2.2"
 
 [[package]]
 name = "doc8"
@@ -1042,7 +1053,7 @@ unidecode = ["Unidecode (>=1.1.1)"]
 name = "pytz"
 version = "2021.1"
 description = "World timezone definitions, modern and historical"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1281,7 +1292,7 @@ test = ["pytest"]
 name = "sqlparse"
 version = "0.4.1"
 description = "A non-validating SQL parser."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.5"
 
@@ -1384,7 +1395,7 @@ python-versions = "*"
 name = "typing-extensions"
 version = "3.10.0.0"
 description = "Backported and Experimental Type Hints for Python 3.5+"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1477,7 +1488,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "3ef785cae2c99853dd2e720fa770df1b666b82697171e065db74a3e3fde82c0b"
+content-hash = "7673dc291b8e8baa258cefa25cc7770d820d3625d378f1b50d40f5dc80232841"
 
 [metadata.files]
 aiocontextvars = [
@@ -1629,6 +1640,10 @@ distlib = [
 django = [
     {file = "Django-3.2.4-py3-none-any.whl", hash = "sha256:ea735cbbbb3b2fba6d4da4784a0043d84c67c92f1fdf15ad6db69900e792c10f"},
     {file = "Django-3.2.4.tar.gz", hash = "sha256:66c9d8db8cc6fe938a28b7887c1596e42d522e27618562517cc8929eb7e7f296"},
+]
+django-jsonfield-backport = [
+    {file = "django-jsonfield-backport-1.0.4.tar.gz", hash = "sha256:73998c6aa2e0ab1a4f9da4ce62f01576e019147678c881401b02846712069786"},
+    {file = "django_jsonfield_backport-1.0.4-py3-none-any.whl", hash = "sha256:ccb0c47bad0dad400940c9897baa6de956b487299e351821a7a59cc18e7b0f69"},
 ]
 doc8 = [
     {file = "doc8-0.8.1-py2.py3-none-any.whl", hash = "sha256:4d58a5c8c56cedd2b2c9d6e3153be5d956cf72f6051128f0f2255c66227df721"},

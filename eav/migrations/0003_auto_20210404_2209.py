@@ -5,8 +5,8 @@ import eav.fields
 import django.core.serializers.json
 try:
     from django.db.models import JSONField
-except:
-    from django.contrib.postgres.fields import JSONField
+except ImportError:
+    from django_jsonfield_backport.models import JSONField
 
 
 class Migration(migrations.Migration):
