@@ -51,7 +51,9 @@ def validate_date(value):
     Raises ``ValidationError`` unless *value* is an instance of ``datetime``
     or ``date``
     """
-    if not isinstance(value, datetime.datetime) and not isinstance(value, datetime.date):
+    if not isinstance(value, datetime.datetime) and not isinstance(
+        value, datetime.date
+    ):
         raise ValidationError(_(u"Must be a date or datetime"))
 
 

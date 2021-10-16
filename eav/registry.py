@@ -26,6 +26,7 @@ class EavConfig(object):
        GenericRelation from Entity to Value. None by default. Therefore,
        if not overridden, it is not possible to query Values by Entities.
     """
+
     manager_attr = 'objects'
     manager_only = False
     eav_attr = 'eav'
@@ -60,8 +61,7 @@ class Registry(object):
             return
 
         if config_cls is EavConfig or config_cls is None:
-            config_cls = type("%sConfig" % model_cls.__name__,
-                              (EavConfig,), {})
+            config_cls = type("%sConfig" % model_cls.__name__, (EavConfig,), {})
 
         # set _eav_config_cls on the model so we can access it there
         setattr(model_cls, '_eav_config_cls', config_cls)
@@ -125,9 +125,9 @@ class Registry(object):
         delattr(self.model_cls, self.config_cls.manager_attr)
 
         if hasattr(self.config_cls, 'old_mgr'):
-            self.config_cls.old_mgr \
-                .contribute_to_class(self.model_cls,
-                                     self.config_cls.manager_attr)
+            self.config_cls.old_mgr.contribute_to_class(
+                self.model_cls, self.config_cls.manager_attr
+            )
 
     def _attach_signals(self):
         """
@@ -136,31 +136,33 @@ class Registry(object):
         able to prepare and clean-up before and after creation /
         update of the user's model class instance.
         """
-        post_init.connect(Registry.attach_eav_attr, sender = self.model_cls)
-        pre_save.connect(Entity.pre_save_handler, sender = self.model_cls)
-        post_save.connect(Entity.post_save_handler, sender = self.model_cls)
+        post_init.connect(Registry.attach_eav_attr, sender=self.model_cls)
+        pre_save.connect(Entity.pre_save_handler, sender=self.model_cls)
+        post_save.connect(Entity.post_save_handler, sender=self.model_cls)
 
     def _detach_signals(self):
         """
         Detach all signals for eav.
         """
-        post_init.disconnect(Registry.attach_eav_attr, sender = self.model_cls)
-        pre_save.disconnect(Entity.pre_save_handler, sender = self.model_cls)
-        post_save.disconnect(Entity.post_save_handler, sender = self.model_cls)
+        post_init.disconnect(Registry.attach_eav_attr, sender=self.model_cls)
+        pre_save.disconnect(Entity.pre_save_handler, sender=self.model_cls)
+        post_save.disconnect(Entity.post_save_handler, sender=self.model_cls)
 
     def _attach_generic_relation(self):
         """
         Set up the generic relation for the entity
         """
-        rel_name = self.config_cls.generic_relation_related_name or \
-                   self.model_cls.__name__
+        rel_name = (
+            self.config_cls.generic_relation_related_name or self.model_cls.__name__
+        )
 
         gr_name = self.config_cls.generic_relation_attr.lower()
-        generic_relation = \
-                     generic.GenericRelation(Value,
-                                             object_id_field='entity_id',
-                                             content_type_field='entity_ct',
-                                             related_query_name=rel_name)
+        generic_relation = generic.GenericRelation(
+            Value,
+            object_id_field='entity_id',
+            content_type_field='entity_ct',
+            related_query_name=rel_name,
+        )
         generic_relation.contribute_to_class(self.model_cls, gr_name)
 
     def _detach_generic_relation(self):

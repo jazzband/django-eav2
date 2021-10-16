@@ -3,6 +3,7 @@
 from django.db import migrations
 import eav.fields
 import django.core.serializers.json
+
 try:
     from django.db.models import JSONField
 except ImportError:
@@ -19,11 +20,29 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='value',
             name='value_json',
-            field=JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder, null=True),
+            field=JSONField(
+                blank=True,
+                default=dict,
+                encoder=django.core.serializers.json.DjangoJSONEncoder,
+                null=True,
+            ),
         ),
         migrations.AlterField(
             model_name='attribute',
             name='datatype',
-            field=eav.fields.EavDatatypeField(choices=[('text', 'Text'), ('date', 'Date'), ('float', 'Float'), ('int', 'Integer'), ('bool', 'True / False'), ('object', 'Django Object'), ('enum', 'Multiple Choice'), ('json', 'JSON Object')], max_length=6, verbose_name='Data Type'),
+            field=eav.fields.EavDatatypeField(
+                choices=[
+                    ('text', 'Text'),
+                    ('date', 'Date'),
+                    ('float', 'Float'),
+                    ('int', 'Integer'),
+                    ('bool', 'True / False'),
+                    ('object', 'Django Object'),
+                    ('enum', 'Multiple Choice'),
+                    ('json', 'JSON Object'),
+                ],
+                max_length=6,
+                verbose_name='Data Type',
+            ),
         ),
     ]

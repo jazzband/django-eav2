@@ -4,8 +4,15 @@ from copy import deepcopy
 
 from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
-from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
-                          FloatField, IntegerField, ModelForm)
+from django.forms import (
+    BooleanField,
+    CharField,
+    ChoiceField,
+    DateTimeField,
+    FloatField,
+    IntegerField,
+    ModelForm,
+)
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -64,15 +71,16 @@ class BaseDynamicEntityForm(ModelForm):
     csv    CSVField
     =====  =============
     """
+
     FIELD_CLASSES = {
-        'text':  CharField,
+        'text': CharField,
         'float': FloatField,
-        'int':   IntegerField,
-        'date':  DateTimeField,
-        'bool':  BooleanField,
-        'enum':  ChoiceField,
-        'json':  JSONField,
-        'csv':   CSVFormField,
+        'int': IntegerField,
+        'date': DateTimeField,
+        'bool': BooleanField,
+        'enum': ChoiceField,
+        'json': JSONField,
+        'csv': CSVFormField,
     }
 
     def __init__(self, data=None, *args, **kwargs):
@@ -123,10 +131,12 @@ class BaseDynamicEntityForm(ModelForm):
         ``self.instance`` and related EAV attributes. Returns ``instance``.
         """
         if self.errors:
-            raise ValueError(_(
-                'The %s could not be saved because the data'
-                'didn\'t validate.' % self.instance._meta.object_name
-            ))
+            raise ValueError(
+                _(
+                    'The %s could not be saved because the data'
+                    'didn\'t validate.' % self.instance._meta.object_name
+                )
+            )
 
         # Create entity instance, don't save yet.
         instance = super(BaseDynamicEntityForm, self).save(commit=False)

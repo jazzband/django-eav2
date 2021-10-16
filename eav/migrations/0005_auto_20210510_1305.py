@@ -19,6 +19,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='attribute',
             name='datatype',
-            field=eav.fields.EavDatatypeField(choices=[('text', 'Text'), ('date', 'Date'), ('float', 'Float'), ('int', 'Integer'), ('bool', 'True / False'), ('object', 'Django Object'), ('enum', 'Multiple Choice'), ('json', 'JSON Object'), ('csv', 'Comma-Separated-Value')], max_length=6, verbose_name='Data Type'),
+            field=eav.fields.EavDatatypeField(
+                choices=[
+                    ('text', 'Text'),
+                    ('date', 'Date'),
+                    ('float', 'Float'),
+                    ('int', 'Integer'),
+                    ('bool', 'True / False'),
+                    ('object', 'Django Object'),
+                    ('enum', 'Multiple Choice'),
+                    ('json', 'JSON Object'),
+                    ('csv', 'Comma-Separated-Value'),
+                ],
+                max_length=6,
+                verbose_name='Data Type',
+            ),
         ),
     ]
