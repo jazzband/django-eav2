@@ -3,8 +3,8 @@
 from django.contrib.contenttypes import fields as generic
 from django.db.models.signals import post_init, post_save, pre_save
 
-from .managers import EntityManager
-from .models import Attribute, Entity, Value
+from eav.managers import EntityManager
+from eav.models import Attribute, Entity, Value
 
 
 class EavConfig(object):

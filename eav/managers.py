@@ -4,7 +4,7 @@ This module contains the custom manager used by entities registered with eav.
 
 from django.db import models
 
-from .queryset import EavQuerySet
+from eav.queryset import EavQuerySet
 
 
 class EntityManager(models.Manager):

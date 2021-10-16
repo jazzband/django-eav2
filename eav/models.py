@@ -25,10 +25,10 @@ try:
 except ImportError:
     from django_jsonfield_backport.models import JSONField
 
-from . import register
-from .exceptions import IllegalAssignmentException
-from .fields import CSVField, EavDatatypeField, EavSlugField
-from .validators import (
+from eav import register
+from eav.exceptions import IllegalAssignmentException
+from eav.fields import CSVField, EavDatatypeField, EavSlugField
+from eav.validators import (
     validate_bool,
     validate_csv,
     validate_date,

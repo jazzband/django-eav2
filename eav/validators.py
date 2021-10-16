@@ -82,7 +82,7 @@ def validate_enum(value):
     Raises ``ValidationError`` unless *value* is a saved
     :class:`~eav.models.EnumValue` model instance.
     """
-    from .models import EnumValue
+    from eav.models import EnumValue
 
     if isinstance(value, EnumValue) and not value.pk:
         raise ValidationError(_(u"EnumValue has not been saved yet"))

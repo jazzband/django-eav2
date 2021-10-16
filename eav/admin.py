@@ -5,7 +5,7 @@ from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
-from .models import Attribute, EnumGroup, EnumValue, Value
+from eav.models import Attribute, EnumGroup, EnumValue, Value
 
 
 class BaseEntityAdmin(ModelAdmin):

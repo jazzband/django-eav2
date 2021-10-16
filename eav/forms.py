@@ -21,7 +21,7 @@ try:
 except:
     JSONField = CharField
 
-from .widgets import CSVWidget
+from eav.widgets import CSVWidget
 
 
 class CSVFormField(forms.Field):
