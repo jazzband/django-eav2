@@ -1,6 +1,6 @@
-from django.forms.widgets import Textarea
-from django.core.exceptions import ValidationError
 from django.core import validators
+from django.core.exceptions import ValidationError
+from django.forms.widgets import Textarea
 
 EMPTY_VALUES = validators.EMPTY_VALUES + ('[]',)
 

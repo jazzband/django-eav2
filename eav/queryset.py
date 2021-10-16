@@ -19,17 +19,20 @@ Q-expressions need to be rewritten for two reasons:
 2. To ensure that Q-expression tree is compiled to valid SQL.
    For details see: :func:`rewrite_q_expr`.
 """
-from itertools import count
 from functools import wraps
+from itertools import count
 
-from django.core.exceptions import FieldDoesNotExist
-from django.core.exceptions import FieldError, ObjectDoesNotExist
+from django.core.exceptions import (
+    FieldDoesNotExist,
+    FieldError,
+    ObjectDoesNotExist,
+)
 from django.db import models
 from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError
 
-from .models import Attribute, Value, EnumValue
+from .models import Attribute, EnumValue, Value
 
 
 def is_eav_and_leaf(expr, gr_name):

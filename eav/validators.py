@@ -10,8 +10,8 @@ These validators are called by the
 :class:`~eav.models.Attribute` model.
 """
 
-import json
 import datetime
+import json
 
 from django.core.exceptions import ValidationError
 from django.db import models
