@@ -1,4 +1,9 @@
-from typing import Final, final
+import sys
+
+if sys.version_info >= (3, 8):
+    from typing import Final, final
+else:
+    from typing_extensions import Final, final
 
 from django.db import models
 
