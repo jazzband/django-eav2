@@ -13,7 +13,7 @@ repos:
   rev: v0.4.0
   hooks:
   - id: check-untracked-migrations
-    additional_dependencies: ['django@3.2']
+    additional_dependencies: [django]
   - id: check-absent-migrations
 
 - repo: https://github.com/psf/black
