@@ -45,3 +45,8 @@ jobs:
           poetry run pytest
           poetry check
           poetry run pip check
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          file: ./coverage.xml
