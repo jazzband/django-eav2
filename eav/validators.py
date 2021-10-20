@@ -10,8 +10,8 @@ These validators are called by the
 :class:`~eav.models.Attribute` model.
 """
 
-import json
 import datetime
+import json
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -51,7 +51,9 @@ def validate_date(value):
     Raises ``ValidationError`` unless *value* is an instance of ``datetime``
     or ``date``
     """
-    if not isinstance(value, datetime.datetime) and not isinstance(value, datetime.date):
+    if not isinstance(value, datetime.datetime) and not isinstance(
+        value, datetime.date
+    ):
         raise ValidationError(_(u"Must be a date or datetime"))
 
 
@@ -80,7 +82,7 @@ def validate_enum(value):
     Raises ``ValidationError`` unless *value* is a saved
     :class:`~eav.models.EnumValue` model instance.
     """
-    from .models import EnumValue
+    from eav.models import EnumValue
 
     if isinstance(value, EnumValue) and not value.pk:
         raise ValidationError(_(u"EnumValue has not been saved yet"))

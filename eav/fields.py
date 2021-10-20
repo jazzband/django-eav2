@@ -1,10 +1,11 @@
 import re
 
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .forms import CSVFormField
+from eav.forms import CSVFormField
+
 
 class EavSlugField(models.SlugField):
     """
@@ -22,10 +23,12 @@ class EavSlugField(models.SlugField):
         slug_regex = r'[a-z][a-z0-9_]*'
 
         if not re.match(slug_regex, value):
-            raise ValidationError(_(
-                'Must be all lower case, start with a letter, and contain '
-                'only letters, numbers, or underscores.'
-            ))
+            raise ValidationError(
+                _(
+                    'Must be all lower case, start with a letter, and contain '
+                    'only letters, numbers, or underscores.'
+                )
+            )
 
     @staticmethod
     def create_slug_from_name(name):
@@ -59,12 +62,14 @@ class EavDatatypeField(models.CharField):
             return
 
         if instance.value_set.count():
-            raise ValidationError(_(
-                'You cannot change the datatype of an attribute that is already in use.'
-            ))
+            raise ValidationError(
+                _(
+                    'You cannot change the datatype of an attribute that is already in use.'
+                )
+            )
 
 
-class CSVField(models.TextField): # (models.Field):
+class CSVField(models.TextField):  # (models.Field):
     description = _("A Comma-Separated-Value field.")
     default_separator = ";"
 

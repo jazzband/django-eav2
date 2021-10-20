@@ -5,7 +5,7 @@ from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
-from .models import Attribute, EnumGroup, EnumValue, Value
+from eav.models import Attribute, EnumGroup, EnumValue, Value
 
 
 class BaseEntityAdmin(ModelAdmin):
@@ -36,6 +36,7 @@ class BaseEntityInlineFormSet(BaseInlineFormSet):
     """
     An inline formset that correctly initializes EAV forms.
     """
+
     def add_fields(self, form, index):
         if self.instance:
             setattr(form.instance, self.fk.name, self.instance)
@@ -59,6 +60,7 @@ class BaseEntityInline(InlineModelAdmin):
         with EAV-Django. You can copy or symlink the ``admin`` directory to
         your templates search path (see Django documentation).
     """
+
     formset = BaseEntityInlineFormSet
 
     def get_fieldsets(self, request, obj=None):

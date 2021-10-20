@@ -19,17 +19,15 @@ Q-expressions need to be rewritten for two reasons:
 2. To ensure that Q-expression tree is compiled to valid SQL.
    For details see: :func:`rewrite_q_expr`.
 """
-from itertools import count
 from functools import wraps
+from itertools import count
 
-from django.core.exceptions import FieldDoesNotExist
-from django.core.exceptions import FieldError, ObjectDoesNotExist
-from django.db import models
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError
 
-from .models import Attribute, Value, EnumValue
+from eav.models import Attribute, EnumValue, Value
 
 
 def is_eav_and_leaf(expr, gr_name):
@@ -44,56 +42,56 @@ def is_eav_and_leaf(expr, gr_name):
         bool
     """
     return (
-        getattr(expr, 'connector', None) == 'AND' and
-        len(expr.children) == 1 and
-        expr.children[0][0] in ['pk__in', '{}__in'.format(gr_name)]
+        getattr(expr, 'connector', None) == 'AND'
+        and len(expr.children) == 1
+        and expr.children[0][0] in ['pk__in', '{}__in'.format(gr_name)]
     )
 
 
 def rewrite_q_expr(model_cls, expr):
     """
-    Rewrites Q-expression to safe form, in order to ensure that
-    generated SQL is valid.
+        Rewrites Q-expression to safe form, in order to ensure that
+        generated SQL is valid.
 
-IGNORE:
-    Suppose we have the following Q-expression:
+    IGNORE:
+        Suppose we have the following Q-expression:
 
-    └── OR
-         ├── AND
-         │    └── eav_values__in [1, 2, 3]
-         └── AND (1)
-              ├── AND
-              │    └── eav_values__in [4, 5]
-              └── AND
-                   └── eav_values__in [6, 7, 8]
-IGNORE
+        └── OR
+             ├── AND
+             │    └── eav_values__in [1, 2, 3]
+             └── AND (1)
+                  ├── AND
+                  │    └── eav_values__in [4, 5]
+                  └── AND
+                       └── eav_values__in [6, 7, 8]
+    IGNORE
 
-    All EAV values are stored in a single table. Therefore, INNER JOIN
-    generated for the AND-expression (1) will always fail, i.e.
-    single row in a eav_values table cannot be both in two disjoint sets at
-    the same time (and the whole point of using AND, usually, is two have
-    two different sets). Therefore, we must paritially rewrite the
-    expression so that the generated SQL is valid::
+        All EAV values are stored in a single table. Therefore, INNER JOIN
+        generated for the AND-expression (1) will always fail, i.e.
+        single row in a eav_values table cannot be both in two disjoint sets at
+        the same time (and the whole point of using AND, usually, is two have
+        two different sets). Therefore, we must paritially rewrite the
+        expression so that the generated SQL is valid::
 
-IGNORE:
-    └── OR
-         ├── AND
-         │    └── eav_values__in [1, 2, 3]
-         └── AND
-              └── pk__in [1, 2]
-IGNORE
+    IGNORE:
+        └── OR
+             ├── AND
+             │    └── eav_values__in [1, 2, 3]
+             └── AND
+                  └── pk__in [1, 2]
+    IGNORE
 
-    This is done by merging dangerous AND's and substituting them with
-    explicit ``pk__in`` filter, where pks are taken from evaluted
-    Q-expr branch.
+        This is done by merging dangerous AND's and substituting them with
+        explicit ``pk__in`` filter, where pks are taken from evaluted
+        Q-expr branch.
 
-    Args:
-        model_cls (TypeVar): model class used to construct :meth:`QuerySet`
-            from leaf attribute-value expression.
-            expr: (Q | tuple): Q-expression (or attr-val leaf) to be rewritten.
+        Args:
+            model_cls (TypeVar): model class used to construct :meth:`QuerySet`
+                from leaf attribute-value expression.
+                expr: (Q | tuple): Q-expression (or attr-val leaf) to be rewritten.
 
-    Returns:
-        Union[Q, tuple]
+        Returns:
+            Union[Q, tuple]
     """
     # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
     # We are only interested in Qs.
@@ -162,6 +160,7 @@ def eav_filter(func):
     :func:`expand_q_filters` and kwargs through :func:`expand_eav_filter`. Returns the
     called function (filter or exclude).
     """
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
         nargs = []
@@ -244,10 +243,7 @@ def expand_eav_filter(model_cls, key, value):
         else:
             lookup = '__{}'.format(fields[2]) if len(fields) > 2 else ''
             value_key = 'value_{}{}'.format(datatype, lookup)
-        kwargs = {
-            value_key: value,
-            'attribute__slug': slug
-        }
+        kwargs = {value_key: value, 'attribute__slug': slug}
         value = Value.objects.filter(**kwargs)
 
         return '%s__in' % gr_name, value
@@ -317,20 +313,25 @@ class EavQuerySet(QuerySet):
 
                 field_name = 'value_%s' % attr.datatype
 
-                pks_values = Value.objects.filter(
-                    # Retrieve pk-values pairs of the related values
-                    # (i.e. values for the specified attribute and
-                    # belonging to entities in the queryset).
-                    attribute__slug=attr.slug,
-                    entity_id__in=self
-                ).order_by(
-                    # Order values by their value-field of
-                    # appriopriate attribute data-type.
-                    field_name
-                ).values_list(
-                    # Retrieve only primary-keys of the entities
-                    # in the current queryset.
-                    'entity_id', field_name
+                pks_values = (
+                    Value.objects.filter(
+                        # Retrieve pk-values pairs of the related values
+                        # (i.e. values for the specified attribute and
+                        # belonging to entities in the queryset).
+                        attribute__slug=attr.slug,
+                        entity_id__in=self,
+                    )
+                    .order_by(
+                        # Order values by their value-field of
+                        # appriopriate attribute data-type.
+                        field_name
+                    )
+                    .values_list(
+                        # Retrieve only primary-keys of the entities
+                        # in the current queryset.
+                        'entity_id',
+                        field_name,
+                    )
                 )
 
                 # Retrive ordered values from pk-value list.
@@ -353,29 +354,20 @@ class EavQuerySet(QuerySet):
                 #         WHEN id = 4 THEN 3
                 #     END
                 #
-                when_clauses = [
-                    When(id=pk, then=i)
-                    for pk, i in entities_pk
-                ]
+                when_clauses = [When(id=pk, then=i) for pk, i in entities_pk]
 
-                order_clause = Case(
-                    *when_clauses,
-                    output_field=IntegerField()
-                )
+                order_clause = Case(*when_clauses, output_field=IntegerField())
 
                 clause_name = '__'.join(term)
                 # Use when-clause to construct
                 # custom order-by clause.
-                query_clause = query_clause.annotate(
-                    **{clause_name: order_clause}
-                )
+                query_clause = query_clause.annotate(**{clause_name: order_clause})
 
                 order_clauses.append(clause_name)
 
             elif len(term) >= 2 and term[0] == config_cls.eav_attr:
                 raise NotSupportedError(
-                    'EAV does not support ordering through '
-                    'foreign-key chains'
+                    'EAV does not support ordering through ' 'foreign-key chains'
                 )
 
             else:

@@ -4,13 +4,14 @@ This module contains the custom manager used by entities registered with eav.
 
 from django.db import models
 
-from .queryset import EavQuerySet
+from eav.queryset import EavQuerySet
 
 
 class EntityManager(models.Manager):
     """
     Our custom manager, overrides ``models.Manager``.
     """
+
     _queryset_class = EavQuerySet
 
     def create(self, **kwargs):
@@ -29,7 +30,7 @@ class EntityManager(models.Manager):
 
         for key, value in kwargs.items():
             if key.startswith(prefix):
-                eav_kwargs.update({key[len(prefix):]: value})
+                eav_kwargs.update({key[len(prefix) :]: value})
             else:
                 new_kwargs.update({key: value})
 
