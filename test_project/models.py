@@ -1,7 +1,12 @@
+from typing import Final, final
+
 from django.db import models
 
 from eav.decorators import register_eav
 from eav.models import EAVModelMeta
+
+#: Constants
+MAX_CHARFIELD_LEN: Final = 254
 
 
 class TestBase(models.Model):
@@ -14,10 +19,15 @@ class TestBase(models.Model):
         abstract = True
 
 
+@final
 class Patient(TestBase):
-    name = models.CharField(max_length=12)
+    name = models.CharField(max_length=MAX_CHARFIELD_LEN)
+    email = models.EmailField(max_length=MAX_CHARFIELD_LEN, blank=True)
     example = models.ForeignKey(
-        'ExampleModel', null=True, blank=True, on_delete=models.PROTECT
+        'ExampleModel',
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
     )
 
     def __str__(self):
@@ -39,31 +49,35 @@ class Encounter(TestBase):
 
 
 @register_eav()
+@final
 class ExampleModel(TestBase):
-    name = models.CharField(max_length=12)
+    name = models.CharField(max_length=MAX_CHARFIELD_LEN)
 
     def __unicode__(self):
         return self.name
 
 
 @register_eav()
+@final
 class M2MModel(TestBase):
-    name = models.CharField(max_length=12)
+    name = models.CharField(max_length=MAX_CHARFIELD_LEN)
     models = models.ManyToManyField(ExampleModel)
 
     def __unicode__(self):
         return self.name
 
 
+@final
 class ExampleMetaclassModel(TestBase, metaclass=EAVModelMeta):
-    name = models.CharField(max_length=12)
+    name = models.CharField(max_length=MAX_CHARFIELD_LEN)
 
     def __str__(self):
         return self.name
 
 
+@final
 class RegisterTestModel(TestBase, metaclass=EAVModelMeta):
-    name = models.CharField(max_length=12)
+    name = models.CharField(max_length=MAX_CHARFIELD_LEN)
 
     def __str__(self):
         return self.name
