@@ -3,43 +3,35 @@ Getting Started
 
 Installation
 ------------
-
-You can install **django-eav2** from PyPI, git or directly from source:
-
-From PyPI
-^^^^^^^^^
 ::
 
     pip install django-eav2
 
-With pip via git
-^^^^^^^^^^^^^^^^
-::
-
-    pip install git+https://github.com/lvm/django-eav2@master
-
-From source
-^^^^^^^^^^^
-::
-
-    git clone git@github.com:lvm/django-eav2.git
-    cd django-eav2
-    python setup.py install
-
-To uninstall::
-
-    python setup.py install --record files.txt
-    rm $(cat files.txt)
-
 Configuration
 -------------
 
-After you've installed the package, you have to add it to your Django apps::
+After you've installed the package, you have to add it to your Django apps
+::
 
     INSTALLED_APPS = [
-        # ...
-
+        ...
         'eav',
+    ]
 
-        # ...
+Note: Django 2.2 Users
+^^^^^^^^^^^^^^^^^^^^^^
+
+Since ``models.JSONField()`` isn't supported in Django 2.2, we use `django-jsonfield-backport <https://github.com/laymonage/django-jsonfield-backport>`_
+ to provide `JSONField <https://docs.djangoproject.com/en/dev/releases/3.1/#jsonfield-for-all-supported-database-backends>`_
+ functionality.
+
+This requires adding ``django_jsonfield_backport`` to your INSTALLED_APPS as well.
+
+
+::
+
+    INSTALLED_APPS = [
+        ...
+        'eav',
+        'django_jsonfield_backport',
     ]

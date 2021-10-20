@@ -85,23 +85,35 @@ In some use-cases, JSONB (binary JSON data) datatype (Postgres 9.4+ and analogou
 
 ## Installation
 
-You can install **django-eav2** from three sources:
+Install with pip
 
 ```bash
-# From PyPI via pip
 pip install django-eav2
+```
 
-# From source via pip
-pip install git+https://github.com/lvm/django-eav2@master
+## Configuration
 
-# From source via setuptools
-git clone git@github.com:lvm/django-eav2.git
-cd django-eav2
-python setup.py install
+Add `eav2` to `INSTALLED_APPS` in your settings.
 
-# To uninstall:
-python setup.py install --record files.txt
-rm $(cat files.txt)
+```python
+INSTALLED_APPS = [
+    ...
+    'eav',
+]
+```
+
+### Note: Django 2.2 Users
+
+Since `models.JSONField()` isn't supported in Django 2.2, we use [django-jsonfield-backport](https://github.com/laymonage/django-jsonfield-backport) to provide [JSONField](https://docs.djangoproject.com/en/dev/releases/3.1/#jsonfield-for-all-supported-database-backends) functionality.
+
+This requires adding `django_jsonfield_backport` to your `INSTALLED_APPS` as well.
+
+```python
+INSTALLED_APPS = [
+    ...
+    'eav',
+    'django_jsonfield_backport',
+]
 ```
 
 ## Getting started
