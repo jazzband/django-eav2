@@ -92,6 +92,22 @@ class Queries(TestCase):
         self.assertEqual(Patient.objects.count(), 2)
         self.assertEqual(Value.objects.count(), 2)
 
+    def test_get_or_create_with_defaults(self):
+        """Tests EntityManager.get_or_create() with defaults keyword."""
+        city_name = 'Tokyo'
+        email = 'mari@test.com'
+        p1, _ = Patient.objects.get_or_create(
+            name='Mari',
+            eav__age=27,
+            defaults={
+                'email': email,
+                'eav__city': city_name,
+            },
+        )
+        assert Patient.objects.count() == 1
+        assert p1.email == email
+        assert p1.eav.city == city_name
+
     def test_get_with_eav(self):
         p1, _ = Patient.objects.get_or_create(name='Bob', eav__age=6)
         self.assertEqual(Patient.objects.get(eav__age=6), p1)
