@@ -9,13 +9,6 @@ repos:
   - id: check-added-large-files
   - id: mixed-line-ending
 
-- repo: https://github.com/ecugol/pre-commit-hooks-django
-  rev: v0.4.0
-  hooks:
-  - id: check-untracked-migrations
-    additional_dependencies: [django]
-  - id: check-absent-migrations
-
 - repo: https://github.com/psf/black
   rev: 21.9b0
   hooks:
