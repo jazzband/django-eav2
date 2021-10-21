@@ -358,10 +358,11 @@ class Attribute(models.Model):
         return '{} ({})'.format(self.name, self.get_datatype_display())
 
 
-class Value(models.Model):
-    """
-    Putting the **V** in *EAV*. This model stores the value for one particular
-    :class:`Attribute` for some entity.
+class Value(models.Model):  # noqa: WPS110
+    """Putting the **V** in *EAV*.
+
+    This model stores the value for one particular :class:`Attribute` for
+    some entity.
 
     As with most EAV implementations, most of the columns of this model will
     be blank, as onle one *value_* field will be used.
@@ -380,22 +381,49 @@ class Value(models.Model):
         # = <Value: crazy_dev_user - Fav Drink: "red bull">
     """
 
-    entity_ct = models.ForeignKey(
-        ContentType, on_delete=models.PROTECT, related_name='value_entities'
+    # Main foreign keys
+    attribute = models.ForeignKey(
+        Attribute,
+        db_index=True,
+        on_delete=models.PROTECT,
+        verbose_name=_('Attribute'),
     )
 
-    entity_id = models.IntegerField()
-    entity = generic.GenericForeignKey(ct_field='entity_ct', fk_field='entity_id')
+    entity = generic.GenericForeignKey(
+        ct_field='entity_ct',
+        fk_field='entity_id',
+    )
 
-    value_text = models.TextField(blank=True, null=True)
+    entity_ct = models.ForeignKey(
+        ContentType,
+        on_delete=models.PROTECT,
+        related_name='value_entities',
+    )
+
+    # Model attributes
+    entity_id = models.IntegerField()
+
+    created = models.DateTimeField(
+        _('Created'),
+        default=timezone.now,
+    )
+
+    modified = models.DateTimeField(_('Modified'), auto_now=True)
+
+    # Value attributes
+    value_bool = models.BooleanField(blank=True, null=True)
+    value_csv = CSVField(blank=True, null=True)
+    value_date = models.DateTimeField(blank=True, null=True)
     value_float = models.FloatField(blank=True, null=True)
     value_int = models.IntegerField(blank=True, null=True)
-    value_date = models.DateTimeField(blank=True, null=True)
-    value_bool = models.BooleanField(blank=True, null=True)
+    value_text = models.TextField(blank=True, null=True)
+
     value_json = JSONField(
-        default=dict, encoder=DjangoJSONEncoder, blank=True, null=True
+        default=dict,
+        encoder=DjangoJSONEncoder,
+        blank=True,
+        null=True,
     )
-    value_csv = CSVField(blank=True, null=True)
 
     value_enum = models.ForeignKey(
         EnumValue,
@@ -405,6 +433,7 @@ class Value(models.Model):
         related_name='eav_values',
     )
 
+    # Value object relationship
     generic_value_id = models.IntegerField(blank=True, null=True)
 
     generic_value_ct = models.ForeignKey(
@@ -416,42 +445,40 @@ class Value(models.Model):
     )
 
     value_object = generic.GenericForeignKey(
-        ct_field='generic_value_ct', fk_field='generic_value_id'
+        ct_field='generic_value_ct',
+        fk_field='generic_value_id',
     )
-
-    created = models.DateTimeField(_('Created'), default=timezone.now)
-    modified = models.DateTimeField(_('Modified'), auto_now=True)
-
-    attribute = models.ForeignKey(
-        Attribute, db_index=True, on_delete=models.PROTECT, verbose_name=_('Attribute')
-    )
-
-    def save(self, *args, **kwargs):
-        """
-        Validate and save this value.
-        """
-        self.full_clean()
-        super(Value, self).save(*args, **kwargs)
-
-    def _get_value(self):
-        """
-        Return the python object this value is holding
-        """
-        return getattr(self, 'value_%s' % self.attribute.datatype)
-
-    def _set_value(self, new_value):
-        """
-        Set the object this value is holding
-        """
-        setattr(self, 'value_%s' % self.attribute.datatype, new_value)
-
-    value = property(_get_value, _set_value)
 
     def __str__(self):
-        return '{}: "{}" ({})'.format(self.attribute.name, self.value, self.entity)
+        """String representation of a Value."""
+        return '{0}: "{1}" ({2})'.format(
+            self.attribute.name,
+            self.value,
+            self.entity,
+        )
 
     def __repr__(self):
-        return '{}: "{}" ({})'.format(self.attribute.name, self.value, self.entity.pk)
+        """Representation of Value object."""
+        return '{0}: "{1}" ({2})'.format(
+            self.attribute.name,
+            self.value,
+            self.entity.pk,
+        )
+
+    def save(self, *args, **kwargs):
+        """Validate and save this value."""
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def _get_value(self):
+        """Return the python object this value is holding."""
+        return getattr(self, 'value_{0}'.format(self.attribute.datatype))
+
+    def _set_value(self, new_value):
+        """Set the object this value is holding."""
+        setattr(self, 'value_{0}'.format(self.attribute.datatype), new_value)
+
+    value = property(_get_value, _set_value)  # noqa: WPS110
 
 
 class Entity(object):
