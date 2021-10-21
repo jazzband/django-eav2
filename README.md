@@ -1,7 +1,7 @@
 [![Build Status](https://github.com/jazzband/django-eav2/actions/workflows/test.yml/badge.svg)](https://github.com/jazzband/django-eav2/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/jazzband/django-eav2/branch/master/graph/badge.svg?token=BJk3zS22BS)](https://codecov.io/gh/jazzband/django-eav2)
-![Python Version](https://img.shields.io/badge/Python-3.6,%203.7,%203.8,%203.9-blue.svg)
-![Django Version](https://img.shields.io/badge/Django-2.2,%20,3.1,%203.2-green.svg)
+[![Python Version](https://img.shields.io/pypi/pyversions/django-eav2.svg)](https://pypi.org/project/django-eav2/)
+[![Django Version](https://img.shields.io/pypi/djversions/django-eav2.svg?color=green)](https://pypi.org/project/django-eav2/)
 [![Jazzband](https://jazzband.co/static/img/badge.svg)](https://jazzband.co/)
 
 ## Django EAV 2 - Entity-Attribute-Value storage for Django
