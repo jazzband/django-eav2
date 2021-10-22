@@ -20,6 +20,8 @@ from django.db.models.base import ModelBase
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from eav.logic.entity_pk import get_entity_pk_type
+
 try:
     from django.db.models import JSONField
 except ImportError:
@@ -334,17 +336,19 @@ class Attribute(models.Model):
         """
         ct = ContentType.objects.get_for_model(entity)
 
+        entity_filter = {
+            'entity_ct': ct,
+            'attribute': self,
+            '{0}'.format(get_entity_pk_type(entity)): entity.pk,
+        }
+
         try:
-            value_obj = self.value_set.get(
-                entity_ct=ct, entity_id=entity.pk, attribute=self
-            )
+            value_obj = self.value_set.get(**entity_filter)
         except Value.DoesNotExist:
             if value == None or value == '':
                 return
 
-            value_obj = Value.objects.create(
-                entity_ct=ct, entity_id=entity.pk, attribute=self
-            )
+            value_obj = Value.objects.create(**entity_filter)
 
         if value == None or value == '':
             value_obj.delete()
@@ -381,7 +385,7 @@ class Value(models.Model):  # noqa: WPS110
         # = <Value: crazy_dev_user - Fav Drink: "red bull">
     """
 
-    # Main foreign keys
+    # Direct foreign keys
     attribute = models.ForeignKey(
         Attribute,
         db_index=True,
@@ -389,10 +393,11 @@ class Value(models.Model):  # noqa: WPS110
         verbose_name=_('Attribute'),
     )
 
-    entity = generic.GenericForeignKey(
-        ct_field='entity_ct',
-        fk_field='entity_id',
-    )
+    # Entity generic relationships. Rather than rely on database casting,
+    # this will instead use a separate ForeignKey field attribute that matches
+    # the FK type of the entity.
+    entity_id = models.IntegerField(blank=True, null=True)
+    entity_uuid = models.UUIDField(blank=True, null=True)
 
     entity_ct = models.ForeignKey(
         ContentType,
@@ -400,9 +405,17 @@ class Value(models.Model):  # noqa: WPS110
         related_name='value_entities',
     )
 
-    # Model attributes
-    entity_id = models.IntegerField()
+    entity_pk_int = generic.GenericForeignKey(
+        ct_field='entity_ct',
+        fk_field='entity_id',
+    )
 
+    entity_pk_uuid = generic.GenericForeignKey(
+        ct_field='entity_ct',
+        fk_field='entity_uuid',
+    )
+
+    # Model attributes
     created = models.DateTimeField(
         _('Created'),
         default=timezone.now,
@@ -451,18 +464,24 @@ class Value(models.Model):  # noqa: WPS110
 
     def __str__(self):
         """String representation of a Value."""
+        entity = self.entity_pk_int
+        if self.entity_uuid:
+            entity = self.entity_pk_uuid
         return '{0}: "{1}" ({2})'.format(
             self.attribute.name,
             self.value,
-            self.entity,
+            entity,
         )
 
     def __repr__(self):
         """Representation of Value object."""
+        entity = self.entity_pk_int
+        if self.entity_uuid:
+            entity = self.entity_pk_uuid
         return '{0}: "{1}" ({2})'.format(
             self.attribute.name,
             self.value,
-            self.entity.pk,
+            entity.pk,
         )
 
     def save(self, *args, **kwargs):
@@ -631,12 +650,13 @@ class Entity(object):
         return {v.attribute.slug: v.value for v in self.get_values()}
 
     def get_values(self):
-        """
-        Get all set :class:`Value` objects for self.instance
-        """
-        return Value.objects.filter(
-            entity_ct=self.ct, entity_id=self.instance.pk
-        ).select_related()
+        """Get all set :class:`Value` objects for self.instance."""
+        entity_filter = {
+            'entity_ct': self.ct,
+            '{0}'.format(get_entity_pk_type(self.instance)): self.instance.pk,
+        }
+
+        return Value.objects.filter(**entity_filter).select_related()
 
     def get_all_attribute_slugs(self):
         """
