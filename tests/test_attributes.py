@@ -5,7 +5,7 @@ import eav
 from eav.exceptions import IllegalAssignmentException
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
-from test_project.models import Encounter, Patient, RegisterTestModel
+from test_project.models import Doctor, Encounter, Patient, RegisterTestModel
 
 
 class Attributes(TestCase):
@@ -81,3 +81,11 @@ class Attributes(TestCase):
         with self.assertRaises(IllegalAssignmentException):
             e.eav.color = 'red'
             e.save()
+
+    def test_uuid_pk(self):
+        """Tests for when model pk is UUID."""
+        d1 = Doctor.objects.create(name='Lu')
+        d1.eav.age = 10
+        d1.save()
+
+        assert d1.eav.age == 10
