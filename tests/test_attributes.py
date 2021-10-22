@@ -66,6 +66,11 @@ class Attributes(TestCase):
         self.assertEqual(t.eav.age, 6)
         self.assertEqual(t.eav.height, 10)
 
+        # Validate repr of Value for an entity with an INT PK
+        v1 = Value.objects.filter(entity_id=p.pk).first()
+        assert isinstance(repr(v1), str)
+        assert isinstance(str(v1), str)
+
     def test_illegal_assignemnt(self):
         class EncounterEavConfig(EavConfig):
             @classmethod
@@ -89,3 +94,8 @@ class Attributes(TestCase):
         d1.save()
 
         assert d1.eav.age == 10
+
+        # Validate repr of Value for an entity with a UUID PK
+        v1 = Value.objects.filter(entity_uuid=d1.pk).first()
+        assert isinstance(repr(v1), str)
+        assert isinstance(str(v1), str)
