@@ -1,4 +1,5 @@
 import sys
+import uuid
 
 if sys.version_info >= (3, 8):
     from typing import Final, final
@@ -22,6 +23,15 @@ class TestBase(models.Model):
 
         app_label = 'test_project'
         abstract = True
+
+
+@final
+@register_eav()
+class Doctor(TestBase):
+    """Test model using UUID as primary key."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=MAX_CHARFIELD_LEN)
 
 
 @final
