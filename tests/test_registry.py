@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 import eav
@@ -100,3 +101,14 @@ class RegistryTests(TestCase):
             @eav.decorators.register_eav()
             class Foo(object):
                 pass
+
+    def test_model_without_local_managers(self):
+        """Test when a model doesn't have local_managers."""
+        # Check just in case test model changes in the future
+        assert bool(User._meta.local_managers) is False
+        eav.register(User)
+        assert isinstance(User.objects, eav.managers.EntityManager)
+
+        # Reverse check: managers should be empty again
+        eav.unregister(User)
+        assert bool(User._meta.local_managers) is False

@@ -109,8 +109,13 @@ class Registry(object):
         # Save the old manager if the attribute name conflicts with the new one.
         if hasattr(self.model_cls, self.config_cls.manager_attr):
             mgr = getattr(self.model_cls, self.config_cls.manager_attr)
-            self.config_cls.old_mgr = mgr
-            self.model_cls._meta.local_managers.remove(mgr)
+
+            # For some models, `local_managers` may be empty, eg.
+            # django.contrib.auth.models.User and AbstractUser
+            if mgr in self.model_cls._meta.local_managers:
+                self.config_cls.old_mgr = mgr
+                self.model_cls._meta.local_managers.remove(mgr)
+
             self.model_cls._meta._expire_cache()
 
         # Attach the new manager to the model.
