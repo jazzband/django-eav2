@@ -70,10 +70,20 @@ class EnumValue(models.Model):
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
 
-    value = models.CharField(_('Value'), db_index=True, unique=True, max_length=50)
+    value = models.CharField(
+        _('Value'),
+        db_index=True,
+        unique=True,
+        max_length=50,
+    )
 
     def __str__(self):
-        return '<EnumValue {}>'.format(self.value)
+        """String representation of `EnumValue` instance."""
+        return str(self.value)
+
+    def __repr__(self):
+        """String representation of `EnumValue` object."""
+        return '<EnumValue {0}>'.format(self.value)
 
 
 class EnumGroup(models.Model):
@@ -89,7 +99,12 @@ class EnumGroup(models.Model):
     values = models.ManyToManyField(EnumValue, verbose_name=_('Enum group'))
 
     def __str__(self):
-        return '<EnumGroup {}>'.format(self.name)
+        """String representation of `EnumGroup` instance."""
+        return str(self.name)
+
+    def __repr__(self):
+        """String representation of `EnumGroup` object."""
+        return '<EnumGroup {0}>'.format(self.name)
 
 
 class Attribute(models.Model):
