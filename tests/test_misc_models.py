@@ -1,3 +1,4 @@
+import pytest
 from django.test import TestCase
 
 import eav
@@ -5,11 +6,32 @@ from eav.models import Attribute, EnumGroup, EnumValue, Value
 from test_project.models import Patient
 
 
+@pytest.fixture()
+def enumgroup(db):
+    """Sample `EnumGroup` object for testing."""
+    test_group = EnumGroup.objects.create(name='Yes / No')
+    value_yes = EnumValue.objects.create(value='Yes')
+    value_no = EnumValue.objects.create(value='No')
+    test_group.values.add(value_yes)
+    test_group.values.add(value_no)
+    return test_group
+
+
+def test_enumgroup_display(enumgroup):
+    """Test repr() and str() of EnumGroup."""
+    assert '<EnumGroup {0}>'.format(enumgroup.name) == repr(enumgroup)
+    assert str(enumgroup) == str(enumgroup.name)
+
+
+def test_enumvalue_display(enumgroup):
+    """Test repr() and str() of EnumValue."""
+    test_value = enumgroup.values.first()
+    assert '<EnumValue {0}>'.format(test_value.value) == repr(test_value)
+    assert str(test_value) == test_value.value
+
+
 class MiscModels(TestCase):
-    def test_enumgroup_str(self):
-        name = 'Yes / No'
-        e = EnumGroup.objects.create(name=name)
-        self.assertEqual('<EnumGroup Yes / No>', str(e))
+    """Miscellaneous tests on models."""
 
     def test_attribute_help_text(self):
         desc = 'Patient Age'
