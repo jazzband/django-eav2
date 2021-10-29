@@ -701,7 +701,7 @@ dev = ["codecov (>=2.0.15)", "colorama (>=0.3.4)", "flake8 (>=3.7.7)", "tox (>=3
 
 [[package]]
 name = "m2r2"
-version = "0.2.7"
+version = "0.3.1"
 description = "Markdown and reStructuredText in a single file."
 category = "dev"
 optional = false
@@ -1499,7 +1499,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "240c03ee9cfeed9d818adfb192c39dad7ea1ddf22471917f99741dbf1f977744"
+content-hash = "89bd1d2c8942892a85e6a2a8d78f5e04a99bbb74a3cd48a0cf72885dbbfc6c5e"
 
 [metadata.files]
 aiocontextvars = [
@@ -1784,8 +1784,8 @@ loguru = [
     {file = "loguru-0.5.3.tar.gz", hash = "sha256:b28e72ac7a98be3d28ad28570299a393dfcd32e5e3f6a353dec94675767b6319"},
 ]
 m2r2 = [
-    {file = "m2r2-0.2.7-py3-none-any.whl", hash = "sha256:a1b87b00f4d5163a3616253fca4c045f8351818cd803ba2e24af8897442a0eae"},
-    {file = "m2r2-0.2.7.tar.gz", hash = "sha256:fbf72ade9f648d41658f97c5267687431612451f36b65761a138fbc276294df5"},
+    {file = "m2r2-0.3.1-py3-none-any.whl", hash = "sha256:c2b62b8dec16f82d9e4d8aecf58830a87835ca90441716fc571e573e32c7d829"},
+    {file = "m2r2-0.3.1.tar.gz", hash = "sha256:6bf2d74e4cd15ce8a795999326cc7a4924af69ac1d114cac8064c1599ab11892"},
 ]
 markupsafe = [
     {file = "MarkupSafe-2.0.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:d8446c54dc28c01e5a2dbac5a25f071f6653e6e40f3a8818e8b45d790fe6ef53"},
