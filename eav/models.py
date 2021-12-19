@@ -443,7 +443,7 @@ class Value(models.Model):  # noqa: WPS110
     value_csv = CSVField(blank=True, null=True)
     value_date = models.DateTimeField(blank=True, null=True)
     value_float = models.FloatField(blank=True, null=True)
-    value_int = models.IntegerField(blank=True, null=True)
+    value_int = models.BigIntegerField(blank=True, null=True)
     value_text = models.TextField(blank=True, null=True)
 
     value_json = JSONField(
