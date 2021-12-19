@@ -99,3 +99,13 @@ class Attributes(TestCase):
         v1 = Value.objects.filter(entity_uuid=d1.pk).first()
         assert isinstance(repr(v1), str)
         assert isinstance(str(v1), str)
+
+    def test_big_integer(self):
+        """Tests an integer larger than 32-bit a value."""
+        big_num = 3147483647
+        patient = Patient.objects.create(name='Jon')
+        patient.eav.age = big_num
+
+        patient.save()
+
+        assert patient.eav.age == big_num
