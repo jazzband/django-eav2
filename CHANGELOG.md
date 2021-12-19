@@ -7,10 +7,13 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ### Features
 
 - Adds 64-bit support for `Value.value_int`
+- Adds Django 4.0 and Python 3.10 support
 
 ### Bug Fixes
 
 ### Misc
+
+- Drops support for Django 3.1 and Python 3.6
 
 ## 1.1.0 (2021-11-07)
 
