@@ -6,6 +6,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Features
 
+- Adds 64-bit support for `Value.value_int`
+
 ### Bug Fixes
 
 ### Misc
