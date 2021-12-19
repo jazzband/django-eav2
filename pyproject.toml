@@ -16,7 +16,7 @@ include = '\.pyi?$'
 [tool.poetry]
 name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django"
-version = "1.1.0"
+version = "1.2.0"
 license = "GNU Lesser General Public License (LGPL), Version 3"
 packages = [
   { include = "eav" }
