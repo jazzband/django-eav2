@@ -22,7 +22,7 @@ Q-expressions need to be rewritten for two reasons:
 from functools import wraps
 from itertools import count
 
-from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist, FieldError
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError
@@ -166,28 +166,25 @@ def eav_filter(func):
         nargs = []
         nkwargs = {}
 
-        try:
-            for arg in args:
-                if isinstance(arg, Q):
-                    # Modify Q objects (warning: recursion ahead).
-                    arg = expand_q_filters(arg, self.model)
-                    # Rewrite Q-expression to safeform.
-                    arg = rewrite_q_expr(self.model, arg)
-                nargs.append(arg)
+        for arg in args:
+            if isinstance(arg, Q):
+                # Modify Q objects (warning: recursion ahead).
+                arg = expand_q_filters(arg, self.model)
+                # Rewrite Q-expression to safeform.
+                arg = rewrite_q_expr(self.model, arg)
+            nargs.append(arg)
 
-            for key, value in kwargs.items():
-                # Modify kwargs (warning: recursion ahead).
-                nkey, nval = expand_eav_filter(self.model, key, value)
+        for key, value in kwargs.items():
+            # Modify kwargs (warning: recursion ahead).
+            nkey, nval = expand_eav_filter(self.model, key, value)
 
-                if nkey in nkwargs:
-                    # Apply AND to both querysets.
-                    nkwargs[nkey] = (nkwargs[nkey] & nval).distinct()
-                else:
-                    nkwargs.update({nkey: nval})
+            if nkey in nkwargs:
+                # Apply AND to both querysets.
+                nkwargs[nkey] = (nkwargs[nkey] & nval).distinct()
+            else:
+                nkwargs.update({nkey: nval})
 
-            return func(self, *nargs, **nkwargs)
-        except FieldError:
-            return func(self, *args, **kwargs)
+        return func(self, *nargs, **nkwargs)
 
     return wrapper
 
