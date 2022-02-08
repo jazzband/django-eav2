@@ -8,6 +8,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+- Fixes FieldError when filtering on foreign keys [#163](https://github.com/jazzband/django-eav2/issues/163)
+
 ### Misc
 
 ## 1.2.0 (2021-12-18)
