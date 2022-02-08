@@ -253,12 +253,13 @@ def expand_eav_filter(model_cls, key, value):
     except FieldDoesNotExist:
         return key, value
 
-    if not field.auto_created or field.concrete:
+    # Leave these types of fields alone
+    if not field.auto_created or field.concrete or field.is_relation:
         return key, value
-    else:
-        sub_key = '__'.join(fields[1:])
-        key, value = expand_eav_filter(field.model, sub_key, value)
-        return '{}__{}'.format(fields[0], key), value
+
+    sub_key = '__'.join(fields[1:])
+    key, value = expand_eav_filter(field.model, sub_key, value)
+    return '{0}__{1}'.format(fields[0], key), value
 
 
 class EavQuerySet(QuerySet):
