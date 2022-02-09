@@ -6,7 +6,7 @@ from django.test import TestCase
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 from eav.registry import EavConfig
-from test_project.models import Encounter, Patient
+from test_project.models import Encounter, Patient, ExampleModel
 
 
 class Queries(TestCase):
@@ -292,3 +292,9 @@ class Queries(TestCase):
         eav.unregister(Patient)
         eav.register(Patient, config_cls=CustomConfig)
         self.assert_order_by_results(eav_attr='data')
+
+    def test_fk_filter(self):
+        e = ExampleModel.objects.create(name='test1')
+        p = Patient.objects.get_or_create(name='Beth', example=e)[0]
+        c = ExampleModel.objects.filter(patient=p)
+        self.assertEqual(c.count(), 1)

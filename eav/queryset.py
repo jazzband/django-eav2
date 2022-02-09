@@ -248,17 +248,8 @@ def expand_eav_filter(model_cls, key, value):
 
         return '%s__in' % gr_name, value
 
-    try:
-        field = model_cls._meta.get_field(fields[0])
-    except FieldDoesNotExist:
-        return key, value
-
-    if not field.auto_created or field.concrete:
-        return key, value
-    else:
-        sub_key = '__'.join(fields[1:])
-        key, value = expand_eav_filter(field.model, sub_key, value)
-        return '{}__{}'.format(fields[0], key), value
+    # Not an eav field, so keep as is
+    return key, value
 
 
 class EavQuerySet(QuerySet):
