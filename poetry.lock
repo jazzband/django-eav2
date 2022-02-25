@@ -227,7 +227,7 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-jsonfield-backport"
-version = "1.0.4"
+version = "1.0.5"
 description = "Backport of the cross-DB JSONField model and form fields from Django 3.1."
 category = "main"
 optional = false
@@ -1507,8 +1507,8 @@ django = [
     {file = "Django-3.2.12.tar.gz", hash = "sha256:9772e6935703e59e993960832d66a614cf0233a1c5123bc6224ecc6ad69e41e2"},
 ]
 django-jsonfield-backport = [
-    {file = "django-jsonfield-backport-1.0.4.tar.gz", hash = "sha256:73998c6aa2e0ab1a4f9da4ce62f01576e019147678c881401b02846712069786"},
-    {file = "django_jsonfield_backport-1.0.4-py3-none-any.whl", hash = "sha256:ccb0c47bad0dad400940c9897baa6de956b487299e351821a7a59cc18e7b0f69"},
+    {file = "django-jsonfield-backport-1.0.5.tar.gz", hash = "sha256:40c39b1f1bade47bd2715664de14983f2e0a96175f65abbad2688029c255c685"},
+    {file = "django_jsonfield_backport-1.0.5-py3-none-any.whl", hash = "sha256:727b402bad632e38539b489e48aefa6ffe03cedba76ac1f11b455423b3225a2d"},
 ]
 doc8 = [
     {file = "doc8-0.10.1-py3-none-any.whl", hash = "sha256:551a61df5915f0107e518d582fead47a0a56df7d4a9374feab955ea14dedea84"},
