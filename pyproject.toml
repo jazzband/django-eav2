@@ -61,7 +61,7 @@ django-jsonfield-backport = "^1.0.4"
 [tool.poetry.dev-dependencies]
 django = "^3.2"
 
-mypy = "^0.931"
+mypy = "^0.942"
 
 wemake-python-styleguide = "^0.16"
 flake8-pytest-style = "^1.6"
