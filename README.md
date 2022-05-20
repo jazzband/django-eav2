@@ -93,7 +93,7 @@ pip install django-eav2
 
 ## Configuration
 
-Add `eav2` to `INSTALLED_APPS` in your settings.
+Add `eav` to `INSTALLED_APPS` in your settings.
 
 ```python
 INSTALLED_APPS = [
