@@ -32,6 +32,7 @@ class CSVFormField(forms.Field):
 
     def __init__(self, *args, **kwargs):
         kwargs.pop('max_length', None)
+        self.separator = kwargs.pop('separator', self.default_separator)
         super().__init__(*args, **kwargs)
 
     def to_python(self, value):
@@ -39,10 +40,10 @@ class CSVFormField(forms.Field):
             return []
         return [v.strip() for v in value.split(self.separator) if v]
 
-    def validate(self, value):
-        super().validate(value)
+    def validate(self, field_value):
+        super().validate(field_value)
         try:
-            isinstance(value.split(self.separator), list)
+            isinstance(field_value, list)
         except ValidationError:
             raise ValidationError(self.message, code=self.code)
 

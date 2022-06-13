@@ -21,3 +21,21 @@ class CSVWidget(Textarea):
     def render(self, name, value, **kwargs):
         value = self.prep_value(value)
         return super().render(name, value, **kwargs)
+
+    def value_from_datadict(self, data, files, name):
+        """
+        Return the value of this widget or None.
+
+        Since we're only given the value of the entity name and the data dict
+        contains the '_eav_config_cls' (which we don't have access to) as the
+        key, we need to loop through each field checking if the eav attribute
+        exists with the given 'name'.
+        """
+        widget_value = None
+        for data_value in data:
+            try:
+                widget_value = getattr(data.get(data_value), name)
+            except AttributeError:
+                pass  # noqa: WPS420
+
+        return widget_value
