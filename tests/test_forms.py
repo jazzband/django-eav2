@@ -1,5 +1,5 @@
 import sys
-
+import pytest
 from django.contrib.admin.sites import AdminSite
 from django.core.handlers.base import BaseHandler
 from django.forms import ModelForm
@@ -45,6 +45,12 @@ request.user = MockSuperUser()
 
 
 class PatientForm(ModelForm):
+    class Meta:
+        model = Patient
+        fields = '__all__'
+
+
+class PatientDynamicForm(BaseDynamicEntityForm):
     class Meta:
         model = Patient
         fields = '__all__'
@@ -111,3 +117,51 @@ class Forms(TestCase):
         form = M2MModelForm(dict(name='Lorem', models=[model.pk]), instance=m2mmodel)
         form.save()
         self.assertEqual(len(m2mmodel.models.all()), 1)
+
+
+@pytest.fixture()
+def patient() -> Patient:
+    """Return an eav enabled Patient instance."""
+    eav.register(Patient)
+    return Patient.objects.create(name='Jim Morrison')
+
+
+@pytest.mark.django_db()
+@pytest.mark.parametrize(
+    'csv_data, separator',
+    [
+        ('', ';'),
+        ('justone', ','),
+        ('one;two;three', ';'),
+        ('alpha,beta,gamma', ','),
+        (None, ','),
+    ],
+)
+def test_csvdynamicform(patient, csv_data, separator) -> None:
+    """Ensure that a TYPE_CSV field works correctly with forms."""
+    Attribute.objects.create(name='csv', datatype=Attribute.TYPE_CSV)
+    patient.eav.csv = csv_data
+    patient.save()
+    patient.refresh_from_db()
+
+    form = PatientDynamicForm(
+        patient.__dict__,
+        instance=patient,
+    )
+    form.fields['csv'].separator = separator
+    assert form.is_valid()
+    jim = form.save()
+
+    expected_result = str(csv_data).split(separator) if csv_data else []
+    assert jim.eav.csv == expected_result
+
+
+@pytest.mark.django_db()
+def test_csvdynamicform_empty(patient) -> None:
+    """Test to ensure an instance with no eav values is correct."""
+    form = PatientDynamicForm(
+        patient.__dict__,
+        instance=patient,
+    )
+    assert form.is_valid()
+    assert form.save()
