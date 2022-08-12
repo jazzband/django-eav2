@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     'slug',
-                    eav.fields.EavSlugField(
+                    models.SlugField(
                         help_text='Short unique attribute label',
                         unique=True,
                         verbose_name='Slug',
