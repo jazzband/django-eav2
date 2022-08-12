@@ -10,7 +10,6 @@ optional metaclass for each eav model class.
 """
 
 from copy import copy
-from typing import Final
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -37,6 +36,12 @@ from eav.validators import (
     validate_object,
     validate_text,
 )
+
+try:
+    from typing import Final
+except ImportError:
+    from typing_extensions import Final
+
 
 try:
     from django.db.models import JSONField

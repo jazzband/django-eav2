@@ -1,8 +1,12 @@
 import secrets
 import string
-from typing import Final
 
 from django.utils.text import slugify
+
+try:
+    from typing import Final
+except ImportError:
+    from typing_extensions import Final
 
 SLUGFIELD_MAX_LENGTH: Final = 50
 
