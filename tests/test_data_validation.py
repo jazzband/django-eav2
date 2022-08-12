@@ -62,15 +62,6 @@ class DataValidation(TestCase):
         self.assertEqual(Patient.objects.count(), 0)
         self.assertEqual(Value.objects.count(), 0)
 
-    def test_bad_slug(self):
-        a = Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
-        a.slug = 'Color'
-        self.assertRaises(ValidationError, a.save)
-        a.slug = '1st'
-        self.assertRaises(ValidationError, a.save)
-        a.slug = '_st'
-        self.assertRaises(ValidationError, a.save)
-
     def test_changing_datatypes(self):
         a = Attribute.objects.create(name='Color', datatype=Attribute.TYPE_INT)
         a.datatype = Attribute.TYPE_TEXT
