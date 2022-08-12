@@ -5,7 +5,7 @@ from django.test import TestCase
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from hypothesis.extra import django
-from hypothesis.strategies import just, text
+from hypothesis.strategies import just
 
 import eav
 from eav.exceptions import IllegalAssignmentException
@@ -143,7 +143,7 @@ class TestAttributeModel(django.TestCase):
         ),
     )
     def test_large_name_input(self, name_value) -> None:
-        """Ensure slug'ing works."""
+        """Ensure proper slug is generated from large name fields."""
         instance = Attribute.objects.create(
             name=name_value,
             datatype=Attribute.TYPE_TEXT,
