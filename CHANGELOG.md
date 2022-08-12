@@ -9,6 +9,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ### Bug Fixes
 
 - Fixes AttributeError when using CSVFormField [[#187](https://github.com/jazzband/django-eav2/issues/187)]
+- Fixes slug generation for Attribute.name fields longer than 50 characters [#223](https://github.com/jazzband/django-eav2/issues/223)
+- Migrates Attribute.slug to django.db.models.SlugField() [#223](https://github.com/jazzband/django-eav2/issues/223)
 
 ## 1.2.1 (2021-02-08)
 ### Bug Fixes
