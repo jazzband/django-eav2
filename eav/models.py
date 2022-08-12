@@ -10,6 +10,7 @@ optional metaclass for each eav model class.
 """
 
 from copy import copy
+from typing import Final
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -22,8 +23,9 @@ from django.utils.translation import gettext_lazy as _
 
 from eav import register
 from eav.exceptions import IllegalAssignmentException
-from eav.fields import CSVField, EavDatatypeField, EavSlugField, generate_slug
+from eav.fields import CSVField, EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
+from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.validators import (
     validate_bool,
     validate_csv,
@@ -40,6 +42,9 @@ try:
     from django.db.models import JSONField
 except ImportError:
     from django_jsonfield_backport.models import JSONField
+
+
+CHARFIELD_LENGTH: Final = 100
 
 
 class EnumValue(models.Model):
@@ -73,7 +78,7 @@ class EnumValue(models.Model):
         _('Value'),
         db_index=True,
         unique=True,
-        max_length=50,
+        max_length=SLUGFIELD_MAX_LENGTH,
     )
 
     def __str__(self):
@@ -94,7 +99,7 @@ class EnumGroup(models.Model):
     See :class:`EnumValue` for an example.
     """
 
-    name = models.CharField(_('Name'), unique=True, max_length=100)
+    name = models.CharField(_('Name'), unique=True, max_length=CHARFIELD_LENGTH)
     values = models.ManyToManyField(EnumValue, verbose_name=_('Enum group'))
 
     def __str__(self):
@@ -191,7 +196,7 @@ class Attribute(models.Model):
 
     name = models.CharField(
         verbose_name=_('Name'),
-        max_length=100,
+        max_length=CHARFIELD_LENGTH,
         help_text=_('User-friendly attribute name'),
     )
 
@@ -202,7 +207,7 @@ class Attribute(models.Model):
     """
     slug = models.SlugField(
         verbose_name=_('Slug'),
-        max_length=50,
+        max_length=SLUGFIELD_MAX_LENGTH,
         db_index=True,
         unique=True,
         help_text=_('Short unique attribute label'),
