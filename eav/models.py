@@ -22,7 +22,7 @@ from django.utils.translation import gettext_lazy as _
 
 from eav import register
 from eav.exceptions import IllegalAssignmentException
-from eav.fields import CSVField, EavDatatypeField, EavSlugField
+from eav.fields import CSVField, EavDatatypeField, EavSlugField, generate_slug
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.validators import (
     validate_bool,
@@ -303,7 +303,7 @@ class Attribute(models.Model):
         if one wasn't provided.
         """
         if not self.slug:
-            self.slug = EavSlugField.create_slug_from_name(self.name)
+            self.slug = generate_slug(self.name)
 
         self.full_clean()
         super(Attribute, self).save(*args, **kwargs)
