@@ -1,5 +1,11 @@
+import string
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from hypothesis import given, settings
+from hypothesis import strategies as st
+from hypothesis.extra import django
+from hypothesis.strategies import just
 
 import eav
 from eav.exceptions import IllegalAssignmentException
@@ -109,3 +115,39 @@ class Attributes(TestCase):
         patient.save()
 
         assert patient.eav.age == big_num
+
+
+class TestAttributeModel(django.TestCase):
+    """This is a property-based test that ensures model correctness."""
+
+    @given(
+        django.from_model(
+            Attribute,
+            datatype=just(Attribute.TYPE_TEXT),
+            enum_group=just(None),
+        ),
+    )
+    @settings(deadline=None)
+    def test_model_properties(self, attribute: Attribute) -> None:
+        """Tests that instance can be saved and has correct representation."""
+        attribute.full_clean()
+        attribute.save()
+
+        assert attribute
+
+    @given(
+        st.text(
+            alphabet=st.sampled_from(string.ascii_letters + string.digits),
+            min_size=50,
+            max_size=100,
+        ),
+    )
+    def test_large_name_input(self, name_value) -> None:
+        """Ensure proper slug is generated from large name fields."""
+        instance = Attribute.objects.create(
+            name=name_value,
+            datatype=Attribute.TYPE_TEXT,
+            enum_group=None,
+        )
+
+        assert isinstance(instance, Attribute)
