@@ -71,7 +71,7 @@ def rewrite_q_expr(model_cls, expr):
         single row in a eav_values table cannot be both in two disjoint sets at
         the same time (and the whole point of using AND, usually, is two have
         two different sets). Therefore, we must paritially rewrite the
-        expression so that the generated SQL is valid::
+        expression so that the generated SQL is valid.
 
     IGNORE:
         └── OR
