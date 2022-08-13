@@ -3,7 +3,7 @@ name = "alabaster"
 version = "0.7.12"
 description = "A configurable sidebar-enabled Sphinx theme"
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
 
 [[package]]
@@ -71,7 +71,7 @@ name = "babel"
 version = "2.9.1"
 description = "Internationalization utilities"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
@@ -245,26 +245,25 @@ Django = ">=2.2"
 
 [[package]]
 name = "doc8"
-version = "1.0.0"
+version = "0.11.2"
 description = "Style checker for Sphinx (or other) RST documentation"
-category = "dev"
+category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.6"
 
 [package.dependencies]
-docutils = ">=0.19,<0.21"
+docutils = "*"
 Pygments = "*"
 restructuredtext-lint = ">=0.7"
 stevedore = "*"
-tomli = {version = "*", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "docutils"
-version = "0.19"
+version = "0.17.1"
 description = "Docutils -- Python Documentation Utilities"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "dparse"
@@ -605,7 +604,7 @@ name = "imagesize"
 version = "1.3.0"
 description = "Getting image size from png/jpeg/jpeg2000/gif file"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
@@ -667,7 +666,7 @@ name = "jinja2"
 version = "3.0.3"
 description = "A very fast and expressive template engine."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -716,7 +715,7 @@ name = "markupsafe"
 version = "2.0.1"
 description = "Safely add untrusted strings to HTML/XML markup."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [[package]]
@@ -869,7 +868,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 name = "pbr"
 version = "5.8.0"
 description = "Python Build Reasonableness"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.6"
 
@@ -1123,7 +1122,7 @@ docs = ["furo (>=2021.9.8)", "linkify-it-py (>=1.0.1,<2.0.0)", "myst-parser (>=0
 name = "restructuredtext-lint"
 version = "1.3.2"
 description = "reStructuredText linter"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -1205,7 +1204,7 @@ name = "sphinx"
 version = "5.1.1"
 description = "Python documentation generator"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
@@ -1248,11 +1247,26 @@ testing = ["covdefaults (>=2.2)", "coverage (>=6.4.2)", "diff-cover (>=6.5.1)", 
 type_comments = ["typed-ast (>=1.5.4)"]
 
 [[package]]
+name = "sphinx-rtd-theme"
+version = "1.0.0"
+description = "Read the Docs theme for Sphinx"
+category = "main"
+optional = false
+python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+
+[package.dependencies]
+docutils = "<0.18"
+sphinx = ">=1.6"
+
+[package.extras]
+dev = ["bump2version", "sphinxcontrib-httpdomain", "transifex-client"]
+
+[[package]]
 name = "sphinxcontrib-applehelp"
 version = "1.0.2"
 description = "sphinxcontrib-applehelp is a sphinx extension which outputs Apple help books"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1264,7 +1278,7 @@ name = "sphinxcontrib-devhelp"
 version = "1.0.2"
 description = "sphinxcontrib-devhelp is a sphinx extension which outputs Devhelp document."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1276,7 +1290,7 @@ name = "sphinxcontrib-htmlhelp"
 version = "2.0.0"
 description = "sphinxcontrib-htmlhelp is a sphinx extension which renders HTML help files"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [package.extras]
@@ -1288,7 +1302,7 @@ name = "sphinxcontrib-jsmath"
 version = "1.0.1"
 description = "A sphinx extension which renders display math in HTML via JavaScript"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1299,7 +1313,7 @@ name = "sphinxcontrib-qthelp"
 version = "1.0.3"
 description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp document."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1311,7 +1325,7 @@ name = "sphinxcontrib-serializinghtml"
 version = "1.1.5"
 description = "sphinxcontrib-serializinghtml is a sphinx extension which outputs \"serialized\" HTML files (json and pickle)."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [package.extras]
@@ -1330,7 +1344,7 @@ python-versions = ">=3.5"
 name = "stevedore"
 version = "3.5.0"
 description = "Manage dynamic plugins for Python applications"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 
@@ -1490,12 +1504,12 @@ docs = ["sphinx", "jaraco.packaging (>=8.2)", "rst.linker (>=1.9)"]
 testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy"]
 
 [extras]
-docs = ["sphinx", "sphinx-autodoc-typehints", "m2r2", "tomlkit"]
+docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme", "m2r2", "tomlkit"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "314d208d7d2d68e8e722b808a36937a536ff5e5f8b5cd4bbbf656f418f759884"
+content-hash = "117a9424d991191615ddb2952a8d1142b8d2458745db8826fade24be4146af00"
 
 [metadata.files]
 alabaster = [
@@ -1569,7 +1583,10 @@ dictdiffer = [
 django = []
 django-jsonfield-backport = []
 doc8 = []
-docutils = []
+docutils = [
+    {file = "docutils-0.17.1-py2.py3-none-any.whl", hash = "sha256:cf316c8370a737a022b72b56874f6602acf974a37a9fba42ec2876387549fc61"},
+    {file = "docutils-0.17.1.tar.gz", hash = "sha256:686577d2e4c32380bb50cbb22f575ed742d58168cee37e99117a854bcd88f125"},
+]
 dparse = [
     {file = "dparse-0.5.1-py3-none-any.whl", hash = "sha256:e953a25e44ebb60a5c6efc2add4420c177f1d8404509da88da9729202f306994"},
     {file = "dparse-0.5.1.tar.gz", hash = "sha256:a1b5f169102e1c894f9a7d5ccf6f9402a836a5d24be80a986c7ce9eaed78f367"},
@@ -1918,6 +1935,7 @@ sortedcontainers = [
 ]
 sphinx = []
 sphinx-autodoc-typehints = []
+sphinx-rtd-theme = []
 sphinxcontrib-applehelp = [
     {file = "sphinxcontrib-applehelp-1.0.2.tar.gz", hash = "sha256:a072735ec80e7675e3f432fcae8610ecf509c5f1869d17e2eecff44389cdbc58"},
     {file = "sphinxcontrib_applehelp-1.0.2-py2.py3-none-any.whl", hash = "sha256:806111e5e962be97c29ec4c1e7fe277bfd19e9652fb1a4392105b43e01af885a"},
