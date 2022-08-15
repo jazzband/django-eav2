@@ -72,6 +72,7 @@ mypy = "^0.971"
 wemake-python-styleguide = "^0.16"
 flake8-pytest-style = "^1.6"
 nitpick = "^0.32"
+black = "^22.6"
 
 safety = "^2.1"
 
@@ -80,7 +81,6 @@ pytest-cov = "^3.0"
 pytest-randomly = "^3.12"
 pytest-pythonpath = "^0.7.4"
 pytest-django = "^4.5.2"
-black = "^22.6"
 hypothesis = "^6.54.3"
 
 doc8 = "^0.11.2"
