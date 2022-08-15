@@ -64,9 +64,7 @@ sphinx = { version = "^5.0", optional = true }
 sphinx-autodoc-typehints = { version = "^1.12", optional = true }
 m2r2 = { version = "^0.3", optional = true }
 tomlkit = { version = "^0.11", optional = true }
-doc8 = "^0.11.2"
 sphinx-rtd-theme = "^1.0.0"
-
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.971"
@@ -84,6 +82,8 @@ pytest-pythonpath = "^0.7.4"
 pytest-django = "^4.5.2"
 black = "^22.6"
 hypothesis = "^6.54.3"
+
+doc8 = "^0.11.2"
 
 [tool.poetry.extras]
 docs = [
