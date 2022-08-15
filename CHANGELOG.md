@@ -8,6 +8,10 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+## 1.2.3 (2022-08-15)
+
+### Bug Fixes
+
 - Don't mark doc8 as a dependency [#235](https://github.com/jazzband/django-eav2/issues/235)
 - Make Read the Docs dependencies all optional
 
