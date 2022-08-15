@@ -83,7 +83,7 @@ pytest-randomly = "^3.12"
 pytest-pythonpath = "^0.7.4"
 pytest-django = "^4.5.2"
 black = "^22.6"
-hypothesis = "^6.54.2"
+hypothesis = "^6.54.3"
 
 [tool.poetry.extras]
 docs = [
