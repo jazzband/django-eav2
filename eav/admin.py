@@ -19,11 +19,12 @@ class BaseEntityAdmin(ModelAdmin):
         view and substitute some data.
         """
         form = context['adminform'].form
+        media = context["media"]
 
         # Infer correct data from the form.
         fieldsets = self.fieldsets or [(None, {'fields': form.fields.keys()})]
         adminform = admin.helpers.AdminForm(form, fieldsets, self.prepopulated_fields)
-        media = mark_safe(self.media + adminform.media)
+        media = mark_safe(media + adminform.media)
 
         context.update(adminform=adminform, media=media)
 
