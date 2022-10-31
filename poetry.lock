@@ -299,7 +299,7 @@ python-versions = "*"
 
 [[package]]
 name = "exceptiongroup"
-version = "1.0.0rc8"
+version = "1.0.0"
 description = "Backport of PEP 654 (exception groups)"
 category = "dev"
 optional = false
@@ -553,7 +553,7 @@ typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.10\"
 
 [[package]]
 name = "hypothesis"
-version = "6.56.3"
+version = "6.56.4"
 description = "A library for property-based testing"
 category = "dev"
 optional = false
@@ -561,7 +561,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 attrs = ">=19.2.0"
-exceptiongroup = {version = ">=1.0.0rc8", markers = "python_version < \"3.11\""}
+exceptiongroup = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 sortedcontainers = ">=2.1.0,<3.0.0"
 
 [package.extras]
@@ -1530,7 +1530,7 @@ docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme", "m2r2", "tomlk
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "da5114d9b1c76f137529b576314418e531ba797db4c3c2637e90e08c3bbd23f5"
+content-hash = "cfb9770e87a01e38bcb63e704e560babab2aa6b9c563bb0f12e1dd1303194c47"
 
 [metadata.files]
 alabaster = [
@@ -1705,8 +1705,8 @@ eradicate = [
     {file = "eradicate-2.0.0.tar.gz", hash = "sha256:27434596f2c5314cc9b31410c93d8f7e8885747399773cd088d3adea647a60c8"},
 ]
 exceptiongroup = [
-    {file = "exceptiongroup-1.0.0rc8-py3-none-any.whl", hash = "sha256:ab0a968e1ef769e55d9a596f4a89f7be9ffedbc9fdefdb77cc68cf5c33ce1035"},
-    {file = "exceptiongroup-1.0.0rc8.tar.gz", hash = "sha256:6990c24f06b8d33c8065cfe43e5e8a4bfa384e0358be036af9cc60b6321bd11a"},
+    {file = "exceptiongroup-1.0.0-py3-none-any.whl", hash = "sha256:2ac84b496be68464a2da60da518af3785fff8b7ec0d090a581604bc870bdee41"},
+    {file = "exceptiongroup-1.0.0.tar.gz", hash = "sha256:affbabf13fb6e98988c38d9c5650e701569fe3c1de3233cfb61c5f33774690ad"},
 ]
 flake8 = [
     {file = "flake8-3.9.2-py2.py3-none-any.whl", hash = "sha256:bf8fd333346d844f616e8d47905ef3a3384edae6b4e9beb0c5101e25e3110907"},
@@ -1787,8 +1787,8 @@ gitpython = [
     {file = "GitPython-3.1.24.tar.gz", hash = "sha256:df83fdf5e684fef7c6ee2c02fc68a5ceb7e7e759d08b694088d0cacb4eba59e5"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.56.3-py3-none-any.whl", hash = "sha256:802d236d03dbd54e0e1c55c0daa2ec41aeaadc87a4dcbb41421b78bf3f7a7789"},
-    {file = "hypothesis-6.56.3.tar.gz", hash = "sha256:15dae5d993339aefa57e00f5cb5a5817ff300eeb661d96d1c9d094eb62b04c9a"},
+    {file = "hypothesis-6.56.4-py3-none-any.whl", hash = "sha256:67950103ee930c66673494b3671474a083ea71f1ebe8f0ff849ba8ad5317772d"},
+    {file = "hypothesis-6.56.4.tar.gz", hash = "sha256:313bc1c0f377ec6c98815d3237a69add7558eadee4effe4ed613d0ba36513a52"},
 ]
 identify = [
     {file = "identify-2.4.0-py2.py3-none-any.whl", hash = "sha256:eba31ca80258de6bb51453084bff4a923187cd2193b9c13710f2516ab30732cc"},
