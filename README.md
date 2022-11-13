@@ -28,7 +28,7 @@ You will find detailed description of the EAV here:
 
 ## EAV - The Good, the Bad or the Ugly?
 
-EAV is a trade-off between flexibility and complexity. As such, it should not be thought of as either an amelioration pattern, nor an anti-pattern. It is more of a [gray pattern](http://wiki.c2.com/?GreyPattern) - it exists in some context, to solve certain set of problems. When used appropriately, it can introduce great flexibility, cut prototyping time or deacrease complexity. When used carelessly, however, it can complicate database schema, degrade the performance and make maintainance hard. **As with every tool, it should not be overused.** In the following paragraphs we briefly discuss the pros, the cons and pointers to keep in mind when using EAV.
+EAV is a trade-off between flexibility and complexity. As such, it should not be thought of as either an amelioration pattern, nor an anti-pattern. It is more of a [gray pattern](https://wiki.c2.com/?GreyPattern) - it exists in some context, to solve certain set of problems. When used appropriately, it can introduce great flexibility, cut prototyping time or deacrease complexity. When used carelessly, however, it can complicate database schema, degrade the performance and make maintainance hard. **As with every tool, it should not be overused.** In the following paragraphs we briefly discuss the pros, the cons and pointers to keep in mind when using EAV.
 
 ### When to use EAV?
 
@@ -59,7 +59,7 @@ For more throughout discussion on the appriopriate use-cases see:
 
 1. [Wikipedia - Scenarios that are appropriate for EAV modeling](https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model#Scenarios_that_are_appropriate_for_EAV_modeling)
 2. [StackOverflow - Entity Attribute Value Database vs. strict Relational Model E-commerce](https://stackoverflow.com/questions/870808/entity-attribute-value-database-vs-strict-relational-model-ecommerce)
-3. [WikiWikiWeb - Generic Data Model](http://wiki.c2.com/?GenericDataModel)
+3. [WikiWikiWeb - Generic Data Model](https://wiki.c2.com/?GenericDataModel)
 
 ## When to avoid it?
 
