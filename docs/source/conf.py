@@ -1,7 +1,7 @@
 # Sphinx documentation generator configuration.
 #
 # More information on the configuration options is available at:
-#     http://www.sphinx-doc.org/en/master/usage/configuration.html
+#     https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys

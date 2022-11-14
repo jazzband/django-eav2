@@ -3,7 +3,7 @@ This module contains a validator for each :class:`~eav.models.Attribute` datatyp
 
 A validator is a callable that takes a value and raises a ``ValidationError``
 if it doesn't meet some criteria (see `Django validators
-<http://docs.djangoproject.com/en/dev/ref/validators/>`_).
+<https://docs.djangoproject.com/en/dev/ref/validators/>`_).
 
 These validators are called by the
 :meth:`~eav.models.Attribute.validate_value` method in the
