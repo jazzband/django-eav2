@@ -1,6 +1,6 @@
 This software is derived from Django EAV (https://github.com/mvpdev/django-eav)
 which, in turn, was derived from EAV Django, originally written and copyrighted
-by Andrey Mikhaylenko <http://pypi.python.org/pypi/eav-django>.
+by Andrey Mikhaylenko <https://pypi.org/project/eav-django/>.
 
 This is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published

@@ -56,7 +56,7 @@ We use GitHub issues to track public bugs. Report a bug by opening a new issue. 
 
 ### Use a consistent coding style
 
-We use [Black](https://github.com/psf/black) and (working towards) [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) for code and [Google-style](http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) reStructuredText for doc-strings.
+We use [Black](https://github.com/psf/black) and (working towards) [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) for code and [Google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) reStructuredText for doc-strings.
 
 <hr>
 
