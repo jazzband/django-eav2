@@ -1,0 +1,223 @@
+# Simplified Chinese translation for django-eav2
+# Copyright (C) 2023
+# This file is distributed under the same license as the django-eav2 package.
+# FIRST 954-Ivory <954ivory@gmail.com>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-01-28 15:46+0800\n"
+"PO-Revision-Date: 2023-01-28 19:14+0800\n"
+"Last-Translator: 954-Ivory <954ivory@gmail.com>\n"
+"Language-Team: \n"
+"Language: zh-Hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\eav\fields.py:30
+msgid "You cannot change the datatype of an attribute that is already in use."
+msgstr "您不能更改已使用属性的数据类型。"
+
+#: .\eav\fields.py:36
+msgid "A Comma-Separated-Value field."
+msgstr "字符分隔值(CSV)字段。"
+
+#: .\eav\forms.py:28
+msgid "Enter comma-separated-values. eg: one;two;three."
+msgstr "输入字符分隔值(CSV)字段，例如：one;two;three。"
+
+#: .\eav\forms.py:137
+#, python-format
+msgid "The %s could not be saved because the datadidn't validate."
+msgstr "由于数据未验证，无法保存 %s 。"
+
+#: .\eav\models.py:83
+msgid "EnumValue"
+msgstr "枚举值"
+
+#: .\eav\models.py:84
+msgid "EnumValues"
+msgstr "枚举值"
+
+#: .\eav\models.py:87 .\eav\models.py:423
+msgid "Value"
+msgstr "值"
+
+#: .\eav\models.py:112
+msgid "EnumGroup"
+msgstr "枚举组"
+
+#: .\eav\models.py:113
+msgid "EnumGroups"
+msgstr "枚举组"
+
+#: .\eav\models.py:115 .\eav\models.py:213
+msgid "Name"
+msgstr "名称"
+
+#: .\eav\models.py:116
+msgid "Enum group"
+msgstr "枚举组"
+
+#: .\eav\models.py:181 .\eav\models.py:431
+msgid "Attribute"
+msgstr "属性"
+
+#: .\eav\models.py:182
+msgid "Attributes"
+msgstr "属性"
+
+#: .\eav\models.py:195
+msgid "Text"
+msgstr "文本"
+
+#: .\eav\models.py:196
+msgid "Date"
+msgstr "日期"
+
+#: .\eav\models.py:197
+msgid "Float"
+msgstr "浮点数"
+
+#: .\eav\models.py:198
+msgid "Integer"
+msgstr "整数"
+
+#: .\eav\models.py:199
+msgid "True / False"
+msgstr "布尔值"
+
+#: .\eav\models.py:200
+msgid "Django Object"
+msgstr "Django 对象"
+
+#: .\eav\models.py:201
+msgid "Multiple Choice"
+msgstr "多项选择"
+
+#: .\eav\models.py:202
+msgid "JSON Object"
+msgstr "JSON 对象"
+
+#: .\eav\models.py:203
+msgid "Comma-Separated-Value"
+msgstr "字符分隔值(CSV)"
+
+#: .\eav\models.py:209
+msgid "Data Type"
+msgstr "数据类型"
+
+#: .\eav\models.py:215
+msgid "User-friendly attribute name"
+msgstr "面向用户的名称"
+
+#: .\eav\models.py:224
+msgid "Slug"
+msgstr "短标识符(Slug)"
+
+#: .\eav\models.py:228
+msgid "Short unique attribute label"
+msgstr "唯一的属性短标识符"
+
+#: .\eav\models.py:237
+msgid "Required"
+msgstr "必填项"
+
+#: .\eav\models.py:249
+msgid "Choice Group"
+msgstr "选项组"
+
+#: .\eav\models.py:256
+msgid "Description"
+msgstr "描述"
+
+#: .\eav\models.py:260
+msgid "Short description"
+msgstr "简短描述"
+
+#: .\eav\models.py:266
+msgid "Display order"
+msgstr "显示顺序"
+
+#: .\eav\models.py:269 .\eav\models.py:462
+msgid "Modified"
+msgstr "修改"
+
+#: .\eav\models.py:272 .\eav\models.py:458
+msgid "Created"
+msgstr "创建"
+
+#: .\eav\models.py:316
+#, python-format
+msgid "%(val)s is not a valid choice for %(attr)s"
+msgstr "%(val)s 不是有效的 %(attr)s 选项"
+
+#: .\eav\models.py:339
+msgid "You must set the choice group for multiple choice attributes"
+msgstr "您必须为多项选择属性设置选项组"
+
+#: .\eav\models.py:344
+msgid "You can only assign a choice group to multiple choice attributes"
+msgstr "您只能将选项组分配给多项选择属性"
+
+#: .\eav\models.py:424
+msgid "Values"
+msgstr "值"
+
+#: .\eav\models.py:593
+#, python-format
+msgid "%(obj)s has no EAV attribute named %(attr)s"
+msgstr "%(obj)s 中不存在为 %(attr)s 的属性"
+
+#: .\eav\models.py:665
+msgid "{} EAV field cannot be blank"
+msgstr "{} 字段不能为空白(blank)"
+
+#: .\eav\models.py:672
+#, python-format
+msgid "%(attr)s EAV field %(err)s"
+msgstr "%(attr)s 字段错误：%(err)s"
+
+#: .\eav\validators.py:26
+msgid "Must be str or unicode"
+msgstr "必须是一个 str 或 unicode"
+
+#: .\eav\validators.py:36
+msgid "Must be a float"
+msgstr "必须是一个浮点数"
+
+#: .\eav\validators.py:46
+msgid "Must be an integer"
+msgstr "必须是一个整数"
+
+#: .\eav\validators.py:57
+msgid "Must be a date or datetime"
+msgstr "必须是一个日期(date)或者日期时间(datetime)"
+
+#: .\eav\validators.py:65
+msgid "Must be a boolean"
+msgstr "必须是一个布尔值"
+
+#: .\eav\validators.py:74
+msgid "Must be a django model object instance"
+msgstr "必须是一个 Django Model 对象的实例"
+
+#: .\eav\validators.py:77
+msgid "Model has not been saved yet"
+msgstr "Model 尚未保存"
+
+#: .\eav\validators.py:88
+msgid "EnumValue has not been saved yet"
+msgstr "枚举值尚未保存"
+
+#: .\eav\validators.py:99 .\eav\validators.py:101
+msgid "Must be a JSON Serializable object"
+msgstr "必须是一个 JSON 序列化对象"
+
+#: .\eav\validators.py:111
+msgid "Must be Comma-Separated-Value."
+msgstr "必须是一个字符分隔值(CSV)"
