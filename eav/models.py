@@ -79,6 +79,10 @@ class EnumValue(models.Model):
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
 
+    class Meta:
+        verbose_name = _('EnumValue')
+        verbose_name_plural = _('EnumValues')
+
     value = models.CharField(
         _('Value'),
         db_index=True,
@@ -103,6 +107,10 @@ class EnumGroup(models.Model):
 
     See :class:`EnumValue` for an example.
     """
+
+    class Meta:
+        verbose_name = _('EnumGroup')
+        verbose_name_plural = _('EnumGroups')
 
     name = models.CharField(_('Name'), unique=True, max_length=CHARFIELD_LENGTH)
     values = models.ManyToManyField(EnumValue, verbose_name=_('Enum group'))
@@ -170,6 +178,8 @@ class Attribute(models.Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name = _('Attribute')
+        verbose_name_plural = _('Attributes')
 
     TYPE_TEXT = 'text'
     TYPE_FLOAT = 'float'
@@ -408,6 +418,10 @@ class Value(models.Model):  # noqa: WPS110
         Value.objects.create(entity = u, attribute = a, value_text = 'red bull')
         # = <Value: crazy_dev_user - Fav Drink: "red bull">
     """
+
+    class Meta:
+        verbose_name = _('Value')
+        verbose_name_plural = _('Values')
 
     # Direct foreign keys
     attribute = models.ForeignKey(
