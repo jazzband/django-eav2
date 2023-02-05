@@ -495,12 +495,36 @@ class Value(models.Model):  # noqa: WPS110
     )
 
     # Value attributes
-    value_bool = models.BooleanField(blank=True, null=True, verbose_name=_('Value bool'), )
-    value_csv = CSVField(blank=True, null=True, verbose_name=_('Value CSV'), )
-    value_date = models.DateTimeField(blank=True, null=True, verbose_name=_('Value date'), )
-    value_float = models.FloatField(blank=True, null=True, verbose_name=_('Value float'), )
-    value_int = models.BigIntegerField(blank=True, null=True, verbose_name=_('Value int'), )
-    value_text = models.TextField(blank=True, null=True, verbose_name=_('Value text'), )
+    value_bool = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value bool'),
+    )
+    value_csv = CSVField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value CSV'),
+    )
+    value_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value date'),
+    )
+    value_float = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value float'),
+    )
+    value_int = models.BigIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value int'),
+    )
+    value_text = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value text'),
+    )
 
     value_json = JSONField(
         default=dict,
