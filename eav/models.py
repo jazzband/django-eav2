@@ -42,12 +42,10 @@ try:
 except ImportError:
     from typing_extensions import Final
 
-
 try:
     from django.db.models import JSONField
 except ImportError:
     from django_jsonfield_backport.models import JSONField
-
 
 CHARFIELD_LENGTH: Final = 100
 
@@ -112,8 +110,15 @@ class EnumGroup(models.Model):
         verbose_name = _('EnumGroup')
         verbose_name_plural = _('EnumGroups')
 
-    name = models.CharField(_('Name'), unique=True, max_length=CHARFIELD_LENGTH)
-    values = models.ManyToManyField(EnumValue, verbose_name=_('Enum group'))
+    name = models.CharField(
+        unique=True,
+        max_length=CHARFIELD_LENGTH,
+        verbose_name=_('Name'),
+    )
+    values = models.ManyToManyField(
+        EnumValue,
+        verbose_name=_('Enum group'),
+    )
 
     def __str__(self):
         """String representation of `EnumGroup` instance."""
@@ -206,13 +211,15 @@ class Attribute(models.Model):
     # Core attributes
 
     datatype = EavDatatypeField(
-        verbose_name=_('Data Type'), choices=DATATYPE_CHOICES, max_length=6
+        choices=DATATYPE_CHOICES,
+        max_length=6,
+        verbose_name=_('Data Type'),
     )
 
     name = models.CharField(
-        verbose_name=_('Name'),
         max_length=CHARFIELD_LENGTH,
         help_text=_('User-friendly attribute name'),
+        verbose_name=_('Name'),
     )
 
     """
@@ -221,11 +228,11 @@ class Attribute(models.Model):
     (see :meth:`~eav.fields.EavSlugField.create_slug_from_name`).
     """
     slug = models.SlugField(
-        verbose_name=_('Slug'),
         max_length=SLUGFIELD_MAX_LENGTH,
         db_index=True,
         unique=True,
         help_text=_('Short unique attribute label'),
+        verbose_name=_('Slug'),
     )
 
     """
@@ -234,9 +241,16 @@ class Attribute(models.Model):
         means that *all* entities that *can* have this attribute will
         be required to have a value for it.
     """
-    required = models.BooleanField(verbose_name=_('Required'), default=False)
+    required = models.BooleanField(
+        default=False,
+        verbose_name=_('Required'),
+    )
 
-    entity_ct = models.ManyToManyField(ContentType, blank=True)
+    entity_ct = models.ManyToManyField(
+        ContentType,
+        blank=True,
+        verbose_name=_('Entity content type'),
+    )
     """
     This field allows you to specify a relationship with any number of content types.
     This would be useful, for example, if you wanted an attribute to apply only to
@@ -246,30 +260,36 @@ class Attribute(models.Model):
 
     enum_group = models.ForeignKey(
         EnumGroup,
-        verbose_name=_('Choice Group'),
         on_delete=models.PROTECT,
         blank=True,
         null=True,
+        verbose_name=_('Choice Group'),
     )
 
     description = models.CharField(
-        verbose_name=_('Description'),
         max_length=256,
         blank=True,
         null=True,
         help_text=_('Short description'),
+        verbose_name=_('Description'),
     )
 
     # Useful meta-information
 
     display_order = models.PositiveIntegerField(
-        verbose_name=_('Display order'), default=1
+        default=1,
+        verbose_name=_('Display order'),
     )
 
-    modified = models.DateTimeField(verbose_name=_('Modified'), auto_now=True)
+    modified = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Modified'),
+    )
 
     created = models.DateTimeField(
-        verbose_name=_('Created'), default=timezone.now, editable=False
+        default=timezone.now,
+        editable=False,
+        verbose_name=_('Created'),
     )
 
     @property
@@ -434,13 +454,23 @@ class Value(models.Model):  # noqa: WPS110
     # Entity generic relationships. Rather than rely on database casting,
     # this will instead use a separate ForeignKey field attribute that matches
     # the FK type of the entity.
-    entity_id = models.IntegerField(blank=True, null=True)
-    entity_uuid = models.UUIDField(blank=True, null=True)
+    entity_id = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Entity id'),
+    )
+
+    entity_uuid = models.UUIDField(
+        blank=True,
+        null=True,
+        verbose_name=_('Entity uuid'),
+    )
 
     entity_ct = models.ForeignKey(
         ContentType,
         on_delete=models.PROTECT,
         related_name='value_entities',
+        verbose_name=_('Entity ct'),
     )
 
     entity_pk_int = generic.GenericForeignKey(
@@ -455,25 +485,53 @@ class Value(models.Model):  # noqa: WPS110
 
     # Model attributes
     created = models.DateTimeField(
-        _('Created'),
         default=timezone.now,
+        verbose_name=_('Created'),
     )
 
-    modified = models.DateTimeField(_('Modified'), auto_now=True)
+    modified = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Modified'),
+    )
 
     # Value attributes
-    value_bool = models.BooleanField(blank=True, null=True)
-    value_csv = CSVField(blank=True, null=True)
-    value_date = models.DateTimeField(blank=True, null=True)
-    value_float = models.FloatField(blank=True, null=True)
-    value_int = models.BigIntegerField(blank=True, null=True)
-    value_text = models.TextField(blank=True, null=True)
+    value_bool = models.BooleanField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value bool'),
+    )
+    value_csv = CSVField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value CSV'),
+    )
+    value_date = models.DateTimeField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value date'),
+    )
+    value_float = models.FloatField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value float'),
+    )
+    value_int = models.BigIntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value int'),
+    )
+    value_text = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name=_('Value text'),
+    )
 
     value_json = JSONField(
         default=dict,
         encoder=DjangoJSONEncoder,
         blank=True,
         null=True,
+        verbose_name=_('Value JSON'),
     )
 
     value_enum = models.ForeignKey(
@@ -482,10 +540,15 @@ class Value(models.Model):  # noqa: WPS110
         null=True,
         on_delete=models.PROTECT,
         related_name='eav_values',
+        verbose_name=_('Value enum'),
     )
 
     # Value object relationship
-    generic_value_id = models.IntegerField(blank=True, null=True)
+    generic_value_id = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name=_('Generic value id'),
+    )
 
     generic_value_ct = models.ForeignKey(
         ContentType,
@@ -493,6 +556,7 @@ class Value(models.Model):  # noqa: WPS110
         null=True,
         on_delete=models.PROTECT,
         related_name='value_values',
+        verbose_name=_('Generic value content type'),
     )
 
     value_object = generic.GenericForeignKey(
