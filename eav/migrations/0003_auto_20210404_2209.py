@@ -12,7 +12,6 @@ except ImportError:
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('eav', '0002_add_entity_ct_field'),
     ]
