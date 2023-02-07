@@ -6,7 +6,6 @@ import eav.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('eav', '0004_alter_value_value_bool'),
     ]
