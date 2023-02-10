@@ -6,10 +6,16 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Features
 
+- Add support for Django 4.1
+
 ### Bug Fixes
 
 - Fixes missing `Add another` button for inlines in `BaseEntityAdmin`
 - Fixes saving of Attribute date types rendering using `BaseDynamicEntityForm` [#261](https://github.com/jazzband/django-eav2/issues/261)
+
+### Misc
+
+- Drops support for Django 2.2 and Python 3.7
 
 ## 1.2.3 (2022-08-15)
 
