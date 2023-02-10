@@ -9,6 +9,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ### Bug Fixes
 
 - Fixes missing `Add another` button for inlines in `BaseEntityAdmin`
+- Fixes saving of Attribute date types rendering using `BaseDynamicEntityForm` [#261](https://github.com/jazzband/django-eav2/issues/261)
 
 ## 1.2.3 (2022-08-15)
 
