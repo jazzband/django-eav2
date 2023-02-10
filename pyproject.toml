@@ -49,15 +49,13 @@ classifiers = [
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Framework :: Django",
-  "Framework :: Django :: 2.2",
   "Framework :: Django :: 3.2",
   "Framework :: Django :: 4.0",
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-django = ">=2.2, <4.1"
-django-jsonfield-backport = "^1.0.4"
+python = "^3.8"
+django = ">=3.2, <4.1"
 
 # Docs extra:
 sphinx = { version = "^5.0", optional = true }

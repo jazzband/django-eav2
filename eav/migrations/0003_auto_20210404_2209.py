@@ -2,13 +2,9 @@
 
 import django.core.serializers.json
 from django.db import migrations
+from django.db.models import JSONField
 
 import eav.fields
-
-try:
-    from django.db.models import JSONField
-except ImportError:
-    from django_jsonfield_backport.models import JSONField
 
 
 class Migration(migrations.Migration):
