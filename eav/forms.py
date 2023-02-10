@@ -9,7 +9,7 @@ from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
-    DateTimeField,
+    SplitDateTimeField,
     FloatField,
     IntegerField,
     ModelForm,
@@ -66,6 +66,7 @@ class BaseDynamicEntityForm(ModelForm):
     text   CharField
     float  IntegerField
     int    DateTimeField
+    date   SplitDateTimeField
     bool   BooleanField
     enum   ChoiceField
     json   JSONField
@@ -77,7 +78,7 @@ class BaseDynamicEntityForm(ModelForm):
         'text': CharField,
         'float': FloatField,
         'int': IntegerField,
-        'date': DateTimeField,
+        'date': SplitDateTimeField,
         'bool': BooleanField,
         'enum': ChoiceField,
         'json': JSONField,
