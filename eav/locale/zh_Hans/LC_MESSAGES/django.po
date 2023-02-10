@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-01-28 15:46+0800\n"
-"PO-Revision-Date: 2023-01-28 19:14+0800\n"
+"POT-Creation-Date: 2023-02-07 02:17+0800\n"
+"PO-Revision-Date: 2023-02-27 16:36+0800\n"
 "Last-Translator: 954-Ivory <954ivory@gmail.com>\n"
 "Language-Team: \n"
 "Language: zh-Hans\n"
@@ -18,206 +18,262 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\eav\fields.py:30
+#: .\fields.py:30
 msgid "You cannot change the datatype of an attribute that is already in use."
 msgstr "您不能更改已使用属性的数据类型。"
 
-#: .\eav\fields.py:36
+#: .\fields.py:36
 msgid "A Comma-Separated-Value field."
 msgstr "字符分隔值(CSV)字段。"
 
-#: .\eav\forms.py:28
+#: .\forms.py:28
 msgid "Enter comma-separated-values. eg: one;two;three."
 msgstr "输入字符分隔值(CSV)字段，例如：one;two;three。"
 
-#: .\eav\forms.py:137
+#: .\forms.py:137
 #, python-format
 msgid "The %s could not be saved because the datadidn't validate."
 msgstr "由于数据未验证，无法保存 %s 。"
 
-#: .\eav\models.py:83
+#: .\models.py:81
 msgid "EnumValue"
 msgstr "枚举值"
 
-#: .\eav\models.py:84
+#: .\models.py:82
 msgid "EnumValues"
 msgstr "枚举值"
 
-#: .\eav\models.py:87 .\eav\models.py:423
+#: .\models.py:85 .\models.py:443
 msgid "Value"
 msgstr "值"
 
-#: .\eav\models.py:112
+#: .\models.py:110
 msgid "EnumGroup"
 msgstr "枚举组"
 
-#: .\eav\models.py:113
+#: .\models.py:111
 msgid "EnumGroups"
 msgstr "枚举组"
 
-#: .\eav\models.py:115 .\eav\models.py:213
+#: .\models.py:116 .\models.py:222
 msgid "Name"
 msgstr "名称"
 
-#: .\eav\models.py:116
+#: .\models.py:120
 msgid "Enum group"
 msgstr "枚举组"
 
-#: .\eav\models.py:181 .\eav\models.py:431
+#: .\models.py:186 .\models.py:451
 msgid "Attribute"
 msgstr "属性"
 
-#: .\eav\models.py:182
+#: .\models.py:187
 msgid "Attributes"
 msgstr "属性"
 
-#: .\eav\models.py:195
+#: .\models.py:200
 msgid "Text"
 msgstr "文本"
 
-#: .\eav\models.py:196
+#: .\models.py:201
 msgid "Date"
 msgstr "日期"
 
-#: .\eav\models.py:197
+#: .\models.py:202
 msgid "Float"
 msgstr "浮点数"
 
-#: .\eav\models.py:198
+#: .\models.py:203
 msgid "Integer"
 msgstr "整数"
 
-#: .\eav\models.py:199
+#: .\models.py:204
 msgid "True / False"
 msgstr "布尔值"
 
-#: .\eav\models.py:200
+#: .\models.py:205
 msgid "Django Object"
 msgstr "Django 对象"
 
-#: .\eav\models.py:201
+#: .\models.py:206
 msgid "Multiple Choice"
 msgstr "多项选择"
 
-#: .\eav\models.py:202
+#: .\models.py:207
 msgid "JSON Object"
 msgstr "JSON 对象"
 
-#: .\eav\models.py:203
+#: .\models.py:208
 msgid "Comma-Separated-Value"
 msgstr "字符分隔值(CSV)"
 
-#: .\eav\models.py:209
+#: .\models.py:216
 msgid "Data Type"
 msgstr "数据类型"
 
-#: .\eav\models.py:215
+#: .\models.py:221
 msgid "User-friendly attribute name"
 msgstr "面向用户的名称"
 
-#: .\eav\models.py:224
-msgid "Slug"
-msgstr "短标识符(Slug)"
-
-#: .\eav\models.py:228
+#: .\models.py:234
 msgid "Short unique attribute label"
 msgstr "唯一的属性短标识符"
 
-#: .\eav\models.py:237
+#: .\models.py:235
+msgid "Slug"
+msgstr "短标识符(Slug)"
+
+#: .\models.py:246
 msgid "Required"
 msgstr "必填项"
 
-#: .\eav\models.py:249
+#: .\models.py:252
+msgid "Entity content type"
+msgstr "实体内容类型"
+
+#: .\models.py:266
 msgid "Choice Group"
 msgstr "选项组"
 
-#: .\eav\models.py:256
-msgid "Description"
-msgstr "描述"
-
-#: .\eav\models.py:260
+#: .\models.py:273
 msgid "Short description"
 msgstr "简短描述"
 
-#: .\eav\models.py:266
+#: .\models.py:274
+msgid "Description"
+msgstr "描述"
+
+#: .\models.py:281
 msgid "Display order"
 msgstr "显示顺序"
 
-#: .\eav\models.py:269 .\eav\models.py:462
+#: .\models.py:286 .\models.py:494
 msgid "Modified"
 msgstr "修改"
 
-#: .\eav\models.py:272 .\eav\models.py:458
+#: .\models.py:292 .\models.py:489
 msgid "Created"
 msgstr "创建"
 
-#: .\eav\models.py:316
+#: .\models.py:336
 #, python-format
 msgid "%(val)s is not a valid choice for %(attr)s"
 msgstr "%(val)s 不是有效的 %(attr)s 选项"
 
-#: .\eav\models.py:339
+#: .\models.py:359
 msgid "You must set the choice group for multiple choice attributes"
 msgstr "您必须为多项选择属性设置选项组"
 
-#: .\eav\models.py:344
+#: .\models.py:364
 msgid "You can only assign a choice group to multiple choice attributes"
 msgstr "您只能将选项组分配给多项选择属性"
 
-#: .\eav\models.py:424
+#: .\models.py:444
 msgid "Values"
 msgstr "值"
 
-#: .\eav\models.py:593
+#: .\models.py:460
+msgid "Entity id"
+msgstr "实体 ID"
+
+#: .\models.py:466
+msgid "Entity uuid"
+msgstr "实体 UUID"
+
+#: .\models.py:473
+msgid "Entity ct"
+msgstr "实体内容类型"
+
+#: .\models.py:501
+msgid "Value bool"
+msgstr "布尔值"
+
+#: .\models.py:506
+msgid "Value CSV"
+msgstr "字符分隔值(CSV)"
+
+#: .\models.py:511
+msgid "Value date"
+msgstr "日期值"
+
+#: .\models.py:516
+msgid "Value float"
+msgstr "浮点值"
+
+#: .\models.py:521
+msgid "Value int"
+msgstr "整型值"
+
+#: .\models.py:526
+msgid "Value text"
+msgstr "文本值"
+
+#: .\models.py:534
+msgid "Value JSON"
+msgstr "JSON 值"
+
+#: .\models.py:543
+msgid "Value enum"
+msgstr "枚举值"
+
+#: .\models.py:550
+msgid "Generic value id"
+msgstr "通用值 ID"
+
+#: .\models.py:559
+msgid "Generic value content type"
+msgstr "通用值内容类型"
+
+#: .\models.py:657
 #, python-format
 msgid "%(obj)s has no EAV attribute named %(attr)s"
 msgstr "%(obj)s 中不存在为 %(attr)s 的属性"
 
-#: .\eav\models.py:665
+#: .\models.py:729
 msgid "{} EAV field cannot be blank"
 msgstr "{} 字段不能为空白(blank)"
 
-#: .\eav\models.py:672
+#: .\models.py:736
 #, python-format
 msgid "%(attr)s EAV field %(err)s"
 msgstr "%(attr)s 字段错误：%(err)s"
 
-#: .\eav\validators.py:26
+#: .\validators.py:26
 msgid "Must be str or unicode"
 msgstr "必须是一个 str 或 unicode"
 
-#: .\eav\validators.py:36
+#: .\validators.py:36
 msgid "Must be a float"
 msgstr "必须是一个浮点数"
 
-#: .\eav\validators.py:46
+#: .\validators.py:46
 msgid "Must be an integer"
 msgstr "必须是一个整数"
 
-#: .\eav\validators.py:57
+#: .\validators.py:57
 msgid "Must be a date or datetime"
 msgstr "必须是一个日期(date)或者日期时间(datetime)"
 
-#: .\eav\validators.py:65
+#: .\validators.py:65
 msgid "Must be a boolean"
 msgstr "必须是一个布尔值"
 
-#: .\eav\validators.py:74
+#: .\validators.py:74
 msgid "Must be a django model object instance"
 msgstr "必须是一个 Django Model 对象的实例"
 
-#: .\eav\validators.py:77
+#: .\validators.py:77
 msgid "Model has not been saved yet"
 msgstr "Model 尚未保存"
 
-#: .\eav\validators.py:88
+#: .\validators.py:88
 msgid "EnumValue has not been saved yet"
 msgstr "枚举值尚未保存"
 
-#: .\eav\validators.py:99 .\eav\validators.py:101
+#: .\validators.py:99 .\validators.py:101
 msgid "Must be a JSON Serializable object"
 msgstr "必须是一个 JSON 序列化对象"
 
-#: .\eav\validators.py:111
+#: .\validators.py:111
 msgid "Must be Comma-Separated-Value."
 msgstr "必须是一个字符分隔值(CSV)"
