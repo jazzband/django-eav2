@@ -2,29 +2,29 @@
 
 from copy import deepcopy
 
-from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
 from django.core.exceptions import ValidationError
 from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
-    DateTimeField,
+    Field,
     FloatField,
     IntegerField,
     ModelForm,
+    SplitDateTimeField,
 )
 from django.utils.translation import gettext_lazy as _
+
+from eav.widgets import CSVWidget
 
 try:
     from django.forms import JSONField
 except:
     JSONField = CharField
 
-from eav.widgets import CSVWidget
 
-
-class CSVFormField(forms.Field):
+class CSVFormField(Field):
     message = _('Enter comma-separated-values. eg: one;two;three.')
     code = 'invalid'
     widget = CSVWidget
@@ -66,6 +66,7 @@ class BaseDynamicEntityForm(ModelForm):
     text   CharField
     float  IntegerField
     int    DateTimeField
+    date   SplitDateTimeField
     bool   BooleanField
     enum   ChoiceField
     json   JSONField
@@ -77,7 +78,7 @@ class BaseDynamicEntityForm(ModelForm):
         'text': CharField,
         'float': FloatField,
         'int': IntegerField,
-        'date': DateTimeField,
+        'date': SplitDateTimeField,
         'bool': BooleanField,
         'enum': ChoiceField,
         'json': JSONField,
