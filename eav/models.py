@@ -42,10 +42,6 @@ try:
 except ImportError:
     from typing_extensions import Final
 
-try:
-    from django.db.models import JSONField
-except ImportError:
-    from django_jsonfield_backport.models import JSONField
 
 CHARFIELD_LENGTH: Final = 100
 
@@ -526,7 +522,7 @@ class Value(models.Model):  # noqa: WPS110
         verbose_name=_('Value text'),
     )
 
-    value_json = JSONField(
+    value_json = models.JSONField(
         default=dict,
         encoder=DjangoJSONEncoder,
         blank=True,
