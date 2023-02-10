@@ -8,20 +8,20 @@ from django.forms import (
     BooleanField,
     CharField,
     ChoiceField,
-    SplitDateTimeField,
+    Field,
     FloatField,
     IntegerField,
     ModelForm,
-    Field,
+    SplitDateTimeField,
 )
 from django.utils.translation import gettext_lazy as _
+
+from eav.widgets import CSVWidget
 
 try:
     from django.forms import JSONField
 except:
     JSONField = CharField
-
-from eav.widgets import CSVWidget
 
 
 class CSVFormField(Field):
