@@ -6,6 +6,12 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Features
 
+### Bug Fixes
+
+## 1.3.0 (2023-02-10)
+
+### Features
+
 - Add support for Django 4.1
 
 ### Bug Fixes
