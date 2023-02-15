@@ -769,14 +769,14 @@ flake8 = "*"
 
 [[package]]
 name = "flake8-pytest-style"
-version = "1.7.0"
+version = "1.7.1"
 description = "A flake8 plugin checking common style issues or inconsistencies with pytest-based tests."
 category = "dev"
 optional = false
 python-versions = ">=3.7.2,<4.0.0"
 files = [
-    {file = "flake8_pytest_style-1.7.0-py3-none-any.whl", hash = "sha256:b8a08ee7778426f9e1adb9fc054be73e5593a639aa785907b43ef6f51368a0d0"},
-    {file = "flake8_pytest_style-1.7.0.tar.gz", hash = "sha256:211920ad66f436b39afd9c4e386e83b0312ef47e33d8b9d339873a0a3695ebf9"},
+    {file = "flake8_pytest_style-1.7.1-py3-none-any.whl", hash = "sha256:34973e9da1004934e0b27524141b939bb2ef14bed5f17cfa4bfa8e1f42450ed8"},
+    {file = "flake8_pytest_style-1.7.1.tar.gz", hash = "sha256:c0c94a60e0585b0014cc8fe286647e7659cec170ab980ad42fe0cb3ee473f077"},
 ]
 
 [package.dependencies]
@@ -2311,4 +2311,4 @@ docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme", "m2r2", "tomlk
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "caa827c80e34ad62d4c277f801a5ae00d76671843acc92f8fd27521b651e7d24"
+content-hash = "844ae65c12ced1bb20206734be1e207b911b371578268febf30df82f415b0c14"
