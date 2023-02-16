@@ -59,7 +59,7 @@ python = "^3.8"
 django = ">=3.2, <4.2"
 
 # Docs extra:
-sphinx = { version = "^5.0", optional = true }
+sphinx = { version = ">=5,<7", optional = true }
 sphinx-autodoc-typehints = { version = "^1.12", optional = true }
 m2r2 = { version = "^0.3", optional = true }
 tomlkit = { version = "^0.11", optional = true }
