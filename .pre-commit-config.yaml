@@ -15,3 +15,10 @@ repos:
   - id: black
     language_version: python3
     entry: black --target-version=py36
+
+- repo: https://github.com/remastr/pre-commit-django-check-migrations
+  rev: v0.1.0
+  hooks:
+    - id: check-migrations-created
+      args: [--manage-path=manage.py]
+      additional_dependencies: [django==4.1]
