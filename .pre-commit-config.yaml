@@ -20,8 +20,5 @@ repos:
   rev: v0.1.0
   hooks:
     - id: check-migrations-created
-      args:
-        [
-          --exec-command=poetry run python,
-          --manage-path=manage.py,
-        ]
+      args: [--manage-path=manage.py]
+      additional_dependencies: [django==4.1]
