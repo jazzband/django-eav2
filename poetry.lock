@@ -1287,14 +1287,14 @@ files = [
 
 [[package]]
 name = "nitpick"
-version = "0.32.0"
+version = "0.33.0"
 description = "Enforce the same settings across multiple language-independent projects"
 category = "dev"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "nitpick-0.32.0-py3-none-any.whl", hash = "sha256:a2befd6371f8726846d4c127b80b4bc2cc510f97ee8d1a698d879e9d20a95a89"},
-    {file = "nitpick-0.32.0.tar.gz", hash = "sha256:9df66107d9dfc5f8631ee5af1c3a1050ef9db0549e04873bef91bf6681a55b61"},
+    {file = "nitpick-0.33.0-py3-none-any.whl", hash = "sha256:737fe069f0597c2ebfc6f50f86415296fd604d5d8f475ae12efb19527455dc54"},
+    {file = "nitpick-0.33.0.tar.gz", hash = "sha256:62015828cc2977166ee53b8affacd35aaede450fe822ec8874a0383e67e565e7"},
 ]
 
 [package.dependencies]
@@ -1317,7 +1317,7 @@ more-itertools = "*"
 pluggy = "*"
 python-slugify = "*"
 requests = "*"
-requests-cache = "*"
+requests-cache = ">=0.9.7"
 "ruamel.yaml" = "*"
 sortedcontainers = "*"
 StrEnum = "*"
@@ -2313,4 +2313,4 @@ docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme", "m2r2", "tomlk
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "7c96b603e468e86ebbb786fc46c606918da3f6211d48103a56a93338a0de2cfe"
+content-hash = "0ba434b8730ee13b27fdd46c6e7d8d68738317e33a2aa8ecc3f1171643d73f96"
