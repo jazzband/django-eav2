@@ -8,6 +8,12 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+## 1.3.2 (2023-06-29)
+
+### Features
+
+- Support Bahasa Indonesia Translations
+
 ## 1.3.1 (2023-02-22)
 
 ### Bug Fixes

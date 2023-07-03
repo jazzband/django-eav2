@@ -1,0 +1,278 @@
+# Indonesian translation for django-eav2
+# Copyright (C) 2023
+# This file is distributed under the same license as the django-eav2 package.
+# Kira <kiraware@github.com>, 2023.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: django-eav2 1.3.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-06-29 16:43+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kira <kiraware@github.com>, 2023\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+#: .\eav\fields.py:30
+msgid "You cannot change the datatype of an attribute that is already in use."
+msgstr "Anda tidak dapat mengubah tipe data atribut yang sudah digunakan."
+
+#: .\eav\fields.py:36
+msgid "A Comma-Separated-Value field."
+msgstr "Bidang Nilai-yang-Dipisahkan-Koma."
+
+#: .\eav\forms.py:28
+msgid "Enter comma-separated-values. eg: one;two;three."
+msgstr "Masukkan nilai-yang-dipisahkan-koma. misalnya: satu;dua;tiga."
+
+#: .\eav\forms.py:138
+#, python-format
+msgid "The %s could not be saved because the datadidn't validate."
+msgstr "%s tidak dapat disimpan karena datanya tidak tervalidasi."
+
+#: .\eav\models.py:77
+msgid "EnumValue"
+msgstr "EnumValue"
+
+#: .\eav\models.py:78
+msgid "EnumValues"
+msgstr "EnumValues"
+
+#: .\eav\models.py:81 .\eav\models.py:439
+msgid "Value"
+msgstr "Nilai"
+
+#: .\eav\models.py:106
+msgid "EnumGroup"
+msgstr "EnumGroup"
+
+#: .\eav\models.py:107
+msgid "EnumGroups"
+msgstr "EnumGroups"
+
+#: .\eav\models.py:112 .\eav\models.py:218
+msgid "Name"
+msgstr "Nama"
+
+#: .\eav\models.py:116
+msgid "Enum group"
+msgstr "Grup enum"
+
+#: .\eav\models.py:182 .\eav\models.py:447
+msgid "Attribute"
+msgstr "Atribut"
+
+#: .\eav\models.py:183
+msgid "Attributes"
+msgstr "Atribut"
+
+#: .\eav\models.py:196
+msgid "Text"
+msgstr "Teks"
+
+#: .\eav\models.py:197
+msgid "Date"
+msgstr "Tanggal"
+
+#: .\eav\models.py:198
+msgid "Float"
+msgstr "Bilangan desimal"
+
+#: .\eav\models.py:199
+msgid "Integer"
+msgstr "Bilangan bulat"
+
+#: .\eav\models.py:200
+msgid "True / False"
+msgstr "Benar / Salah"
+
+#: .\eav\models.py:201
+msgid "Django Object"
+msgstr "Objek Django"
+
+#: .\eav\models.py:202
+msgid "Multiple Choice"
+msgstr "Pilihan Ganda"
+
+#: .\eav\models.py:203
+msgid "JSON Object"
+msgstr "Objek JSON"
+
+#: .\eav\models.py:204
+msgid "Comma-Separated-Value"
+msgstr "Nilai-yang-Dipisahkan-Koma"
+
+#: .\eav\models.py:212
+msgid "Data Type"
+msgstr "Tipe Data"
+
+#: .\eav\models.py:217
+msgid "User-friendly attribute name"
+msgstr "Nama atribut yang ramah pengguna"
+
+#: .\eav\models.py:230
+msgid "Short unique attribute label"
+msgstr "Label atribut unik yang pendek"
+
+#: .\eav\models.py:231
+msgid "Slug"
+msgstr "Slug"
+
+#: .\eav\models.py:242
+msgid "Required"
+msgstr "Diperlukan"
+
+#: .\eav\models.py:248
+msgid "Entity content type"
+msgstr "Jenis konten entitas"
+
+#: .\eav\models.py:262
+msgid "Choice Group"
+msgstr "Grup Pilihan"
+
+#: .\eav\models.py:269
+msgid "Short description"
+msgstr "Deskripsi singkat"
+
+#: .\eav\models.py:270
+msgid "Description"
+msgstr "Deskripsi"
+
+#: .\eav\models.py:277
+msgid "Display order"
+msgstr "Urutan tampilan"
+
+#: .\eav\models.py:282 .\eav\models.py:490
+msgid "Modified"
+msgstr "Dimodifikasi"
+
+#: .\eav\models.py:288 .\eav\models.py:485
+msgid "Created"
+msgstr "Dibuat"
+
+#: .\eav\models.py:332
+#, python-format
+msgid "%(val)s is not a valid choice for %(attr)s"
+msgstr "%(val)s bukan pilihan yang valid untuk %(attr)s"
+
+#: .\eav\models.py:355
+msgid "You must set the choice group for multiple choice attributes"
+msgstr "Anda harus mengatur grup pilihan untuk atribut pilihan ganda"
+
+#: .\eav\models.py:360
+msgid "You can only assign a choice group to multiple choice attributes"
+msgstr "Anda hanya dapat menetapkan grup pilihan ke atribut pilihan ganda"
+
+#: .\eav\models.py:440
+msgid "Values"
+msgstr "Nilai"
+
+#: .\eav\models.py:456
+msgid "Entity id"
+msgstr "id entitas"
+
+#: .\eav\models.py:462
+msgid "Entity uuid"
+msgstr "uuid entitas"
+
+#: .\eav\models.py:469
+msgid "Entity ct"
+msgstr "Entitas ct"
+
+#: .\eav\models.py:497
+msgid "Value bool"
+msgstr "Nilai bool"
+
+#: .\eav\models.py:502
+msgid "Value CSV"
+msgstr "Nilai CSV"
+
+#: .\eav\models.py:507
+msgid "Value date"
+msgstr "Nilai tanggal"
+
+#: .\eav\models.py:512
+msgid "Value float"
+msgstr "Nilai float"
+
+#: .\eav\models.py:517
+msgid "Value int"
+msgstr "Nilai int"
+
+#: .\eav\models.py:522
+msgid "Value text"
+msgstr "Nilai teks"
+
+#: .\eav\models.py:530
+msgid "Value JSON"
+msgstr "Nilai JSON"
+
+#: .\eav\models.py:539
+msgid "Value enum"
+msgstr "Nilai enum"
+
+#: .\eav\models.py:546
+msgid "Generic value id"
+msgstr "Id nilai generik"
+
+#: .\eav\models.py:555
+msgid "Generic value content type"
+msgstr "Jenis konten nilai generik"
+
+#: .\eav\models.py:653
+#, python-format
+msgid "%(obj)s has no EAV attribute named %(attr)s"
+msgstr "%(obj)s tidak memiliki atribut EAV bernama %(attr)s"
+
+#: .\eav\models.py:725
+msgid "{} EAV field cannot be blank"
+msgstr "{} Bidang EAV tidak boleh kosong"
+
+#: .\eav\models.py:732
+#, python-format
+msgid "%(attr)s EAV field %(err)s"
+msgstr "%(attr)s bidang EAV %(err)s"
+
+#: .\eav\validators.py:26
+msgid "Must be str or unicode"
+msgstr "Harus berupa str atau unicode"
+
+#: .\eav\validators.py:36
+msgid "Must be a float"
+msgstr "Harus berupa float"
+
+#: .\eav\validators.py:46
+msgid "Must be an integer"
+msgstr "Harus berupa integer"
+
+#: .\eav\validators.py:57
+msgid "Must be a date or datetime"
+msgstr "Harus berupa date atau datetime"
+
+#: .\eav\validators.py:65
+msgid "Must be a boolean"
+msgstr "Harus berupa boolean"
+
+#: .\eav\validators.py:74
+msgid "Must be a django model object instance"
+msgstr "Harus berupa instance objek model django"
+
+#: .\eav\validators.py:77
+msgid "Model has not been saved yet"
+msgstr "Model belum disimpan"
+
+#: .\eav\validators.py:88
+msgid "EnumValue has not been saved yet"
+msgstr "EnumValue belum disimpan"
+
+#: .\eav\validators.py:99 .\eav\validators.py:101
+msgid "Must be a JSON Serializable object"
+msgstr "Harus berupa objek JSON yang dapat diserialisasikan"
+
+#: .\eav\validators.py:111
+msgid "Must be Comma-Separated-Value."
+msgstr "Harus berupa Nilai-ang-Dipisahkan-Koma."
