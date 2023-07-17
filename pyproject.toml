@@ -90,7 +90,7 @@ pytest-cov = "^4.1"
 pytest-randomly = "^3.13"
 pytest-pythonpath = "^0.7.4"
 pytest-django = "^4.5.2"
-hypothesis = "^6.81.1"
+hypothesis = "^6.81.2"
 
 doc8 = "^0.11.2"
 
