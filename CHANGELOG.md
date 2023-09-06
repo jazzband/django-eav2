@@ -8,6 +8,13 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+## 1.5.0 (2023-09-06)
+
+### Features
+
+- Support for many type of primary key (UUIDField, BigAutoField, CharField)
+- Support for natural key use for some models (EnumValue, EnumGroup, Attribute, Value)
+
 ## 1.4.0 (2023-07-07)
 
 ### Features
