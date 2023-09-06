@@ -32,6 +32,9 @@ INSTALLED_APPS = [
     'eav',
 ]
 
+
+PRIMARY_KEY_TYPE = "UUID"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

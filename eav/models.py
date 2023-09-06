@@ -25,6 +25,7 @@ from eav.exceptions import IllegalAssignmentException
 from eav.fields import CSVField, EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
+from eav.logic.object_pk import get_pk_format
 from eav.validators import (
     validate_bool,
     validate_csv,
@@ -77,6 +78,9 @@ class EnumValue(models.Model):
         verbose_name = _('EnumValue')
         verbose_name_plural = _('EnumValues')
 
+    # added
+    id = get_pk_format()
+
     value = models.CharField(
         _('Value'),
         db_index=True,
@@ -105,6 +109,8 @@ class EnumGroup(models.Model):
     class Meta:
         verbose_name = _('EnumGroup')
         verbose_name_plural = _('EnumGroups')
+    # added
+    id = get_pk_format()
 
     name = models.CharField(
         unique=True,
@@ -205,6 +211,8 @@ class Attribute(models.Model):
     )
 
     # Core attributes
+    # added
+    id = get_pk_format()
 
     datatype = EavDatatypeField(
         choices=DATATYPE_CHOICES,
@@ -438,6 +446,9 @@ class Value(models.Model):  # noqa: WPS110
     class Meta:
         verbose_name = _('Value')
         verbose_name_plural = _('Values')
+
+    # added
+    id = get_pk_format()
 
     # Direct foreign keys
     attribute = models.ForeignKey(
