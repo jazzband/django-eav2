@@ -6,9 +6,14 @@ from django.conf import settings
 
 
 def get_pk_format():
-    PrimaryField = partial(models.BigAutoField, primary_key=True, editable=False)
-    if settings.PRIMARY_KEY_TYPE == "UUID":
+    if settings.PRIMARY_KEY_FIELD == "UUIDField":
         PrimaryField = partial(
             models.UUIDField, primary_key=True, editable=False, default=uuid.uuid4
         )
+    elif settings.PRIMARY_KEY_FIELD == "CharField":
+        PrimaryField = partial(
+            models.CharField, primary_key=True, editable=False, max_length=40
+        )
+    else:
+        PrimaryField = partial(models.BigAutoField, primary_key=True, editable=False)
     return PrimaryField()
