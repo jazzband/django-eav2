@@ -28,6 +28,7 @@ from eav.logic.model_managers import (
     EnumValueManager,
     EnumGroupManager,
     AttributeManager,
+    ValueManager,
 )
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.logic.object_pk import get_pk_format
@@ -469,6 +470,8 @@ class Value(models.Model):  # noqa: WPS110
         # = <Value: crazy_dev_user - Fav Drink: "red bull">
     """
 
+    objects = ValueManager()
+
     class Meta:
         verbose_name = _('Value')
         verbose_name_plural = _('Values')
@@ -597,11 +600,12 @@ class Value(models.Model):  # noqa: WPS110
         fk_field='generic_value_id',
     )
 
+    def natural_key(self):
+        return (self.id, self.value, self.attribute.natural_key())
+
     def __str__(self):
         """String representation of a Value."""
-        entity = self.entity_pk_int
-        if self.entity_uuid:
-            entity = self.entity_pk_uuid
+        entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return '{0}: "{1}" ({2})'.format(
             self.attribute.name,
             self.value,
@@ -610,13 +614,11 @@ class Value(models.Model):  # noqa: WPS110
 
     def __repr__(self):
         """Representation of Value object."""
-        entity = self.entity_pk_int
-        if self.entity_uuid:
-            entity = self.entity_pk_uuid
+        entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return '{0}: "{1}" ({2})'.format(
             self.attribute.name,
             self.value,
-            entity.pk,
+            entity,
         )
 
     def save(self, *args, **kwargs):
