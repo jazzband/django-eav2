@@ -24,6 +24,11 @@ from eav import register
 from eav.exceptions import IllegalAssignmentException
 from eav.fields import CSVField, EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
+from eav.logic.model_managers import (
+    EnumValueManager,
+    EnumGroupManager,
+    AttributeManager,
+)
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.logic.object_pk import get_pk_format
 from eav.validators import (
@@ -74,6 +79,8 @@ class EnumValue(models.Model):
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
 
+    objects = EnumValueManager()
+
     class Meta:
         verbose_name = _('EnumValue')
         verbose_name_plural = _('EnumValues')
@@ -88,9 +95,14 @@ class EnumValue(models.Model):
         max_length=SLUGFIELD_MAX_LENGTH,
     )
 
+    def natural_key(self):
+        return (self.value,)
+
     def __str__(self):
         """String representation of `EnumValue` instance."""
-        return str(self.value)
+        return str(
+            self.value,
+        )
 
     def __repr__(self):
         """String representation of `EnumValue` object."""
@@ -106,9 +118,12 @@ class EnumGroup(models.Model):
     See :class:`EnumValue` for an example.
     """
 
+    objects = EnumGroupManager()
+
     class Meta:
         verbose_name = _('EnumGroup')
         verbose_name_plural = _('EnumGroups')
+
     # added
     id = get_pk_format()
 
@@ -121,6 +136,9 @@ class EnumGroup(models.Model):
         EnumValue,
         verbose_name=_('Enum group'),
     )
+
+    def natural_key(self):
+        return (self.name,)
 
     def __str__(self):
         """String representation of `EnumGroup` instance."""
@@ -182,6 +200,8 @@ class Attribute(models.Model):
     .. warning:: Once an Attribute has been used by an entity, you can not
                  change it's datatype.
     """
+
+    objects = AttributeManager()
 
     class Meta:
         ordering = ['name']
@@ -295,6 +315,12 @@ class Attribute(models.Model):
         editable=False,
         verbose_name=_('Created'),
     )
+
+    def natural_key(self):
+        return (
+            self.name,
+            self.slug,
+        )
 
     @property
     def help_text(self):

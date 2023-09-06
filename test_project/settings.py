@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 ]
 
 
-PRIMARY_KEY_TYPE = "UUID"
+PRIMARY_KEY_FIELD = "django.db.models.BigAutoField"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -68,9 +68,10 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
-    },
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
