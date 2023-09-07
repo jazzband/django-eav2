@@ -8,6 +8,12 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+## 1.5.2 (2023-09-07)
+
+### Bug Fixes
+
+- Fixing error at new attribute creation at datatype field validation
+
 ## 1.5.1 (2023-09-07)
 
 ### Bug Fixes

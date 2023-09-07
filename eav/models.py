@@ -220,15 +220,15 @@ class Attribute(models.Model):
     TYPE_CSV = 'csv'
 
     DATATYPE_CHOICES = (
-        (TYPE_TEXT, _('Text')),
-        (TYPE_DATE, _('Date')),
-        (TYPE_FLOAT, _('Float')),
-        (TYPE_INT, _('Integer')),
-        (TYPE_BOOLEAN, _('True / False')),
-        (TYPE_OBJECT, _('Django Object')),
-        (TYPE_ENUM, _('Multiple Choice')),
-        (TYPE_JSON, _('JSON Object')),
-        (TYPE_CSV, _('Comma-Separated-Value')),
+        (TYPE_TEXT, _("Texte")),
+        (TYPE_DATE, _("Date")),
+        (TYPE_FLOAT, _("Nombre décimal")),
+        (TYPE_INT, _("Entier")),
+        (TYPE_BOOLEAN, _("Vrai / Faux")),
+        (TYPE_OBJECT, _("Django Object")),
+        (TYPE_ENUM, _("Multiple Choice")),
+        (TYPE_JSON, _("JSON Object")),
+        (TYPE_CSV, _("Comma-Separated-Value")),
     )
 
     # Core attributes
@@ -601,7 +601,7 @@ class Value(models.Model):  # noqa: WPS110
     )
 
     def natural_key(self):
-        return (self.id, self.attribute.natural_key())
+        return (self.attribute.natural_key(), self.entity_id, self.entity_uuid)
 
     def __str__(self):
         """String representation of a Value."""

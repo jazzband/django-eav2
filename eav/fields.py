@@ -20,6 +20,10 @@ class EavDatatypeField(models.CharField):
 
         if not instance.pk:
             return
+        
+        # added
+        if not type(instance).objects.filter(pk=instance.pk).exists():
+            return
 
         if type(instance).objects.get(pk=instance.pk).datatype == instance.datatype:
             return

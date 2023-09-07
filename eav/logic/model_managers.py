@@ -17,8 +17,9 @@ class AttributeManager(models.Manager):
 
 
 class ValueManager(models.Manager):
-    def get_by_natural_key(self, id, attribute):
+    def get_by_natural_key(self, attribute, entity_id, entity_uuid):
         from eav.models import Attribute
 
         attribute = Attribute.objects.get(name=attribute[0], slug=attribute[1])
-        return self.get(id=id, attribute=attribute)
+
+        return self.get(attribute=attribute, entity_id=entity_id, entity_uuid=entity_uuid)
