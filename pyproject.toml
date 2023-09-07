@@ -16,28 +16,18 @@ include = '\.pyi?$'
 [tool.poetry]
 name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django with the possibility of changing the pk field and using natural key for serialization"
-version = "1.5.0"
+version = "1.5.1"
 license = "GNU Lesser General Public License (LGPL), Version 3"
-packages = [
-  { include = "eav" }
-]
+packages = [{ include = "eav" }]
 
 
-authors = [
-  "Mauro Lizaur <mauro@sdf.org>",
-]
+authors = ["Mauro Lizaur <mauro@sdf.org>"]
 
 readme = "README.md"
 
 repository = "https://github.com/jazzband/django-eav2"
 
-keywords = [
-  "django",
-  "django-eav2",
-  "database",
-  "eav",
-  "sql",
-]
+keywords = ["django", "django-eav2", "database", "eav", "sql"]
 
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -56,9 +46,7 @@ classifiers = [
 ]
 
 [tool.semantic_release]
-version_variable = [
-    "pyproject.toml:version"
-]
+version_variable = ["pyproject.toml:version"]
 branch = "master"
 upload_to_pypi = false
 upload_to_release = false

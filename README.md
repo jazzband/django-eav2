@@ -4,7 +4,7 @@
 [![Django Version](https://img.shields.io/pypi/djversions/django-eav2.svg?color=green)](https://pypi.org/project/django-eav2/)
 [![Jazzband](https://jazzband.co/static/img/badge.svg)](https://jazzband.co/)
 
-## Django EAV 2 - Entity-Attribute-Value storage for Django
+## Django EAV 2 - Entity-Attribute-Value storage for Django with the possibility of changing the pk field and using natural key for serialization
 
 Django EAV 2 is a fork of django-eav (which itself was derived from eav-django).
 You can find documentation <a href="https://django-eav2.rtfd.io">here</a>.
@@ -157,7 +157,7 @@ Supplier.objects.filter(eav__city='London')
 
 ### References
 
-[1] Exploring Performance Issues for a Clinical Database Organized Using an Entity-Attribute-Value Representation, https://doi.org/10.1136/jamia.2000.0070475 <br>
-[2] What is so bad about EAV, anyway?, https://sqlblog.org/2009/11/19/what-is-so-bad-about-eav-anyway <br>
-[3] Magento for Developers: Part 7—Advanced ORM: Entity Attribute Value, https://devdocs.magento.com/guides/m1x/magefordev/mage-for-dev-7.html <br>
-[4] Data Extraction and Ad Hoc Query of an Entity— Attribute— Value Database, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC61332/
+[1] Exploring Performance Issues for a Clinical Database Organized Using an Entity-Attribute-Value Representation, <https://doi.org/10.1136/jamia.2000.0070475> <br>
+[2] What is so bad about EAV, anyway?, <https://sqlblog.org/2009/11/19/what-is-so-bad-about-eav-anyway> <br>
+[3] Magento for Developers: Part 7—Advanced ORM: Entity Attribute Value, <https://devdocs.magento.com/guides/m1x/magefordev/mage-for-dev-7.html> <br>
+[4] Data Extraction and Ad Hoc Query of an Entity— Attribute— Value Database, <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC61332/>

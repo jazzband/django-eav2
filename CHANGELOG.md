@@ -8,6 +8,12 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+## 1.5.1 (2023-09-07)
+
+### Bug Fixes
+
+- Fixing error on generate foreign key based on attribute natural key at deserialization of value object
+
 ## 1.5.0 (2023-09-06)
 
 ### Features
@@ -51,6 +57,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - Make Read the Docs dependencies all optional
 
 ## 1.2.2 (2022-08-13)
+
 ### Bug Fixes
 
 - Fixes AttributeError when using CSVFormField [#187](https://github.com/jazzband/django-eav2/issues/187)
@@ -58,6 +65,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - Migrates Attribute.slug to django.db.models.SlugField() [#223](https://github.com/jazzband/django-eav2/issues/223)
 
 ## 1.2.1 (2022-02-08)
+
 ### Bug Fixes
 
 - Fixes FieldError when filtering on foreign keys [#163](https://github.com/jazzband/django-eav2/issues/163)
@@ -88,7 +96,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 - Bumps min python version to `3.6.2`
 
-**Full Changelog**: https://github.com/jazzband/django-eav2/compare/1.0.0...1.1.0
+**Full Changelog**: <https://github.com/jazzband/django-eav2/compare/1.0.0...1.1.0>
 
 ## 1.0.0 (2021-10-21)
 
@@ -109,7 +117,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - Revamps all tooling, including moving to `poetry`, `pytest`, and `black`
 - Adds Github Actions and Dependabot
 
-**Full Changelog**: https://github.com/jazzband/django-eav2/compare/0.14.0...1.0.0
+**Full Changelog**: <https://github.com/jazzband/django-eav2/compare/0.14.0...1.0.0>
 
 ## 0.14.0 (2021-04-23)
 
@@ -118,6 +126,6 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - This release will be the last to support this range of Django versions: 1.11, 2.0, 2.1, 2.2, 3.0. SInce all of their extended support was ended by Django Project.
 - From the next release only will be supported 2.2 LTS, 3.1, and 3.2 LTS (eventually 4.x)
 
-**Full Changelog**: https://github.com/jazzband/django-eav2/compare/0.13.0...0.14.0
+**Full Changelog**: <https://github.com/jazzband/django-eav2/compare/0.13.0...0.14.0>
 
 (Anything before 0.14.0 was not recorded.)
