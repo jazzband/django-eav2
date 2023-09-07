@@ -8,6 +8,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+- Fixes querying with multiple eav kwargs [#395](https://github.com/jazzband/django-eav2/issues/395)
+
 ## 1.4.0 (2023-07-07)
 
 ### Features
