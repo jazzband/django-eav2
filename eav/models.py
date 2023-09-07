@@ -601,7 +601,7 @@ class Value(models.Model):  # noqa: WPS110
     )
 
     def natural_key(self):
-        return (self.id, self.value, self.attribute.natural_key())
+        return (self.id, self.attribute.natural_key())
 
     def __str__(self):
         """String representation of a Value."""
