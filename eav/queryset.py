@@ -26,6 +26,7 @@ from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
 from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError
+from django.db.models import Subquery
 
 from eav.models import Attribute, EnumValue, Value
 
@@ -179,8 +180,10 @@ def eav_filter(func):
             nkey, nval = expand_eav_filter(self.model, key, value)
 
             if nkey in nkwargs:
-                # Apply AND to both querysets.
-                nkwargs[nkey] = (nkwargs[nkey] & nval).distinct()
+                # Add filter to check if matching entity_id is in the previous queryset with same nkey
+                nkwargs[nkey] = nval.filter(
+                    entity_id__in=nkwargs[nkey].values_list('entity_id', flat=True)
+                ).distinct()
             else:
                 nkwargs.update({nkey: nval})
 
