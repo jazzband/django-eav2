@@ -6,8 +6,13 @@
 
 ## Django EAV 2 - Entity-Attribute-Value storage for Django with the possibility of changing the pk field and using natural key for serialization
 
+## What is new here ?
+
+With this version of a href="https://django-eav2.rtfd.io">django eav</a>, you can use an IntegerField or a UUIDField as the primary key for your eav models. 
+
 Django EAV 2 is a fork of django-eav (which itself was derived from eav-django).
 You can find documentation <a href="https://django-eav2.rtfd.io">here</a>.
+
 
 ## What is EAV anyway?
 
