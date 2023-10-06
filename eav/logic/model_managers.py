@@ -22,4 +22,6 @@ class ValueManager(models.Manager):
 
         attribute = Attribute.objects.get(name=attribute[0], slug=attribute[1])
 
-        return self.get(attribute=attribute, entity_id=entity_id, entity_uuid=entity_uuid)
+        return self.get(
+            attribute=attribute, entity_id=entity_id, entity_uuid=entity_uuid
+        )
