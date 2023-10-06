@@ -1,4 +1,5 @@
 # Version History
+# Version History
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
@@ -8,24 +9,14 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
-## 1.5.2 (2023-09-07)
+- Fixes querying with multiple eav kwargs [#395](https://github.com/jazzband/django-eav2/issues/395)
 
-### Bug Fixes
-
-- Fixing error at new attribute creation at datatype field validation
-
-## 1.5.1 (2023-09-07)
-
-### Bug Fixes
-
-- Fixing error on generate foreign key based on attribute natural key at deserialization of value object
-
-## 1.5.0 (2023-09-06)
+## 1.5.0 (2023-09-07)
 
 ### Features
 
-- Support for many type of primary key (UUIDField, BigAutoField, CharField)
-- Support for natural key use for some models (EnumValue, EnumGroup, Attribute, Value)
+- Support for many type of primary key (UUIDField, BigAutoField)
+- Support for natural key use for some models for serialization (EnumValue, EnumGroup, Attribute, Value)
 
 ## 1.4.0 (2023-07-07)
 
