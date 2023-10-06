@@ -298,3 +298,24 @@ class Queries(TestCase):
         p = Patient.objects.get_or_create(name='Beth', example=e)[0]
         c = ExampleModel.objects.filter(patient=p)
         self.assertEqual(c.count(), 1)
+
+    def test_filter_with_multiple_eav_attributes(self):
+        """
+        Test filtering a model using both regular and multiple EAV attributes.
+
+        This test initializes test data and then filters the Patient test model
+        based on a combination of a regular attribute and multiple EAV attributes.
+        """
+        self.init_data()
+
+        # Use the filter method with 3 EAV attribute conditions
+        patients = Patient.objects.filter(
+            name='Anne',
+            eav__age=3,
+            eav__illness='cold',
+            eav__fever='no',
+        )
+
+        # Assert that the expected patient is returned
+        self.assertEqual(len(patients), 1)
+        self.assertEqual(patients[0].name, 'Anne')

@@ -83,11 +83,6 @@ However, it is important to note that:
 
 In some use-cases, JSONB (binary JSON data) datatype (Postgres 9.4+ and analogous in other RDMSs) can be used as an alternative to EAV. JSONB supports indexing, which amortizes performance trade-off. It's important to keep in mind that JSONB is not RDMS-agnostic solution and has it's own problems, such as typing.
 
-## What is new here ?
-
-With this version of django eav, you can use an IntegerField or a UUIDField as the primary key for your eav models.
-You can also use the natural key for serialization instead of the primary key.
-
 
 ## Installation
 

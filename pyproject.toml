@@ -57,7 +57,7 @@ python = "^3.8"
 django = ">=3.2,<4.3"
 
 # Docs extra:
-sphinx = { version = ">=5,<7", optional = true }
+sphinx = { version = ">=5,<8", optional = true }
 sphinx-autodoc-typehints = { version = "^1.12", optional = true }
 m2r2 = { version = "^0.3", optional = true }
 tomlkit = { version = ">=0.11,<0.13", optional = true }
@@ -78,7 +78,7 @@ pytest-cov = "^4.1"
 pytest-randomly = "^3.15"
 pytest-pythonpath = "^0.7.4"
 pytest-django = "^4.5.2"
-hypothesis = "^6.82.6"
+hypothesis = "^6.87.1"
 
 doc8 = "^0.11.2"
 
