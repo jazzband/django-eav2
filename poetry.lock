@@ -833,13 +833,13 @@ gitdb = ">=4.0.1,<5"
 
 [[package]]
 name = "hypothesis"
-version = "6.87.1"
+version = "6.87.3"
 description = "A library for property-based testing"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "hypothesis-6.87.1-py3-none-any.whl", hash = "sha256:6b03e774d7ddddc29810e58ba4c41b5c9a894427aaf336e6400c560655a7449b"},
-    {file = "hypothesis-6.87.1.tar.gz", hash = "sha256:13615a8f7fa27d102c43ab2f92eaef519988700f3ca8129bc6340d36dec372dd"},
+    {file = "hypothesis-6.87.3-py3-none-any.whl", hash = "sha256:684a7b56a4a2e990cb0efb3124c2d886c5138453550b6f4f4a3b75bfc8ef24d4"},
+    {file = "hypothesis-6.87.3.tar.gz", hash = "sha256:e67391efb9e6f663031f493d04b5edfb2e47bfc5a6ea56190aed3bc7993d5899"},
 ]
 
 [package.dependencies]
@@ -2184,4 +2184,4 @@ docs = ["m2r2", "sphinx", "sphinx-autodoc-typehints", "sphinx-rtd-theme", "tomlk
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "c8c849e9e1eb1c95b34e2e1980408ccd831b560e4915ca1261bbf54e1ced598c"
+content-hash = "7f3be059e18ad403ae39bf28bc9da5a380aa4567a2a9cfd2d5bd760d43e48516"
