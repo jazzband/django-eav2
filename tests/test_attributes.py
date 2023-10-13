@@ -4,9 +4,9 @@ import string
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from hypothesis import given, settings
+from hypothesis.extra import django
 from django.conf import settings as django_settings
 from hypothesis import strategies as st
-from hypothesis.extra import django
 from hypothesis.strategies import just
 
 import eav
