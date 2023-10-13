@@ -5,7 +5,6 @@ import eav.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('eav', '0009_enchance_naming'),
     ]
