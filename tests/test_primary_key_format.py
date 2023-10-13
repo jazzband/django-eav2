@@ -7,6 +7,7 @@ from functools import partial
 import uuid
 from eav.logic.object_pk import get_pk_format
 
+
 class GetPrimaryKeyFormatTestCase(TestCase):
     def test_get_uuid_primary_key(self):
         settings.PRIMARY_KEY_FIELD = "django.db.models.UUIDField"
