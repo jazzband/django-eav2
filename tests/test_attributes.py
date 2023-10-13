@@ -15,6 +15,7 @@ from eav.models import Attribute, Value
 from eav.registry import EavConfig
 from test_project.models import Doctor, Encounter, Patient, RegisterTestModel
 
+
 if django_settings.PRIMARY_KEY_FIELD == "django.db.models.UUIDField":
     auto_field_strategy = st.builds(uuid.uuid4, version=4, max_length=32)
 elif django_settings.PRIMARY_KEY_FIELD == "django.db.models.CharField":
