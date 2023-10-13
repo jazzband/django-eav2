@@ -24,7 +24,7 @@ from eav import register
 from eav.exceptions import IllegalAssignmentException
 from eav.fields import CSVField, EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
-from eav.logic.model_managers import (
+from eav.logic.managers import (
     EnumValueManager,
     EnumGroupManager,
     AttributeManager,

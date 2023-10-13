@@ -1,8 +1,10 @@
+import uuid
 import string
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from hypothesis import given, settings
+from django.conf import settings as django_settings
 from hypothesis import strategies as st
 from hypothesis.extra import django
 from hypothesis.strategies import just
@@ -12,6 +14,13 @@ from eav.exceptions import IllegalAssignmentException
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
 from test_project.models import Doctor, Encounter, Patient, RegisterTestModel
+
+if django_settings.PRIMARY_KEY_FIELD == "django.db.models.UUIDField":
+    auto_field_strategy = st.builds(uuid.uuid4, version=4, max_length=32)
+elif django_settings.PRIMARY_KEY_FIELD == "django.db.models.CharField":
+    auto_field_strategy = st.text(min_size=1, max_size=255)
+else:
+    auto_field_strategy = st.integers(min_value=1, max_value=32)
 
 
 class Attributes(TestCase):
@@ -123,6 +132,7 @@ class TestAttributeModel(django.TestCase):
     @given(
         django.from_model(
             Attribute,
+            id=auto_field_strategy,
             datatype=just(Attribute.TYPE_TEXT),
             enum_group=just(None),
         ),

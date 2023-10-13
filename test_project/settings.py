@@ -74,6 +74,7 @@ DATABASES = {
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+PRIMARY_KEY_FIELD = 'django.db.models.AutoField'
 
 
 # Password validation
