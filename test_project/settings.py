@@ -33,8 +33,6 @@ INSTALLED_APPS = [
 ]
 
 
-PRIMARY_KEY_FIELD = "django.db.models.BigAutoField"
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -68,13 +66,13 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'NAME': ':memory:',
+    },
 }
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-PRIMARY_KEY_FIELD = 'django.db.models.AutoField'
+EAV2_PRIMARY_KEY_FIELD = 'django.db.models.AutoField'
 
 
 # Password validation

@@ -103,21 +103,21 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add `django.db.models.UUIDField` or `django.db.models.BigAutoField` as value of `PRIMARY_KEY_FIELD` in your settings
+Add `django.db.models.UUIDField` or `django.db.models.BigAutoField` as value of `EAV2_PRIMARY_KEY_FIELD` in your settings
 
 ``` python
-PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as exemple
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as exemple
 ```
 
 ### Note: Primary key mandatory modification field
 
-If the primary key of eav models are to be modified (UUIDField -> BigAutoField, BigAutoField -> UUIDField) in the middle of the project when the migrations are already done, you have to change the value of `PRIMARY_KEY_FIELD` in your settings.
+If the primary key of eav models are to be modified (UUIDField -> BigAutoField, BigAutoField -> UUIDField) in the middle of the project when the migrations are already done, you have to change the value of `EAV2_PRIMARY_KEY_FIELD` in your settings.
 
 ##### Step 1
- Change the value of `PRIMARY_KEY_FIELD` into `django.db.models.CharField` in your settings.
+ Change the value of `EAV2_PRIMARY_KEY_FIELD` into `django.db.models.CharField` in your settings.
 
  ```python
- PRIMARY_KEY_FIELD = "django.db.models.CharField"
+ EAV2_PRIMARY_KEY_FIELD = "django.db.models.CharField"
  ```
 
  Run the migrations
@@ -128,10 +128,10 @@ If the primary key of eav models are to be modified (UUIDField -> BigAutoField, 
  ```
 
 ##### Step 2
- Change the value of `PRIMARY_KEY_FIELD` into the desired value (`django.db.models.BigAutoField` or `django.db.models.UUIDField`) in your settings.
+ Change the value of `EAV2_PRIMARY_KEY_FIELD` into the desired value (`django.db.models.BigAutoField` or `django.db.models.UUIDField`) in your settings.
 
  ```python
- PRIMARY_KEY_FIELD = "django.db.models.BigAutoField" # as exemple
+ EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField" # as exemple
  ```
 
   Run again the migrations.

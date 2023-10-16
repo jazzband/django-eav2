@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
@@ -16,18 +16,28 @@ include = '\.pyi?$'
 [tool.poetry]
 name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django"
-version = "1.5.0"
+version = "1.4.0"
 license = "GNU Lesser General Public License (LGPL), Version 3"
-packages = [{ include = "eav" }]
+packages = [
+  { include = "eav" }
+]
 
 
-authors = ["Mauro Lizaur <mauro@sdf.org>"]
+authors = [
+  "Mauro Lizaur <mauro@sdf.org>",
+]
 
 readme = "README.md"
 
 repository = "https://github.com/jazzband/django-eav2"
 
-keywords = ["django", "django-eav2", "database", "eav", "sql"]
+keywords = [
+  "django",
+  "django-eav2",
+  "database",
+  "eav",
+  "sql",
+]
 
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -46,7 +56,9 @@ classifiers = [
 ]
 
 [tool.semantic_release]
-version_variable = ["pyproject.toml:version"]
+version_variable = [
+    "pyproject.toml:version"
+]
 branch = "master"
 upload_to_pypi = false
 upload_to_release = false
@@ -56,14 +68,7 @@ build_command = "pip install poetry && poetry build"
 python = "^3.8"
 django = ">=3.2,<4.3"
 
-# Docs extra:
-sphinx = { version = ">=5,<8", optional = true }
-sphinx-autodoc-typehints = { version = "^1.12", optional = true }
-m2r2 = { version = "^0.3", optional = true }
-tomlkit = { version = ">=0.11,<0.13", optional = true }
-sphinx-rtd-theme = { version = "^1.0.0", optional = true }
-
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.test.dependencies]
 mypy = "^1.6"
 
 wemake-python-styleguide = "^0.17"
@@ -82,11 +87,12 @@ hypothesis = "^6.87.1"
 
 doc8 = "^0.11.2"
 
-[tool.poetry.extras]
-docs = [
-  "sphinx",
-  "sphinx-autodoc-typehints",
-  "sphinx_rtd_theme",
-  "m2r2",
-  "tomlkit",
-]
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=5.0,<8.0"
+sphinx-rtd-theme = "^1.3.0"
+sphinx-autodoc-typehints = "^1.19.5"
+m2r2 = "^0.3"
+tomlkit = ">=0.11,<0.13"
