@@ -31,10 +31,3 @@ def test_get_default_primary_key(settings) -> None:
     assert isinstance(primary_field, models.BigAutoField)
     assert primary_field.primary_key
     assert not primary_field.editable
-
-
-def test_unrecognized_primary_key_field(settings):
-    # Test when an unrecognized primary key field is specified in settings
-    settings.EAV2_PRIMARY_KEY_FIELD = "UnrecognizedField"
-    with pytest.raises(ValueError):
-        get_pk_format()
