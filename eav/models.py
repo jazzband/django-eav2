@@ -25,13 +25,13 @@ from eav.exceptions import IllegalAssignmentException
 from eav.fields import CSVField, EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.managers import (
-    EnumValueManager,
-    EnumGroupManager,
     AttributeManager,
+    EnumGroupManager,
+    EnumValueManager,
     ValueManager,
 )
-from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.logic.object_pk import get_pk_format
+from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.validators import (
     validate_bool,
     validate_csv,
@@ -220,15 +220,15 @@ class Attribute(models.Model):
     TYPE_CSV = 'csv'
 
     DATATYPE_CHOICES = (
-        (TYPE_TEXT, _("Texte")),
-        (TYPE_DATE, _("Date")),
-        (TYPE_FLOAT, _("Nombre décimal")),
-        (TYPE_INT, _("Entier")),
-        (TYPE_BOOLEAN, _("Vrai / Faux")),
-        (TYPE_OBJECT, _("Django Object")),
-        (TYPE_ENUM, _("Multiple Choice")),
-        (TYPE_JSON, _("JSON Object")),
-        (TYPE_CSV, _("Comma-Separated-Value")),
+        (TYPE_TEXT, _('Text')),
+        (TYPE_DATE, _('Date')),
+        (TYPE_FLOAT, _('Float')),
+        (TYPE_INT, _('Integer')),
+        (TYPE_BOOLEAN, _('True / False')),
+        (TYPE_OBJECT, _('Django Object')),
+        (TYPE_ENUM, _('Multiple Choice')),
+        (TYPE_JSON, _('JSON Object')),
+        (TYPE_CSV, _('Comma-Separated-Value')),
     )
 
     # Core attributes
