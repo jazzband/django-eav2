@@ -10,6 +10,7 @@ optional metaclass for each eav model class.
 """
 
 from copy import copy
+from typing import Tuple
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -95,7 +96,7 @@ class EnumValue(models.Model):
         max_length=SLUGFIELD_MAX_LENGTH,
     )
 
-    def natural_key(self) -> tuple[str,]:
+    def natural_key(self) -> Tuple[str]:
         """
         Retrieve the natural key for the EnumValue instance.
 
@@ -145,7 +146,7 @@ class EnumGroup(models.Model):
         verbose_name=_('Enum group'),
     )
 
-    def natural_key(self) -> tuple[str,]:
+    def natural_key(self) -> Tuple[str]:
         """
         Retrieve the natural key for the EnumGroup instance.
 
@@ -332,7 +333,7 @@ class Attribute(models.Model):
         verbose_name=_('Created'),
     )
 
-    def natural_key(self) -> tuple[str, str]:
+    def natural_key(self) -> Tuple[str, str]:
         """
         Retrieve the natural key for the Attribute instance.
 
@@ -623,7 +624,7 @@ class Value(models.Model):  # noqa: WPS110
         fk_field='generic_value_id',
     )
 
-    def natural_key(self) -> tuple[tuple, int, str]:
+    def natural_key(self) -> Tuple[Tuple[str, str], int, str]:
         """
         Retrieve the natural key for the Value instance.
 
