@@ -86,7 +86,6 @@ class EnumValue(models.Model):
         verbose_name = _('EnumValue')
         verbose_name_plural = _('EnumValues')
 
-    # added
     id = get_pk_format()
 
     value = models.CharField(
@@ -96,7 +95,16 @@ class EnumValue(models.Model):
         max_length=SLUGFIELD_MAX_LENGTH,
     )
 
-    def natural_key(self):
+    def natural_key(self) -> tuple[str, ]:
+        """
+        Retrieve the natural key for the EnumValue instance.
+
+        The natural key for an EnumValue is defined by its `value`. This method returns
+        the value of the instance as a single-element tuple.
+
+        Returns:
+            tuple: A tuple containing the value of the EnumValue instance.
+        """
         return (self.value,)
 
     def __str__(self):
@@ -125,7 +133,6 @@ class EnumGroup(models.Model):
         verbose_name = _('EnumGroup')
         verbose_name_plural = _('EnumGroups')
 
-    # added
     id = get_pk_format()
 
     name = models.CharField(
@@ -138,7 +145,16 @@ class EnumGroup(models.Model):
         verbose_name=_('Enum group'),
     )
 
-    def natural_key(self):
+    def natural_key(self) -> tuple[str, ]:
+        """
+        Retrieve the natural key for the EnumGroup instance.
+
+        The natural key for an EnumGroup is defined by its `name`. This method
+        returns the name of the instance as a single-element tuple.
+
+        Returns:
+            tuple: A tuple containing the name of the EnumGroup instance.
+        """
         return (self.name,)
 
     def __str__(self):
@@ -232,7 +248,6 @@ class Attribute(models.Model):
     )
 
     # Core attributes
-    # added
     id = get_pk_format()
 
     datatype = EavDatatypeField(
@@ -317,7 +332,16 @@ class Attribute(models.Model):
         verbose_name=_('Created'),
     )
 
-    def natural_key(self):
+    def natural_key(self) -> tuple[str, str]:
+        """
+        Retrieve the natural key for the Attribute instance.
+
+        The natural key for an Attribute is defined by its `name` and `slug`. This method
+        returns a tuple containing these two attributes of the instance.
+
+        Returns:
+            tuple: A tuple containing the name and slug of the Attribute instance.
+        """
         return (
             self.name,
             self.slug,
@@ -476,7 +500,6 @@ class Value(models.Model):  # noqa: WPS110
         verbose_name = _('Value')
         verbose_name_plural = _('Values')
 
-    # added
     id = get_pk_format()
 
     # Direct foreign keys
@@ -600,7 +623,18 @@ class Value(models.Model):  # noqa: WPS110
         fk_field='generic_value_id',
     )
 
-    def natural_key(self):
+    def natural_key(self) -> tuple[tuple, int, str]:
+        """
+        Retrieve the natural key for the Value instance.
+
+        The natural key for a Value is a combination of its `attribute` natural key,
+        `entity_id`, and `entity_uuid`. This method returns a tuple containing these
+        three elements.
+
+        Returns:
+            tuple: A tuple containing the natural key of the attribute, entity ID,
+                and entity UUID of the Value instance.
+        """
         return (self.attribute.natural_key(), self.entity_id, self.entity_uuid)
 
     def __str__(self):
