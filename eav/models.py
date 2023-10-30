@@ -95,7 +95,7 @@ class EnumValue(models.Model):
         max_length=SLUGFIELD_MAX_LENGTH,
     )
 
-    def natural_key(self) -> tuple[str, ]:
+    def natural_key(self) -> tuple[str,]:
         """
         Retrieve the natural key for the EnumValue instance.
 
@@ -145,7 +145,7 @@ class EnumGroup(models.Model):
         verbose_name=_('Enum group'),
     )
 
-    def natural_key(self) -> tuple[str, ]:
+    def natural_key(self) -> tuple[str,]:
         """
         Retrieve the natural key for the EnumGroup instance.
 
