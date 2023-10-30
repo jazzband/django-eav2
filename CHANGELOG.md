@@ -14,6 +14,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 - Support for many type of primary key (UUIDField, BigAutoField)
 - Support for natural key use for some models for serialization (EnumValue, EnumGroup, Attribute, Value)
+- Add support for Django 4.2
+- Add support for Python 3.11
 
 ## 1.4.0 (2023-07-07)
 
