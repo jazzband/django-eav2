@@ -83,6 +83,7 @@ However, it is important to note that:
 
 In some use-cases, JSONB (binary JSON data) datatype (Postgres 9.4+ and analogous in other RDMSs) can be used as an alternative to EAV. JSONB supports indexing, which amortizes performance trade-off. It's important to keep in mind that JSONB is not RDMS-agnostic solution and has it's own problems, such as typing.
 
+
 ## Installation
 
 Install with pip
@@ -101,6 +102,44 @@ INSTALLED_APPS = [
     'eav',
 ]
 ```
+
+Add `django.db.models.UUIDField` or `django.db.models.BigAutoField` as value of `EAV2_PRIMARY_KEY_FIELD` in your settings
+
+``` python
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as exemple
+```
+
+### Note: Primary key mandatory modification field
+
+If the primary key of eav models are to be modified (UUIDField -> BigAutoField, BigAutoField -> UUIDField) in the middle of the project when the migrations are already done, you have to change the value of `EAV2_PRIMARY_KEY_FIELD` in your settings.
+
+##### Step 1
+ Change the value of `EAV2_PRIMARY_KEY_FIELD` into `django.db.models.CharField` in your settings.
+
+ ```python
+ EAV2_PRIMARY_KEY_FIELD = "django.db.models.CharField"
+ ```
+
+ Run the migrations
+
+ ```bash
+ python manage.py makemigrations
+ python manage.py migrate
+ ```
+
+##### Step 2
+ Change the value of `EAV2_PRIMARY_KEY_FIELD` into the desired value (`django.db.models.BigAutoField` or `django.db.models.UUIDField`) in your settings.
+
+ ```python
+ EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField" # as exemple
+ ```
+
+  Run again the migrations.
+
+```bash
+ python manage.py makemigrations
+ python manage.py migrate
+ ```
 
 ### Note: Django 2.2 Users
 

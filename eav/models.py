@@ -10,6 +10,7 @@ optional metaclass for each eav model class.
 """
 
 from copy import copy
+from typing import Tuple
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -24,6 +25,13 @@ from eav import register
 from eav.exceptions import IllegalAssignmentException
 from eav.fields import CSVField, EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
+from eav.logic.managers import (
+    AttributeManager,
+    EnumGroupManager,
+    EnumValueManager,
+    ValueManager,
+)
+from eav.logic.object_pk import get_pk_format
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.validators import (
     validate_bool,
@@ -73,9 +81,13 @@ class EnumValue(models.Model):
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
 
+    objects = EnumValueManager()
+
     class Meta:
         verbose_name = _('EnumValue')
         verbose_name_plural = _('EnumValues')
+
+    id = get_pk_format()
 
     value = models.CharField(
         _('Value'),
@@ -84,9 +96,23 @@ class EnumValue(models.Model):
         max_length=SLUGFIELD_MAX_LENGTH,
     )
 
+    def natural_key(self) -> Tuple[str]:
+        """
+        Retrieve the natural key for the EnumValue instance.
+
+        The natural key for an EnumValue is defined by its `value`. This method returns
+        the value of the instance as a single-element tuple.
+
+        Returns:
+            tuple: A tuple containing the value of the EnumValue instance.
+        """
+        return (self.value,)
+
     def __str__(self):
         """String representation of `EnumValue` instance."""
-        return str(self.value)
+        return str(
+            self.value,
+        )
 
     def __repr__(self):
         """String representation of `EnumValue` object."""
@@ -102,9 +128,13 @@ class EnumGroup(models.Model):
     See :class:`EnumValue` for an example.
     """
 
+    objects = EnumGroupManager()
+
     class Meta:
         verbose_name = _('EnumGroup')
         verbose_name_plural = _('EnumGroups')
+
+    id = get_pk_format()
 
     name = models.CharField(
         unique=True,
@@ -115,6 +145,18 @@ class EnumGroup(models.Model):
         EnumValue,
         verbose_name=_('Enum group'),
     )
+
+    def natural_key(self) -> Tuple[str]:
+        """
+        Retrieve the natural key for the EnumGroup instance.
+
+        The natural key for an EnumGroup is defined by its `name`. This method
+        returns the name of the instance as a single-element tuple.
+
+        Returns:
+            tuple: A tuple containing the name of the EnumGroup instance.
+        """
+        return (self.name,)
 
     def __str__(self):
         """String representation of `EnumGroup` instance."""
@@ -177,6 +219,8 @@ class Attribute(models.Model):
                  change it's datatype.
     """
 
+    objects = AttributeManager()
+
     class Meta:
         ordering = ['name']
         verbose_name = _('Attribute')
@@ -205,6 +249,7 @@ class Attribute(models.Model):
     )
 
     # Core attributes
+    id = get_pk_format()
 
     datatype = EavDatatypeField(
         choices=DATATYPE_CHOICES,
@@ -287,6 +332,21 @@ class Attribute(models.Model):
         editable=False,
         verbose_name=_('Created'),
     )
+
+    def natural_key(self) -> Tuple[str, str]:
+        """
+        Retrieve the natural key for the Attribute instance.
+
+        The natural key for an Attribute is defined by its `name` and `slug`. This method
+        returns a tuple containing these two attributes of the instance.
+
+        Returns:
+            tuple: A tuple containing the name and slug of the Attribute instance.
+        """
+        return (
+            self.name,
+            self.slug,
+        )
 
     @property
     def help_text(self):
@@ -435,9 +495,13 @@ class Value(models.Model):  # noqa: WPS110
         # = <Value: crazy_dev_user - Fav Drink: "red bull">
     """
 
+    objects = ValueManager()
+
     class Meta:
         verbose_name = _('Value')
         verbose_name_plural = _('Values')
+
+    id = get_pk_format()
 
     # Direct foreign keys
     attribute = models.ForeignKey(
@@ -560,11 +624,23 @@ class Value(models.Model):  # noqa: WPS110
         fk_field='generic_value_id',
     )
 
+    def natural_key(self) -> Tuple[Tuple[str, str], int, str]:
+        """
+        Retrieve the natural key for the Value instance.
+
+        The natural key for a Value is a combination of its `attribute` natural key,
+        `entity_id`, and `entity_uuid`. This method returns a tuple containing these
+        three elements.
+
+        Returns:
+            tuple: A tuple containing the natural key of the attribute, entity ID,
+                and entity UUID of the Value instance.
+        """
+        return (self.attribute.natural_key(), self.entity_id, self.entity_uuid)
+
     def __str__(self):
         """String representation of a Value."""
-        entity = self.entity_pk_int
-        if self.entity_uuid:
-            entity = self.entity_pk_uuid
+        entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return '{0}: "{1}" ({2})'.format(
             self.attribute.name,
             self.value,
@@ -573,13 +649,11 @@ class Value(models.Model):  # noqa: WPS110
 
     def __repr__(self):
         """Representation of Value object."""
-        entity = self.entity_pk_int
-        if self.entity_uuid:
-            entity = self.entity_pk_uuid
+        entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return '{0}: "{1}" ({2})'.format(
             self.attribute.name,
             self.value,
-            entity.pk,
+            entity,
         )
 
     def save(self, *args, **kwargs):
