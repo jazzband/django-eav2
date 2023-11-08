@@ -4,7 +4,10 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ## {{ Next Version }}
 
+### Bug Fixes
 ### Features
+
+## 1.5.0 (2023-11-08)
 
 ### Bug Fixes
 
