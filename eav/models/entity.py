@@ -15,10 +15,7 @@ from .value import Value
 
 
 class Entity:
-    """
-    The helper class that will be attached to any entity
-    registered with eav.
-    """
+    """Helper class that will be attached to entities registered with eav."""
 
     @staticmethod
     def pre_save_handler(sender, *args, **kwargs):

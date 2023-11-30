@@ -1,9 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from eav.logic.managers import (
-    EnumValueManager,
-)
+from eav.logic.managers import EnumValueManager
 from eav.logic.object_pk import get_pk_format
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH
 

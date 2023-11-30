@@ -4,9 +4,7 @@ from django.db import models
 from django.db.models import ManyToManyField
 from django.utils.translation import gettext_lazy as _
 
-from eav.logic.managers import (
-    EnumGroupManager,
-)
+from eav.logic.managers import EnumGroupManager
 from eav.logic.object_pk import get_pk_format
 from eav.settings import CHARFIELD_LENGTH
 

@@ -11,9 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from eav.fields import EavDatatypeField
 from eav.logic.entity_pk import get_entity_pk_type
-from eav.logic.managers import (
-    AttributeManager,
-)
+from eav.logic.managers import AttributeManager
 from eav.logic.object_pk import get_pk_format
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.settings import CHARFIELD_LENGTH
