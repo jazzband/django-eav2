@@ -1,6 +1,5 @@
 import uuid
 
-import pytest
 from django.db import models
 
 from eav.logic.object_pk import get_pk_format

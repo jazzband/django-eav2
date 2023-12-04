@@ -5,18 +5,21 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ## {{ Next Version }}
 
+### Bug Fixes
 ### Features
+
+## 1.5.0 (2023-11-08)
 
 ### Bug Fixes
 
 - Fixes querying with multiple eav kwargs [#395](https://github.com/jazzband/django-eav2/issues/395)
 
-## 1.5.0 (2023-09-07)
-
 ### Features
 
 - Support for many type of primary key (UUIDField, BigAutoField)
 - Support for natural key use for some models for serialization (EnumValue, EnumGroup, Attribute, Value)
+- Add support for Django 4.2
+- Add support for Python 3.11
 
 ## 1.4.0 (2023-07-07)
 
