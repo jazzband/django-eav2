@@ -22,7 +22,7 @@ Q-expressions need to be rewritten for two reasons:
 from functools import wraps
 from itertools import count
 
-from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError

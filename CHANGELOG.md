@@ -8,6 +8,13 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ### Bug Fixes
 ### Features
 
+## 1.5.1 (2023-12-04)
+
+### Bug Fixes
+
+- Fixes errors in migrations [#406](https://github.com/jazzband/django-eav2/issues/406)
+
+
 ## 1.5.0 (2023-11-08)
 
 ### Bug Fixes
