@@ -1,6 +1,6 @@
 # ruff: noqa: UP007
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Tuple  # noqa: UP035
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -203,7 +203,7 @@ class Attribute(models.Model):
     def __str__(self) -> str:
         return f'{self.name} ({self.get_datatype_display()})'
 
-    def natural_key(self) -> tuple[str, str]:
+    def natural_key(self) -> Tuple[str, str]:  # noqa: UP006
         """
         Retrieve the natural key for the Attribute instance.
 
