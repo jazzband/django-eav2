@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -58,7 +60,7 @@ class EnumValue(models.Model):
         """String representation of `EnumValue` object."""
         return f'<EnumValue {self.value}>'
 
-    def natural_key(self) -> tuple[str]:
+    def natural_key(self) -> Tuple[str]:
         """
         Retrieve the natural key for the EnumValue instance.
 

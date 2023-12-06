@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Tuple
 
 from django.db import models
 from django.db.models import ManyToManyField
@@ -47,7 +47,7 @@ class EnumGroup(models.Model):
         """String representation of `EnumGroup` object."""
         return f'<EnumGroup {self.name}>'
 
-    def natural_key(self) -> tuple[str]:
+    def natural_key(self) -> Tuple[str]:
         """
         Retrieve the natural key for the EnumGroup instance.
 
