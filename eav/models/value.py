@@ -1,6 +1,6 @@
 # ruff: noqa: UP007
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -172,7 +172,7 @@ class Value(models.Model):
         fk_field='generic_value_id',
     )
 
-    def natural_key(self) -> tuple[tuple[str, str], int, str]:
+    def natural_key(self) -> Tuple[Tuple[str, str], int, str]:
         """
         Retrieve the natural key for the Value instance.
 
