@@ -72,7 +72,7 @@ DATABASES = {
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-EAV2_PRIMARY_KEY_FIELD = 'django.db.models.AutoField'
+EAV2_PRIMARY_KEY_FIELD = 'django.db.models.CharField'
 
 
 # Password validation
