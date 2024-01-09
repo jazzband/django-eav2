@@ -1,3 +1,4 @@
+# https://docs.djangoproject.com/en/stable/faq/install/#what-python-version-can-i-use-with-django
 name: test
 
 "on": [push, pull_request, workflow_dispatch]
@@ -9,7 +10,15 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         django-version: ["3.2", "4.1", "4.2", "5.0"]
-
+        exclude:
+          - django-version: "3.2"
+            python-version: "3.11"
+          - django-version: "3.2"
+            python-version: "3.12"
+          - django-version: "5.0"
+            python-version: "3.8"
+          - django-version: "5.0"
+            python-version: "3.9"
     steps:
       - uses: actions/checkout@v4
 
@@ -34,8 +43,8 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install
-          poetry run pip install -U pip
-          poetry run pip install -U "django==${{ matrix.django-version }}.*"
+          poetry run pip install --upgrade pip
+          poetry run pip install --upgrade "django==${{ matrix.django-version }}.*"
 
       - name: Run tests
         run: |
