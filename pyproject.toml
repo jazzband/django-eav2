@@ -74,7 +74,6 @@ build_command = "pip install poetry && poetry build"
 python = "^3.8"
 django = ">=3.2,<5.1"
 pyyaml = { version = "^6.0.1", python = "^3.12" }
-setuptools = { version = "^69.0.3", python = "^3.12" }
 
 [tool.poetry.group.test.dependencies]
 mypy = "^1.6"
