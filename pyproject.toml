@@ -51,12 +51,14 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Framework :: Django",
   "Framework :: Django :: 3.2",
   "Framework :: Django :: 4.1",
   "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
 ]
 
 [tool.semantic_release]
@@ -70,7 +72,8 @@ build_command = "pip install poetry && poetry build"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-django = ">=3.2,<4.3"
+django = ">=3.2,<5.1"
+setuptools = { version = "^69.0.3", python = "^3.12" }
 
 [tool.poetry.group.test.dependencies]
 mypy = "^1.6"
