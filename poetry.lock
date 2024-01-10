@@ -821,6 +821,16 @@ files = [
 smmap = ">=3.0.1,<6"
 
 [[package]]
+name = "gitignore-parser"
+version = "0.1.10"
+description = "A spec-compliant gitignore parser for Python 3.5+"
+optional = false
+python-versions = "*"
+files = [
+    {file = "gitignore_parser-0.1.10.tar.gz", hash = "sha256:bb0b4c8c61543c106c2ea5cd35dcd159e5a3fad2c1995b52bfe43c13ada0914e"},
+]
+
+[[package]]
 name = "gitpython"
 version = "3.1.37"
 description = "GitPython is a Python library used to interact with Git repositories"
@@ -1216,13 +1226,13 @@ files = [
 
 [[package]]
 name = "nitpick"
-version = "0.34.0"
+version = "0.35.0"
 description = "Enforce the same settings across multiple language-independent projects"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "nitpick-0.34.0-py3-none-any.whl", hash = "sha256:ca346dfdd256dadb7c0e6d5c939ba4182a826c40ea395705d9653cf56469cdef"},
-    {file = "nitpick-0.34.0.tar.gz", hash = "sha256:ea01639a02a01e4a49e06e3018e2c0da8fb3a25068467884f5a178d8d8d81023"},
+    {file = "nitpick-0.35.0-py3-none-any.whl", hash = "sha256:9911d32c2d488b41914aa1a6d230531fa92bbe3d6610e4a468a5cb5e30fab907"},
+    {file = "nitpick-0.35.0.tar.gz", hash = "sha256:098167a4c65655aca52c0ea3876b1e71cf634a27d0e17b971bce9bfcc1f3febe"},
 ]
 
 [package.dependencies]
@@ -1235,6 +1245,7 @@ dpath = "*"
 flake8 = ">=3.0.0"
 flatten-dict = "*"
 furl = "*"
+gitignore_parser = "*"
 identify = "*"
 importlib-resources = {version = "*", markers = "python_version >= \"3.8\" and python_version < \"3.9\""}
 jmespath = "*"
@@ -1242,6 +1253,7 @@ loguru = "*"
 marshmallow = ">=3.0.0b10"
 marshmallow-polyfield = ">=5.10,<6.0"
 more-itertools = "*"
+packaging = "*"
 pluggy = "*"
 python-slugify = "*"
 requests = "*"
@@ -2154,4 +2166,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "0b9cd7983b57231129ad9119e7b5cd997accbba89b2419d21cb48bf55684e0d5"
+content-hash = "653272ea33a90b0c58290828728335cb2e5c0e9c52c294a49bbd364c2d8b268a"
