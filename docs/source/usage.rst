@@ -25,8 +25,8 @@ or with decorators:
     class Supplier(models.Model):
         ...
 
-Generally, if you chose the former, the most appriopriate place for the
-statement would be at the bottom of your ``models.py`` or immmediately after
+Generally, if you chose the former, the most appropriate place for the
+statement would be at the bottom of your ``models.py`` or immediately after
 model definition.
 
 Advanced Registration
