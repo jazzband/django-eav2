@@ -83,7 +83,7 @@ def rewrite_q_expr(model_cls, expr):
     IGNORE
 
         This is done by merging dangerous AND's and substituting them with
-        explicit ``pk__in`` filter, where pks are taken from evaluted
+        explicit ``pk__in`` filter, where pks are taken from evaluated
         Q-expr branch.
 
         Args:
@@ -101,7 +101,7 @@ def rewrite_q_expr(model_cls, expr):
         config_cls = getattr(model_cls, '_eav_config_cls', None)
         gr_name = config_cls.generic_relation_attr
 
-        # Recurively check child nodes.
+        # Recursively check child nodes.
         expr.children = [rewrite_q_expr(model_cls, c) for c in expr.children]
         # Check which ones need a rewrite.
         rewritable = [c for c in expr.children if is_eav_and_leaf(c, gr_name)]
@@ -317,7 +317,7 @@ class EavQuerySet(QuerySet):
                     )
                     .order_by(
                         # Order values by their value-field of
-                        # appriopriate attribute data-type.
+                        # appropriate attribute data-type.
                         field_name
                     )
                     .values_list(
@@ -328,7 +328,7 @@ class EavQuerySet(QuerySet):
                     )
                 )
 
-                # Retrive ordered values from pk-value list.
+                # Retrieve ordered values from pk-value list.
                 _, ordered_values = zip(*pks_values)
 
                 # Add explicit ordering and turn

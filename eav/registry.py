@@ -11,7 +11,7 @@ from eav.logic.entity_pk import get_entity_pk_type
 
 class EavConfig(object):
     """
-    The default ``EavConfig`` class used if it is not overriden on registration.
+    The default ``EavConfig`` class used if it is not overridden on registration.
     This is where all the default eav attribute names are defined.
 
     Available options are as follows:
