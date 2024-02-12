@@ -81,7 +81,7 @@ mypy = "^1.6"
 wemake-python-styleguide = "^0.17"
 flake8-pytest-style = "^1.7"
 nitpick = ">=0.34,<0.36"
-black = ">=22.12,<24.0"
+black = ">=22.12,<25.0"
 
 safety = ">=2.3,<4.0"
 
