@@ -46,11 +46,13 @@ class BaseEntityAdmin(ModelAdmin):
             HttpResponse object representing the rendered change form.
         """
         form = context['adminform'].form
-        media = context['media']
 
         # Identify EAV fields based on the form instance's configuration.
-        config_cls = form.instance._eav_config_cls
-        eav_fields = self._get_eav_fields(form.instance) if config_cls else []
+        eav_fields = self._get_eav_fields(form.instance)
+
+        # # Fallback to default if no EAV fields exist
+        if not eav_fields:
+            return super().render_change_form(request, context, *args, **kwargs)
 
         # Get the non-EAV fieldsets and then append our own
         fieldsets = list(self.get_fieldsets(request, kwargs['obj']))
@@ -69,7 +71,7 @@ class BaseEntityAdmin(ModelAdmin):
             readonly_fields=self.readonly_fields,
             model_admin=self,
         )
-        media = mark_safe(media + adminform.media)
+        media = mark_safe(context['media'] + adminform.media)
         context.update(adminform=adminform, media=media)
 
         return super().render_change_form(request, context, *args, **kwargs)
@@ -83,10 +85,8 @@ class BaseEntityAdmin(ModelAdmin):
         Returns:
             A list of strings representing the slugs of EAV fields.
         """
-        entity = getattr(instance, instance._eav_config_cls.eav_attr, None)
-        if entity:
-            return list(entity.get_all_attributes().values_list('slug', flat=True))
-        return []
+        entity = getattr(instance, instance._eav_config_cls.eav_attr)
+        return list(entity.get_all_attributes().values_list('slug', flat=True))
 
     def _get_eav_fieldset(self, eav_fields) -> _FIELDSET_TYPE:
         """Constructs an EAV Attributes fieldset for inclusion in admin form fieldsets.
@@ -100,9 +100,6 @@ class BaseEntityAdmin(ModelAdmin):
             eav_fields (List[str]): A list of slugs representing the EAV fields to be included
             in the EAV Attributes fieldset.
         """
-        if not eav_fields:
-            return []
-
         return [
             self.eav_fieldset_title,
             {'fields': eav_fields, 'description': self.eav_fieldset_description},
