@@ -197,3 +197,23 @@ def test_entity_admin_form(patient, define_fieldsets):
         assert len(adminform.fieldsets) == 3
     else:
         assert len(adminform.fieldsets) == 2
+
+
+@pytest.mark.django_db()
+def test_entity_admin_form_no_attributes(patient):
+    """Test the BaseEntityAdmin form with no Attributes created."""
+    admin = BaseEntityAdmin(Patient, AdminSite())
+    admin.readonly_fields = ('email',)
+    admin.form = BaseDynamicEntityForm
+
+    view = admin.change_view(request, str(patient.pk))
+
+    adminform = view.context_data['adminform']
+
+    # Count the total fields in fieldsets
+    total_fields = sum(
+        len(fields_info['fields']) for _, fields_info in adminform.fieldsets
+    )
+
+    # 3 for 'name', 'email', 'example'
+    assert total_fields == 3
