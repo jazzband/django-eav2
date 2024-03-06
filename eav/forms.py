@@ -11,17 +11,13 @@ from django.forms import (
     Field,
     FloatField,
     IntegerField,
+    JSONField,
     ModelForm,
     SplitDateTimeField,
 )
 from django.utils.translation import gettext_lazy as _
 
 from eav.widgets import CSVWidget
-
-try:
-    from django.forms import JSONField
-except:
-    JSONField = CharField
 
 
 class CSVFormField(Field):
