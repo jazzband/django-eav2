@@ -48,7 +48,7 @@ class Entity:
 
     def __getattr__(self, name):
         """
-        Tha magic getattr helper. This is called whenever user invokes::
+        The magic getattr helper. This is called whenever user invokes::
 
             instance.<attribute>
 

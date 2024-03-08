@@ -28,7 +28,7 @@ You will find detailed description of the EAV here:
 
 ## EAV - The Good, the Bad or the Ugly?
 
-EAV is a trade-off between flexibility and complexity. As such, it should not be thought of as either an amelioration pattern, nor an anti-pattern. It is more of a [gray pattern](https://wiki.c2.com/?GreyPattern) - it exists in some context, to solve certain set of problems. When used appropriately, it can introduce great flexibility, cut prototyping time or deacrease complexity. When used carelessly, however, it can complicate database schema, degrade the performance and make maintainance hard. **As with every tool, it should not be overused.** In the following paragraphs we briefly discuss the pros, the cons and pointers to keep in mind when using EAV.
+EAV is a trade-off between flexibility and complexity. As such, it should not be thought of as either an amelioration pattern, nor an anti-pattern. It is more of a [gray pattern](https://wiki.c2.com/?GreyPattern) - it exists in some context, to solve certain set of problems. When used appropriately, it can introduce great flexibility, cut prototyping time or deacrease complexity. When used carelessly, however, it can complicate database schema, degrade the performance and make maintenance hard. **As with every tool, it should not be overused.** In the following paragraphs we briefly discuss the pros, the cons and pointers to keep in mind when using EAV.
 
 ### When to use EAV?
 
@@ -55,7 +55,7 @@ As a rule of thumb, EAV can be used when:
 - Numerous classes of data need to be represented, each class has a limited number of attributes, but the number of instances of each class is very small.
 - We want to minimise programmer's input when changing the data model.
 
-For more throughout discussion on the appriopriate use-cases see:
+For more throughout discussion on the appropriate use-cases see:
 
 1. [Wikipedia - Scenarios that are appropriate for EAV modeling](https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model#Scenarios_that_are_appropriate_for_EAV_modeling)
 2. [StackOverflow - Entity Attribute Value Database vs. strict Relational Model E-commerce](https://stackoverflow.com/questions/870808/entity-attribute-value-database-vs-strict-relational-model-ecommerce)
@@ -106,7 +106,7 @@ INSTALLED_APPS = [
 Add `django.db.models.UUIDField` or `django.db.models.BigAutoField` as value of `EAV2_PRIMARY_KEY_FIELD` in your settings
 
 ``` python
-EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as exemple
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as example
 ```
 
 ### Note: Primary key mandatory modification field
@@ -131,7 +131,7 @@ If the primary key of eav models are to be modified (UUIDField -> BigAutoField, 
  Change the value of `EAV2_PRIMARY_KEY_FIELD` into the desired value (`django.db.models.BigAutoField` or `django.db.models.UUIDField`) in your settings.
 
  ```python
- EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField" # as exemple
+ EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField" # as example
  ```
 
   Run again the migrations.

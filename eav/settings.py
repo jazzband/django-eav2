@@ -1,7 +1,3 @@
-try:
-    from typing import Final
-except ImportError:
-    from typing_extensions import Final  # noqa: UP035
-
+from typing import Final
 
 CHARFIELD_LENGTH: Final = 100

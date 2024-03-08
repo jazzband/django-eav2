@@ -51,12 +51,13 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Framework :: Django",
   "Framework :: Django :: 3.2",
-  "Framework :: Django :: 4.1",
   "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
 ]
 
 [tool.semantic_release]
@@ -70,19 +71,20 @@ build_command = "pip install poetry && poetry build"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-django = ">=3.2,<4.3"
+django = ">=3.2,<5.1"
+pyyaml = { version = "^6.0.1", python = "^3.12" }
 
 [tool.poetry.group.test.dependencies]
 mypy = "^1.6"
 
 wemake-python-styleguide = "^0.17"
 flake8-pytest-style = "^1.7"
-nitpick = "^0.34"
-black = ">=22.12,<24.0"
+nitpick = ">=0.34,<0.36"
+black = ">=22.12,<25.0"
 
-safety = "^2.3"
+safety = ">=2.3,<4.0"
 
-pytest = "^7.4.3"
+pytest = ">=7.4.3,<9.0.0"
 pytest-cov = "^4.1"
 pytest-randomly = "^3.15"
 pytest-django = "^4.5.2"
@@ -96,6 +98,6 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=5.0,<8.0"
 sphinx-rtd-theme = ">=1.3,<3.0"
-sphinx-autodoc-typehints = "^1.19.5"
+sphinx-autodoc-typehints = ">=1.19.5,<3.0.0"
 m2r2 = "^0.3"
 tomlkit = ">=0.11,<0.13"

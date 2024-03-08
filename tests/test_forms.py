@@ -1,4 +1,5 @@
 import sys
+
 import pytest
 from django.contrib.admin.sites import AdminSite
 from django.core.handlers.base import BaseHandler
@@ -78,19 +79,6 @@ class Forms(TestCase):
         )
 
         self.instance = Patient.objects.create(name='Jim Morrison')
-        self.site = AdminSite()
-
-    def test_fields(self):
-        admin = BaseEntityAdmin(Patient, self.site)
-        admin.form = BaseDynamicEntityForm
-        view = admin.change_view(request, str(self.instance.pk))
-
-        own_fields = 3
-        adminform = view.context_data['adminform']
-
-        self.assertEqual(
-            len(adminform.form.fields), Attribute.objects.count() + own_fields
-        )
 
     def test_valid_submit(self):
         self.instance.eav.color = 'Blue'
@@ -124,6 +112,13 @@ def patient() -> Patient:
     """Return an eav enabled Patient instance."""
     eav.register(Patient)
     return Patient.objects.create(name='Jim Morrison')
+
+
+@pytest.fixture()
+def create_attributes() -> None:
+    """Create some Attributes to use for testing."""
+    Attribute.objects.create(name='weight', datatype=Attribute.TYPE_FLOAT)
+    Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
 
 
 @pytest.mark.django_db()
@@ -165,3 +160,60 @@ def test_csvdynamicform_empty(patient) -> None:
     )
     assert form.is_valid()
     assert form.save()
+
+
+@pytest.mark.django_db()
+@pytest.mark.usefixtures('create_attributes')
+@pytest.mark.parametrize('define_fieldsets', (True, False))
+def test_entity_admin_form(patient, define_fieldsets):
+    """Test the BaseEntityAdmin form setup and dynamic fieldsets handling."""
+    admin = BaseEntityAdmin(Patient, AdminSite())
+    admin.readonly_fields = ('email',)
+    admin.form = BaseDynamicEntityForm
+
+    if define_fieldsets:
+        # Use all fields in Patient model
+        admin.fieldsets = (
+            (None, {'fields': ['name', 'example']}),
+            ('Contact Info', {'fields': ['email']}),
+        )
+
+    view = admin.change_view(request, str(patient.pk))
+
+    adminform = view.context_data['adminform']
+
+    # Count the total fields in fieldsets
+    total_fields = sum(
+        len(fields_info['fields']) for _, fields_info in adminform.fieldsets
+    )
+
+    # 3 for 'name', 'email', 'example'
+    expected_fields_count = Attribute.objects.count() + 3
+
+    assert total_fields == expected_fields_count
+
+    # Ensure our fieldset count is correct
+    if define_fieldsets:
+        assert len(adminform.fieldsets) == 3
+    else:
+        assert len(adminform.fieldsets) == 2
+
+
+@pytest.mark.django_db()
+def test_entity_admin_form_no_attributes(patient):
+    """Test the BaseEntityAdmin form with no Attributes created."""
+    admin = BaseEntityAdmin(Patient, AdminSite())
+    admin.readonly_fields = ('email',)
+    admin.form = BaseDynamicEntityForm
+
+    view = admin.change_view(request, str(patient.pk))
+
+    adminform = view.context_data['adminform']
+
+    # Count the total fields in fieldsets
+    total_fields = sum(
+        len(fields_info['fields']) for _, fields_info in adminform.fieldsets
+    )
+
+    # 3 for 'name', 'email', 'example'
+    assert total_fields == 3

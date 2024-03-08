@@ -6,6 +6,9 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ## {{ Next Version }}
 
 ### Bug Fixes
+
+- Corrects `BaseEntityAdmin` integration into Django Admin site
+
 ### Features
 
 ## 1.5.1 (2023-12-04)

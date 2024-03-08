@@ -25,8 +25,8 @@ or with decorators:
     class Supplier(models.Model):
         ...
 
-Generally, if you chose the former, the most appriopriate place for the
-statement would be at the bottom of your ``models.py`` or immmediately after
+Generally, if you chose the former, the most appropriate place for the
+statement would be at the bottom of your ``models.py`` or immediately after
 model definition.
 
 Advanced Registration
@@ -286,8 +286,10 @@ You can use ``Q`` expressions too:
 Admin Integration
 -----------------
 
-Django EAV 2 includes integration for Django's admin. As usual, you need to
-register your model first:
+Django EAV 2 seamlessly integrates with Django's admin interface by providing
+dynamic attribute management directly within the admin panel. This feature
+provides the EAV Attributes as a separate fieldset, whether use the base
+fieldset or when providing your own.
 
 .. code-block:: python
 
@@ -302,3 +304,11 @@ register your model first:
         form = PatientAdminForm
 
     admin.site.register(Patient, PatientAdmin)
+
+Customizing the EAV Fieldset
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Django EAV 2 integration allows you to customize the presentation of EAV
+attributes in the admin interface through the use of a dedicated fieldset. You
+can configure this fieldset by setting ``eav_fieldset_title`` and
+``eav_fieldset_description`` within your admin class.

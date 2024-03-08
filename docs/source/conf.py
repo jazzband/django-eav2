@@ -26,6 +26,7 @@ settings.configure(
         'eav',
     ],
     SECRET_KEY=os.environ.get('DJANGO_SECRET_KEY', 'this-is-not-s3cur3'),
+    EAV2_PRIMARY_KEY_FIELD="django.db.models.BigAutoField",
 )
 
 # Call django.setup to load installed apps and other stuff.
