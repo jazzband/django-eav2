@@ -3,13 +3,16 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
-## {{ Next Version }}
+## 1.6.0 (2024-03-14)
 
-### Bug Fixes
+### What's Changed
 
 - Corrects `BaseEntityAdmin` integration into Django Admin site
-
-### Features
+- Split model modules by @iacobfred in https://github.com/jazzband/django-eav2/pull/467
+- Add Django 5.0 and Python 3.12 to the testing by @cclauss in https://github.com/jazzband/django-eav2/pull/487
+- Fix typos with codespell by @cclauss in https://github.com/jazzband/django-eav2/pull/489
+- Enhance BaseEntityAdmin by @Dresdn in https://github.com/jazzband/django-eav2/pull/541
+- Remove support for Django < 3.2 and Python < 3.8 by @Dresdn in https://github.com/jazzband/django-eav2/pull/542
 
 ## 1.5.1 (2023-12-04)
 
