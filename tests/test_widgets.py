@@ -3,6 +3,7 @@ from django.forms import Textarea
 from django.test import TestCase
 from eav.widgets import CSVWidget
 
+
 class TestCSVWidget(TestCase):
     def test_prep_value_string(self):
         self._extracted_from_test_prep_value_empty_2("Test Value")

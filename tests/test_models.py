@@ -35,17 +35,18 @@ class AttributeTestCase(TestCase):
 class ValueModelTestCase(TestCase):
     def setUp(self):
         eav.register(User)
-        self.attribute = Attribute.objects.create(name='Test Attribute', datatype=Attribute.TYPE_TEXT, slug="test_attribute")
+        self.attribute = Attribute.objects.create(
+            name='Test Attribute', datatype=Attribute.TYPE_TEXT, slug="test_attribute"
+        )
         self.user = User.objects.create(username='crazy_dev_user')
         user_content_type = ContentType.objects.get_for_model(User)
         self.value = Value.objects.create(
             entity_id=self.user.id,
             entity_ct=user_content_type,
             value_text='Test Value',
-            attribute=self.attribute
+            attribute=self.attribute,
         )
 
     def test_value_str(self):
         expected_str = f'{self.attribute.name}: "{self.value.value_text}" ({self.value.entity_pk_int})'
         self.assertEqual(str(self.value), expected_str)
-
