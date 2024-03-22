@@ -105,10 +105,10 @@ class RegistryTests(TestCase):
     def test_model_without_local_managers(self):
         """Test when a model doesn't have local_managers."""
         # Check just in case test model changes in the future
-        assert bool(User._meta.local_managers) is False
+        assert bool(User._meta.local_managers)
         eav.register(User)
         assert isinstance(User.objects, eav.managers.EntityManager)
 
         # Reverse check: managers should be empty again
         eav.unregister(User)
-        assert bool(User._meta.local_managers) is False
+        assert not bool(User._meta.local_managers)

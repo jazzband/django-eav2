@@ -67,12 +67,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': ':memory:',
+        # 'NAME': BASE_DIR / 'db.sqlite3'
     },
 }
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-EAV2_PRIMARY_KEY_FIELD = 'django.db.models.CharField'
+EAV2_PRIMARY_KEY_FIELD = 'django.db.models.BigAutoField'
 
 
 # Password validation
