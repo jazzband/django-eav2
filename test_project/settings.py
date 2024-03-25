@@ -64,15 +64,12 @@ TEMPLATES = [
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': ':memory:',
-    },
+    'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'},
 }
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
-EAV2_PRIMARY_KEY_FIELD = 'django.db.models.AutoField'
+EAV2_PRIMARY_KEY_FIELD = 'django.db.models.BigAutoField'
 
 
 # Password validation
