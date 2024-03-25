@@ -85,7 +85,7 @@ black = ">=22.12,<25.0"
 safety = ">=2.3,<4.0"
 
 pytest = ">=7.4.3,<9.0.0"
-pytest-cov = "^4.1"
+pytest-cov = ">=4.1,<6.0"
 pytest-randomly = "^3.15"
 pytest-django = "^4.5.2"
 hypothesis = "^6.87.1"
