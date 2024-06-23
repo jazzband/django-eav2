@@ -2,6 +2,13 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
+## 1.6.1 (2024-06-23)
+
+### What's Changed
+
+- Ensure eav.register() Maintains Manager Order by @Dresdn in https://github.com/jazzband/django-eav2/pull/595
+- Update downstream dependencies by @Dresdn in https://github.com/jazzband/django-eav2/pull/597
+
 ## 1.6.0 (2024-03-14)
 
 ### What's Changed
