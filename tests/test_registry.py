@@ -115,6 +115,7 @@ class RegistryTests(TestCase):
         eav.unregister(User)
         assert bool(User._meta.local_managers) is False
 
+
 def test_default_manager_stays() -> None:
     """
     Test to ensure default manager remains after registration.
