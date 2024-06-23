@@ -10,6 +10,7 @@ from django.db import models
 
 from eav.decorators import register_eav
 from eav.models import EAVModelMeta
+from eav.managers import EntityManager
 
 #: Constants
 MAX_CHARFIELD_LEN: Final = 254
@@ -25,6 +26,47 @@ class TestBase(models.Model):
         abstract = True
 
 
+class DoctorManager(EntityManager):
+    """
+    Custom manager for the Doctor model.
+
+    This manager extends the EntityManager and provides additional
+    methods specific to the Doctor model, and is expected to be the
+    default manager on the model.
+    """
+
+    def get_by_name(self, name: str) -> models.QuerySet:
+        """Returns a QuerySet of doctors with the given name.
+
+        Args:
+            name (str): The name of the doctor to search for.
+
+        Returns:
+            models.QuerySet: A QuerySet of doctors with the specified name.
+        """
+        return self.filter(name=name)
+
+
+class DoctorSubstringManager(models.Manager):
+    """
+    Custom manager for the Doctor model.
+
+    This is a second manager used to ensure during testing that it's not replaced
+    as the default manager after eav.register().
+    """
+
+    def get_by_name_contains(self, substring: str) -> models.QuerySet:
+        """Returns a QuerySet of doctors whose names contain the given substring.
+
+        Args:
+            substring (str): The substring to search for in the doctor's name.
+
+        Returns:
+            models.QuerySet: A QuerySet of doctors whose names contain the specified substring.
+        """
+        return self.filter(name__icontains=substring)
+
+
 @final
 @register_eav()
 class Doctor(TestBase):
@@ -32,6 +74,9 @@ class Doctor(TestBase):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=MAX_CHARFIELD_LEN)
+
+    objects = DoctorManager()
+    substrings = DoctorSubstringManager()
 
 
 @final

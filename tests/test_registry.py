@@ -2,8 +2,10 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 import eav
+from eav.managers import EntityManager
 from eav.registry import EavConfig
 from test_project.models import (
+    Doctor,
     Encounter,
     ExampleMetaclassModel,
     ExampleModel,
@@ -112,3 +114,22 @@ class RegistryTests(TestCase):
         # Reverse check: managers should be empty again
         eav.unregister(User)
         assert bool(User._meta.local_managers) is False
+
+def test_default_manager_stays() -> None:
+    """
+    Test to ensure default manager remains after registration.
+
+    This test verifies that the default manager of the Doctor model is correctly
+    replaced or maintained after registering a new EntityManager. Specifically,
+    if the model's Meta default_manager_name isn't set, the test ensures that
+    the default manager remains as 'objects' or the first manager declared in
+    the class.
+    """
+    instance_meta = Doctor._meta
+    assert instance_meta.default_manager_name is None
+    assert isinstance(instance_meta.default_manager, EntityManager)
+
+    # Explicity test this as for our test setup, we want to have a state where
+    # the default manager is 'objects'
+    assert instance_meta.default_manager.name == 'objects'
+    assert len(instance_meta.managers) == 2
