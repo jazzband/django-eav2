@@ -102,25 +102,41 @@ class Registry(object):
         self.model_cls = model_cls
         self.config_cls = model_cls._eav_config_cls
 
-    def _attach_manager(self):
+    def _attach_manager(self) -> None:
         """
-        Attach the manager to *manager_attr* specified in *config_cls*
+        Attach the EntityManager to the model class.
+
+        This method replaces the existing manager specified in the `config_cls`
+        with a new instance of `EntityManager`. If the specified manager is the
+        default manager, the `EntityManager` is set as the new default manager.
+        Otherwise, it is appended to the list of managers.
+
+        If the model class already has a manager with the same name as the one
+        specified in `config_cls`, it is saved as `old_mgr` in the `config_cls`
+        for use during detachment.
         """
-        # Save the old manager if the attribute name conflicts with the new one.
-        if hasattr(self.model_cls, self.config_cls.manager_attr):
-            mgr = getattr(self.model_cls, self.config_cls.manager_attr)
+        manager_attr = self.config_cls.manager_attr
+        model_meta = self.model_cls._meta
+        current_manager = getattr(self.model_cls, manager_attr, None)
 
-            # For some models, `local_managers` may be empty, eg.
-            # django.contrib.auth.models.User and AbstractUser
-            if mgr in self.model_cls._meta.local_managers:
-                self.config_cls.old_mgr = mgr
-                self.model_cls._meta.local_managers.remove(mgr)
+        if isinstance(current_manager, EntityManager):
+            # EntityManager is already attached, no need to proceed
+            return
 
-            self.model_cls._meta._expire_cache()
+        # Create a new EntityManager
+        new_manager = EntityManager()
 
-        # Attach the new manager to the model.
-        mgr = EntityManager()
-        mgr.contribute_to_class(self.model_cls, self.config_cls.manager_attr)
+        # Save and remove the old manager if it exists
+        if current_manager and current_manager in model_meta.local_managers:
+            self.config_cls.old_mgr = current_manager
+            model_meta.local_managers.remove(current_manager)
+
+            # Set the creation_counter to maintain the order
+            # This ensures that the new manager has the same priority as the old one
+            new_manager.creation_counter = current_manager.creation_counter
+
+        # Attach the new EntityManager instance to the model.
+        new_manager.contribute_to_class(self.model_cls, manager_attr)
 
     def _detach_manager(self):
         """
