@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Third party
+    'django_extensions',
     # Test Project:
     'test_project.apps.TestAppConfig',
     # Our app:
