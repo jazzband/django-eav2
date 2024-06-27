@@ -418,7 +418,7 @@ class Value(models.Model):
     value_decimal = models.DecimalField(blank = True, null = True, max_digits = 14, decimal_places = 2)
     value_int     = models.IntegerField(blank = True, null = True)
     value_date    = models.DateTimeField(blank = True, null = True)
-    value_bool    = models.NullBooleanField(blank = True, null = True)
+    value_bool    = models.BooleanField(null=True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
