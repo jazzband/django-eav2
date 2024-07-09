@@ -19,7 +19,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.base import ModelBase
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .validators import validate_decimal
 from .validators import validate_enum_multi
@@ -418,7 +418,7 @@ class Value(models.Model):
     value_decimal = models.DecimalField(blank = True, null = True, max_digits = 14, decimal_places = 2)
     value_int     = models.IntegerField(blank = True, null = True)
     value_date    = models.DateTimeField(blank = True, null = True)
-    value_bool    = models.NullBooleanField(blank = True, null = True)
+    value_bool    = models.BooleanField(null=True)
 
     value_enum  = models.ForeignKey(
         EnumValue,
