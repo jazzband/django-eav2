@@ -3,6 +3,7 @@
 This is a [Jazzband](https://jazzband.co/) project. By contributing you agree to abide by the [Contributor Code of Conduct](https://jazzband.co/about/conduct) and follow the [guidelines](https://jazzband.co/about/guidelines).
 
 # Contributing
+
 We love your input! We want to make contributing to this project as easy and transparent as possible, whether it's:
 
 - Reporting a bug
@@ -23,6 +24,19 @@ poetry install
 
 To activate your `virtualenv` run `poetry shell`.
 
+## Configuration
+
+Set EAV2_PRIMARY_KEY_FIELD value to `django.db.models.UUIDField` or `django.db.models.BigAutoField` in your settings.
+
+```python
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as example
+```
+
+and run
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
 ## Tests
 
@@ -34,10 +48,20 @@ To run all tests:
 pytest
 ```
 
+## Cleanup
+
+At the end of the test, ensure that you delete the migration file created by the EAV2_PRIMARY_KEY_FIELD change. Additionally, verify that the migration files are clean and reset the value to django.db.models.CharField in your settings.
+
+```python
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.CharField"
+```
+
 ## We develop with Github
+
 We use github to host code, to track issues and feature requests, as well as accept pull requests.
 
 ### We use [Github Flow](https://guides.github.com/introduction/flow/index.html), so all code changes from community happen through pull requests
+
 Pull requests are the best way to propose changes to the codebase (we use [Github Flow](https://guides.github.com/introduction/flow/index.html)). We actively welcome your pull requests:
 
 1. Fork the repo and create your branch from `master`.
@@ -48,11 +72,12 @@ Pull requests are the best way to propose changes to the codebase (we use [Githu
 6. Describe the pull request using [this](https://github.com/jazzband/django-eav2/blob/master/PULL_REQUEST_TEMPLATE.md) template.
 
 ### Any contributions you make will be under the GNU Lesser General Public License v3.0
+
 In short, when you submit code changes, your submissions are understood to be under the same [LGPLv3](https://choosealicense.com/licenses/lgpl-3.0/) that covers the project. Feel free to contact the maintainers if that's a concern.
 
 ### Report bugs using Github's [issues](https://github.com/jazzband/django-eav2/issues)
-We use GitHub issues to track public bugs. Report a bug by opening a new issue. Use [this](https://github.com/jazzband/django-eav2/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) template to describe your reports.
 
+We use GitHub issues to track public bugs. Report a bug by opening a new issue. Use [this](https://github.com/jazzband/django-eav2/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) template to describe your reports.
 
 ### Use a consistent coding style
 

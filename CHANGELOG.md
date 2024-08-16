@@ -1,4 +1,5 @@
 # Version History
+# Version History
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
@@ -19,6 +20,13 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - Fix typos with codespell by @cclauss in https://github.com/jazzband/django-eav2/pull/489
 - Enhance BaseEntityAdmin by @Dresdn in https://github.com/jazzband/django-eav2/pull/541
 - Remove support for Django < 3.2 and Python < 3.8 by @Dresdn in https://github.com/jazzband/django-eav2/pull/542
+
+## 1.5.1 (2023-12-04)
+
+### Bug Fixes
+
+- Fixes errors in migrations [#406](https://github.com/jazzband/django-eav2/issues/406)
+
 
 ## 1.5.0 (2023-11-08)
 
