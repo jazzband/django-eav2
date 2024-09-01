@@ -291,6 +291,26 @@ class Attribute(models.Model):
                 _('You can only assign a choice group to multiple choice attributes'),
             )
 
+    def clean_fields(self, exclude=None):
+        """Perform field-specific validation on the model's fields.
+
+        This method extends the default field cleaning process to include
+        custom validation for the slug field.
+
+        Args:
+            exclude (list): Fields to exclude from cleaning.
+
+        Raises:
+            ValidationError: If the slug is not a valid Python identifier.
+        """
+        super().clean_fields(exclude=exclude)
+
+        if not self.slug.isidentifier():
+            raise ValidationError({
+                'slug': _("Slug must be a valid Python identifier (no spaces, "
+                            "special characters, or leading digits).")
+            })
+
     def get_choices(self):
         """
         Returns a query set of :class:`EnumValue` objects for this attribute.
