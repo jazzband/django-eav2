@@ -14,136 +14,136 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ExampleMetaclassModel',
+            name="ExampleMetaclassModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID',
+                        verbose_name="ID",
                     ),
                 ),
-                ('name', models.CharField(max_length=MAX_CHARFIELD_LEN)),
+                ("name", models.CharField(max_length=MAX_CHARFIELD_LEN)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ExampleModel',
+            name="ExampleModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID',
+                        verbose_name="ID",
                     ),
                 ),
-                ('name', models.CharField(max_length=MAX_CHARFIELD_LEN)),
+                ("name", models.CharField(max_length=MAX_CHARFIELD_LEN)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='RegisterTestModel',
+            name="RegisterTestModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID',
+                        verbose_name="ID",
                     ),
                 ),
-                ('name', models.CharField(max_length=MAX_CHARFIELD_LEN)),
+                ("name", models.CharField(max_length=MAX_CHARFIELD_LEN)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Patient',
+            name="Patient",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID',
+                        verbose_name="ID",
                     ),
                 ),
-                ('name', models.CharField(max_length=MAX_CHARFIELD_LEN)),
-                ('email', models.EmailField(blank=True, max_length=MAX_CHARFIELD_LEN)),
+                ("name", models.CharField(max_length=MAX_CHARFIELD_LEN)),
+                ("email", models.EmailField(blank=True, max_length=MAX_CHARFIELD_LEN)),
                 (
-                    'example',
+                    "example",
                     models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=models.deletion.PROTECT,
-                        to='test_project.examplemodel',
+                        to="test_project.examplemodel",
                     ),
                 ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='M2MModel',
+            name="M2MModel",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID',
+                        verbose_name="ID",
                     ),
                 ),
-                ('name', models.CharField(max_length=MAX_CHARFIELD_LEN)),
-                ('models', models.ManyToManyField(to='test_project.ExampleModel')),
+                ("name", models.CharField(max_length=MAX_CHARFIELD_LEN)),
+                ("models", models.ManyToManyField(to="test_project.ExampleModel")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Encounter',
+            name="Encounter",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.AutoField(
                         auto_created=True,
                         primary_key=True,
                         serialize=False,
-                        verbose_name='ID',
+                        verbose_name="ID",
                     ),
                 ),
-                ('num', models.PositiveSmallIntegerField()),
+                ("num", models.PositiveSmallIntegerField()),
                 (
-                    'patient',
+                    "patient",
                     models.ForeignKey(
                         on_delete=models.deletion.PROTECT,
-                        to='test_project.patient',
+                        to="test_project.patient",
                     ),
                 ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Doctor',
+            name="Doctor",
             fields=[
                 (
-                    'id',
+                    "id",
                     models.UUIDField(
                         default=uuid.uuid4,
                         editable=False,
@@ -151,10 +151,10 @@ class Migration(migrations.Migration):
                         serialize=False,
                     ),
                 ),
-                ('name', models.CharField(max_length=MAX_CHARFIELD_LEN)),
+                ("name", models.CharField(max_length=MAX_CHARFIELD_LEN)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

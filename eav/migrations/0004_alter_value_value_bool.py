@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('eav', '0003_auto_20210404_2209'),
+        ("eav", "0003_auto_20210404_2209"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='value',
-            name='value_bool',
+            model_name="value",
+            name="value_bool",
             field=models.BooleanField(blank=True, null=True),
         ),
     ]

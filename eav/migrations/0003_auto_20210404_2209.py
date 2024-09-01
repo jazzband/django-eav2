@@ -9,13 +9,13 @@ import eav.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('eav', '0002_add_entity_ct_field'),
+        ("eav", "0002_add_entity_ct_field"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='value',
-            name='value_json',
+            model_name="value",
+            name="value_json",
             field=JSONField(
                 blank=True,
                 default=dict,
@@ -24,21 +24,21 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name='attribute',
-            name='datatype',
+            model_name="attribute",
+            name="datatype",
             field=eav.fields.EavDatatypeField(
                 choices=[
-                    ('text', 'Text'),
-                    ('date', 'Date'),
-                    ('float', 'Float'),
-                    ('int', 'Integer'),
-                    ('bool', 'True / False'),
-                    ('object', 'Django Object'),
-                    ('enum', 'Multiple Choice'),
-                    ('json', 'JSON Object'),
+                    ("text", "Text"),
+                    ("date", "Date"),
+                    ("float", "Float"),
+                    ("int", "Integer"),
+                    ("bool", "True / False"),
+                    ("object", "Django Object"),
+                    ("enum", "Multiple Choice"),
+                    ("json", "JSON Object"),
                 ],
                 max_length=6,
-                verbose_name='Data Type',
+                verbose_name="Data Type",
             ),
         ),
     ]
