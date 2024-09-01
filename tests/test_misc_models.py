@@ -6,7 +6,7 @@ from eav.models import Attribute, EnumGroup, EnumValue, Value
 from test_project.models import Patient
 
 
-@pytest.fixture()
+@pytest.fixture
 def enumgroup(db):
     """Sample `EnumGroup` object for testing."""
     test_group = EnumGroup.objects.create(name='Yes / No')
@@ -19,14 +19,14 @@ def enumgroup(db):
 
 def test_enumgroup_display(enumgroup):
     """Test repr() and str() of EnumGroup."""
-    assert '<EnumGroup {0}>'.format(enumgroup.name) == repr(enumgroup)
+    assert f'<EnumGroup {enumgroup.name}>' == repr(enumgroup)
     assert str(enumgroup) == str(enumgroup.name)
 
 
 def test_enumvalue_display(enumgroup):
     """Test repr() and str() of EnumValue."""
     test_value = enumgroup.values.first()
-    assert '<EnumValue {0}>'.format(test_value.value) == repr(test_value)
+    assert f'<EnumValue {test_value.value}>' == repr(test_value)
     assert str(test_value) == test_value.value
 
 
@@ -36,7 +36,7 @@ class MiscModels(TestCase):
     def test_attribute_help_text(self):
         desc = 'Patient Age'
         a = Attribute.objects.create(
-            name='age', description=desc, datatype=Attribute.TYPE_INT
+            name='age', description=desc, datatype=Attribute.TYPE_INT,
         )
         self.assertEqual(a.help_text, desc)
 
@@ -56,7 +56,7 @@ class MiscModels(TestCase):
         ynu.values.add(yes)
         ynu.values.add(no)
         Attribute.objects.create(
-            name='is_patient', datatype=Attribute.TYPE_ENUM, enum_group=ynu
+            name='is_patient', datatype=Attribute.TYPE_ENUM, enum_group=ynu,
         )
         eav.register(Patient)
         p = Patient.objects.create(name='Joe')

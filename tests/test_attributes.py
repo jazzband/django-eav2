@@ -27,22 +27,22 @@ else:
 class Attributes(TestCase):
     def setUp(self):
         class EncounterEavConfig(EavConfig):
-            manager_attr = 'eav_objects'
-            eav_attr = 'eav_field'
-            generic_relation_attr = 'encounter_eav_values'
-            generic_relation_related_name = 'encounters'
+            manager_attr = "eav_objects"
+            eav_attr = "eav_field"
+            generic_relation_attr = "encounter_eav_values"
+            generic_relation_related_name = "encounters"
 
             @classmethod
             def get_attributes(cls, instance=None):
-                return Attribute.objects.filter(slug__contains='a')
+                return Attribute.objects.filter(slug__contains="a")
 
         eav.register(Encounter, EncounterEavConfig)
         eav.register(Patient)
 
-        Attribute.objects.create(name='age', datatype=Attribute.TYPE_INT)
-        Attribute.objects.create(name='height', datatype=Attribute.TYPE_FLOAT)
-        Attribute.objects.create(name='weight', datatype=Attribute.TYPE_FLOAT)
-        Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
+        Attribute.objects.create(name="age", datatype=Attribute.TYPE_INT)
+        Attribute.objects.create(name="height", datatype=Attribute.TYPE_FLOAT)
+        Attribute.objects.create(name="weight", datatype=Attribute.TYPE_FLOAT)
+        Attribute.objects.create(name="color", datatype=Attribute.TYPE_TEXT)
 
     def tearDown(self):
         eav.unregister(Encounter)
@@ -53,14 +53,14 @@ class Attributes(TestCase):
         self.assertEqual(Encounter._eav_config_cls.get_attributes().count(), 1)
 
     def test_duplicate_attributs(self):
-        '''
+        """
         Ensure that no two Attributes with the same slug can exist.
-        '''
+        """
         with self.assertRaises(ValidationError):
-            Attribute.objects.create(name='height', datatype=Attribute.TYPE_FLOAT)
+            Attribute.objects.create(name="height", datatype=Attribute.TYPE_FLOAT)
 
     def test_setting_attributes(self):
-        p = Patient.objects.create(name='Jon')
+        p = Patient.objects.create(name="Jon")
         e = Encounter.objects.create(patient=p, num=1)
 
         p.eav.age = 3
@@ -73,7 +73,7 @@ class Attributes(TestCase):
         t.eav.age = 6
         t.eav.height = 10
         t.save()
-        p = Patient.objects.get(name='Jon')
+        p = Patient.objects.get(name="Jon")
         self.assertEqual(p.eav.age, 3)
         self.assertEqual(p.eav.height, 2.3)
         e = Encounter.objects.get(num=1)
@@ -96,20 +96,21 @@ class Attributes(TestCase):
         eav.unregister(Encounter)
         eav.register(Encounter, EncounterEavConfig)
 
-        p = Patient.objects.create(name='Jon')
+        p = Patient.objects.create(name="Jon")
         e = Encounter.objects.create(patient=p, num=1)
 
         with self.assertRaises(IllegalAssignmentException):
-            e.eav.color = 'red'
+            e.eav.color = "red"
             e.save()
 
     def test_uuid_pk(self):
         """Tests for when model pk is UUID."""
-        d1 = Doctor.objects.create(name='Lu')
-        d1.eav.age = 10
+        expected_age = 10
+        d1 = Doctor.objects.create(name="Lu")
+        d1.eav.age = expected_age
         d1.save()
 
-        assert d1.eav.age == 10
+        assert d1.eav.age == expected_age
 
         # Validate repr of Value for an entity with a UUID PK
         v1 = Value.objects.filter(entity_uuid=d1.pk).first()
@@ -119,7 +120,7 @@ class Attributes(TestCase):
     def test_big_integer(self):
         """Tests an integer larger than 32-bit a value."""
         big_num = 3147483647
-        patient = Patient.objects.create(name='Jon')
+        patient = Patient.objects.create(name="Jon")
         patient.eav.age = big_num
 
         patient.save()
@@ -169,5 +170,7 @@ class TestAttributeModel(django.TestCase):
 def test_attribute_create_with_invalid_slug():
     with pytest.raises(ValidationError):
         Attribute.objects.create(
-            name="Test Attribute", slug="123-invalid", datatype=Attribute.TYPE_TEXT
+            name="Test Attribute",
+            slug="123-invalid",
+            datatype=Attribute.TYPE_TEXT,
         )

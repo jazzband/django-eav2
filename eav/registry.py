@@ -3,13 +3,12 @@
 from django.contrib.contenttypes import fields as generic
 from django.db.models.signals import post_init, post_save, pre_save
 
+from eav.logic.entity_pk import get_entity_pk_type
 from eav.managers import EntityManager
 from eav.models import Attribute, Entity, Value
 
-from eav.logic.entity_pk import get_entity_pk_type
 
-
-class EavConfig(object):
+class EavConfig:
     """
     The default ``EavConfig`` class used if it is not overridden on registration.
     This is where all the default eav attribute names are defined.
@@ -29,10 +28,10 @@ class EavConfig(object):
        if not overridden, it is not possible to query Values by Entities.
     """
 
-    manager_attr = 'objects'
+    manager_attr = "objects"
     manager_only = False
-    eav_attr = 'eav'
-    generic_relation_attr = 'eav_values'
+    eav_attr = "eav"
+    generic_relation_attr = "eav_values"
     generic_relation_related_name = None
 
     @classmethod
@@ -44,7 +43,7 @@ class EavConfig(object):
         return Attribute.objects.all()
 
 
-class Registry(object):
+class Registry:
     """
     Handles registration through the
     :meth:`register` and :meth:`unregister` methods.
@@ -59,14 +58,14 @@ class Registry(object):
         .. note::
            Multiple registrations for the same entity are harmlessly ignored.
         """
-        if hasattr(model_cls, '_eav_config_cls'):
+        if hasattr(model_cls, "_eav_config_cls"):
             return
 
         if config_cls is EavConfig or config_cls is None:
-            config_cls = type("%sConfig" % model_cls.__name__, (EavConfig,), {})
+            config_cls = type(f"{model_cls.__name__}Config", (EavConfig,), {})
 
         # set _eav_config_cls on the model so we can access it there
-        setattr(model_cls, '_eav_config_cls', config_cls)
+        model_cls._eav_config_cls = config_cls
 
         reg = Registry(model_cls)
         reg._register_self()
@@ -79,19 +78,19 @@ class Registry(object):
         .. note::
            Unregistering a class not already registered is harmlessly ignored.
         """
-        if not getattr(model_cls, '_eav_config_cls', None):
+        if not getattr(model_cls, "_eav_config_cls", None):
             return
         reg = Registry(model_cls)
         reg._unregister_self()
 
-        delattr(model_cls, '_eav_config_cls')
+        delattr(model_cls, "_eav_config_cls")
 
     @staticmethod
     def attach_eav_attr(sender, *args, **kwargs):
         """
         Attach EAV Entity toolkit to an instance after init.
         """
-        instance = kwargs['instance']
+        instance = kwargs["instance"]
         config_cls = instance.__class__._eav_config_cls
         setattr(instance, config_cls.eav_attr, Entity(instance))
 
@@ -147,9 +146,10 @@ class Registry(object):
         self.model_cls._meta._expire_cache()
         delattr(self.model_cls, self.config_cls.manager_attr)
 
-        if hasattr(self.config_cls, 'old_mgr'):
+        if hasattr(self.config_cls, "old_mgr"):
             self.config_cls.old_mgr.contribute_to_class(
-                self.model_cls, self.config_cls.manager_attr
+                self.model_cls,
+                self.config_cls.manager_attr,
             )
 
     def _attach_signals(self):
@@ -181,7 +181,7 @@ class Registry(object):
         generic_relation = generic.GenericRelation(
             Value,
             object_id_field=get_entity_pk_type(self.model_cls),
-            content_type_field='entity_ct',
+            content_type_field="entity_ct",
             related_query_name=rel_name,
         )
         generic_relation.contribute_to_class(self.model_cls, gr_name)

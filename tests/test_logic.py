@@ -38,7 +38,7 @@ def test_generate_slug_uniqueness() -> None:
         generated_slugs[input_str] = slug
 
     assert len(generated_slugs) == len(
-        inputs
+        inputs,
     ), "Number of unique slugs doesn't match number of inputs"
 
 
@@ -72,5 +72,5 @@ def test_generate_slug_valid_identifier(input_str: str) -> None:
     slug = generate_slug(input_str)
     assert slug.isidentifier(), (
         f"Generated slug '{slug}' for input '{input_str}' "
-        "is not a valid Python identifier"
+        + "is not a valid Python identifier"
     )

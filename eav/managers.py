@@ -19,12 +19,12 @@ class EntityManager(models.Manager):
         Parse eav attributes out of *kwargs*, then try to create and save
         the object, then assign and save it's eav attributes.
         """
-        config_cls = getattr(self.model, '_eav_config_cls', None)
+        config_cls = getattr(self.model, "_eav_config_cls", None)
 
         if not config_cls or config_cls.manager_only:
-            return super(EntityManager, self).create(**kwargs)
+            return super().create(**kwargs)
 
-        prefix = '%s__' % config_cls.eav_attr
+        prefix = f"{config_cls.eav_attr}__"
         new_kwargs = {}
         eav_kwargs = {}
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module contains custom :class:`EavQuerySet` class used for overriding
 relational operators and pure functions for rewriting Q-expressions.
@@ -19,14 +18,14 @@ Q-expressions need to be rewritten for two reasons:
 2. To ensure that Q-expression tree is compiled to valid SQL.
    For details see: :func:`rewrite_q_expr`.
 """
+
 from functools import wraps
 from itertools import count
 
-from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Case, IntegerField, Q, When
 from django.db.models.query import QuerySet
 from django.db.utils import NotSupportedError
-from django.db.models import Subquery
 
 from eav.models import Attribute, EnumValue, Value
 
@@ -43,9 +42,9 @@ def is_eav_and_leaf(expr, gr_name):
         bool
     """
     return (
-        getattr(expr, 'connector', None) == 'AND'
+        getattr(expr, "connector", None) == "AND"
         and len(expr.children) == 1
-        and expr.children[0][0] in ['pk__in', '{}__in'.format(gr_name)]
+        and expr.children[0][0] in ["pk__in", f"{gr_name}__in"]
     )
 
 
@@ -98,7 +97,7 @@ def rewrite_q_expr(model_cls, expr):
     # We are only interested in Qs.
 
     if isinstance(expr, Q):
-        config_cls = getattr(model_cls, '_eav_config_cls', None)
+        config_cls = getattr(model_cls, "_eav_config_cls", None)
         gr_name = config_cls.generic_relation_attr
 
         # Recursively check child nodes.
@@ -112,18 +111,18 @@ def rewrite_q_expr(model_cls, expr):
         if len(rewritable) > 1:
             q = None
             # Save nodes which shouldn't be merged (non-EAV).
-            other = [c for c in expr.children if not c in rewritable]
+            other = [c for c in expr.children if c not in rewritable]
 
             for child in rewritable:
                 if not (child.children and len(child.children) == 1):
-                    raise AssertionError('Child must have exactly one descendant')
+                    raise AssertionError("Child must have exactly one descendant")
                 # Child to be merged is always a terminal Q node,
                 # i.e. it's an AND expression with attribute-value tuple child.
                 attrval = child.children[0]
                 if not isinstance(attrval, tuple):
-                    raise AssertionError('Attribute-value must be a tuple')
+                    raise TypeError("Attribute-value must be a tuple")
 
-                fname = '{}__in'.format(gr_name)
+                fname = f"{gr_name}__in"
 
                 # Child can be either a 'eav_values__in' or 'pk__in' query.
                 # If it's the former then transform it into the latter.
@@ -131,7 +130,7 @@ def rewrite_q_expr(model_cls, expr):
                 # If so, reverse it back to QuerySet so that set operators
                 # can be applied.
 
-                if attrval[0] == fname or hasattr(attrval[1], '__contains__'):
+                if attrval[0] == fname or hasattr(attrval[1], "__contains__"):
                     # Create model queryset.
                     _q = model_cls.objects.filter(**{fname: attrval[1]})
                 else:
@@ -140,17 +139,17 @@ def rewrite_q_expr(model_cls, expr):
 
                 # Explicitly check for None. 'or' doesn't work here
                 # as empty QuerySet, which is valid, is falsy.
-                q = q if q != None else _q
+                q = q if q is not None else _q
 
-                if expr.connector == 'AND':
+                if expr.connector == "AND":
                     q &= _q
                 else:
                     q |= _q
 
             # If any two children were merged,
             # update parent expression.
-            if q != None:
-                expr.children = other + [('pk__in', q)]
+            if q is not None:
+                expr.children = [*other, ("pk__in", q)]
 
     return expr
 
@@ -170,9 +169,9 @@ def eav_filter(func):
         for arg in args:
             if isinstance(arg, Q):
                 # Modify Q objects (warning: recursion ahead).
-                arg = expand_q_filters(arg, self.model)
+                arg = expand_q_filters(arg, self.model)  # noqa: PLW2901
                 # Rewrite Q-expression to safeform.
-                arg = rewrite_q_expr(self.model, arg)
+                arg = rewrite_q_expr(self.model, arg)  # noqa: PLW2901
             nargs.append(arg)
 
         for key, value in kwargs.items():
@@ -180,9 +179,10 @@ def eav_filter(func):
             nkey, nval = expand_eav_filter(self.model, key, value)
 
             if nkey in nkwargs:
-                # Add filter to check if matching entity_id is in the previous queryset with same nkey
+                # Add filter to check if matching entity_id is
+                # in the previous queryset with same nkey
                 nkwargs[nkey] = nval.filter(
-                    entity_id__in=nkwargs[nkey].values_list('entity_id', flat=True)
+                    entity_id__in=nkwargs[nkey].values_list("entity_id", flat=True),
                 ).distinct()
             else:
                 nkwargs.update({nkey: nval})
@@ -229,27 +229,27 @@ def expand_eav_filter(model_cls, key, value):
         key = 'eav_values__in'
         value = Values.objects.filter(value_int=5, attribute__slug='height')
     """
-    fields = key.split('__')
-    config_cls = getattr(model_cls, '_eav_config_cls', None)
+    fields = key.split("__")
+    config_cls = getattr(model_cls, "_eav_config_cls", None)
 
     if len(fields) > 1 and config_cls and fields[0] == config_cls.eav_attr:
         slug = fields[1]
         gr_name = config_cls.generic_relation_attr
         datatype = Attribute.objects.get(slug=slug).datatype
 
-        value_key = ''
+        value_key = ""
         if datatype == Attribute.TYPE_ENUM and not isinstance(value, EnumValue):
-            lookup = '__value__{}'.format(fields[2]) if len(fields) > 2 else '__value'
-            value_key = 'value_{}{}'.format(datatype, lookup)
+            lookup = f"__value__{fields[2]}" if len(fields) > 2 else "__value"  # noqa: PLR2004
+            value_key = f"value_{datatype}{lookup}"
         elif datatype == Attribute.TYPE_OBJECT:
-            value_key = 'generic_value_id'
+            value_key = "generic_value_id"
         else:
-            lookup = '__{}'.format(fields[2]) if len(fields) > 2 else ''
-            value_key = 'value_{}{}'.format(datatype, lookup)
-        kwargs = {value_key: value, 'attribute__slug': slug}
+            lookup = f"__{fields[2]}" if len(fields) > 2 else ""  # noqa: PLR2004
+            value_key = f"value_{datatype}{lookup}"
+        kwargs = {value_key: value, "attribute__slug": slug}
         value = Value.objects.filter(**kwargs)
 
-        return '%s__in' % gr_name, value
+        return f"{gr_name}__in", value
 
     # Not an eav field, so keep as is
     return key, value
@@ -266,7 +266,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
         the ``Manager`` filter method.
         """
-        return super(EavQuerySet, self).filter(*args, **kwargs)
+        return super().filter(*args, **kwargs)
 
     @eav_filter
     def exclude(self, *args, **kwargs):
@@ -274,7 +274,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
         the ``Manager`` exclude method.
         """
-        return super(EavQuerySet, self).exclude(*args, **kwargs)
+        return super().exclude(*args, **kwargs)
 
     @eav_filter
     def get(self, *args, **kwargs):
@@ -282,7 +282,7 @@ class EavQuerySet(QuerySet):
         Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
         the ``Manager`` get method.
         """
-        return super(EavQuerySet, self).get(*args, **kwargs)
+        return super().get(*args, **kwargs)
 
     def order_by(self, *fields):
         # Django only allows to order querysets by direct fields and
@@ -292,20 +292,20 @@ class EavQuerySet(QuerySet):
         # This will be slow, of course.
         order_clauses = []
         query_clause = self
-        config_cls = self.model._eav_config_cls
+        config_cls = self.model._eav_config_cls  # noqa: SLF001
 
-        for term in [t.split('__') for t in fields]:
+        for term in [t.split("__") for t in fields]:
             # Continue only for EAV attributes.
-            if len(term) == 2 and term[0] == config_cls.eav_attr:
+            if len(term) == 2 and term[0] == config_cls.eav_attr:  # noqa: PLR2004
                 # Retrieve Attribute over which the ordering is performed.
                 try:
                     attr = Attribute.objects.get(slug=term[1])
-                except ObjectDoesNotExist:
+                except ObjectDoesNotExist as err:
                     raise ObjectDoesNotExist(
-                        'Cannot find EAV attribute "{}"'.format(term[1])
-                    )
+                        f'Cannot find EAV attribute "{term[1]}"',
+                    ) from err
 
-                field_name = 'value_%s' % attr.datatype
+                field_name = f"value_{attr.datatype}"
 
                 pks_values = (
                     Value.objects.filter(
@@ -318,12 +318,12 @@ class EavQuerySet(QuerySet):
                     .order_by(
                         # Order values by their value-field of
                         # appropriate attribute data-type.
-                        field_name
+                        field_name,
                     )
                     .values_list(
                         # Retrieve only primary-keys of the entities
                         # in the current queryset.
-                        'entity_id',
+                        "entity_id",
                         field_name,
                     )
                 )
@@ -352,16 +352,16 @@ class EavQuerySet(QuerySet):
 
                 order_clause = Case(*when_clauses, output_field=IntegerField())
 
-                clause_name = '__'.join(term)
+                clause_name = "__".join(term)
                 # Use when-clause to construct
                 # custom order-by clause.
                 query_clause = query_clause.annotate(**{clause_name: order_clause})
 
                 order_clauses.append(clause_name)
 
-            elif len(term) >= 2 and term[0] == config_cls.eav_attr:
+            elif len(term) >= 2 and term[0] == config_cls.eav_attr:  # noqa: PLR2004
                 raise NotSupportedError(
-                    'EAV does not support ordering through ' 'foreign-key chains'
+                    "EAV does not support ordering through foreign-key chains",
                 )
 
             else:

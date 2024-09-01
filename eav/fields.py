@@ -16,7 +16,7 @@ class EavDatatypeField(models.CharField):
         :class:`~eav.models.Attribute` that is already used by
         :class:`~eav.models.Value` objects.
         """
-        super(EavDatatypeField, self).validate(value, instance)
+        super().validate(value, instance)
 
         if not instance.pk:
             return
@@ -31,8 +31,9 @@ class EavDatatypeField(models.CharField):
         if instance.value_set.count():
             raise ValidationError(
                 _(
-                    'You cannot change the datatype of an attribute that is already in use.'
-                )
+                    "You cannot change the datatype of an "
+                    + "attribute that is already in use.",
+                ),
             )
 
 
@@ -42,21 +43,21 @@ class CSVField(models.TextField):  # (models.Field):
 
     def __init__(self, separator=";", *args, **kwargs):
         self.separator = separator
-        kwargs.setdefault('default', "")
+        kwargs.setdefault("default", "")
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         if self.separator != self.default_separator:
-            kwargs['separator'] = self.separator
+            kwargs["separator"] = self.separator
         return name, path, args, kwargs
 
     def formfield(self, **kwargs):
-        defaults = {'form_class': CSVFormField}
+        defaults = {"form_class": CSVFormField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
-    def from_db_value(self, value, expression, connection, context=None):
+    def from_db_value(self, value, expression, connection):
         if value is None:
             return []
         return value.split(self.separator)
@@ -73,8 +74,9 @@ class CSVField(models.TextField):  # (models.Field):
             return ""
         if isinstance(value, str):
             return value
-        elif isinstance(value, list):
+        if isinstance(value, list):
             return self.separator.join(value)
+        return value
 
     def value_to_string(self, obj):
         value = self.value_from_object(obj)

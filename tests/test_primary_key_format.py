@@ -1,9 +1,8 @@
 import uuid
 
-import pytest
 from django.db import models
 
-from eav.logic.object_pk import get_pk_format
+from eav.logic.object_pk import _DEFAULT_CHARFIELD_LEN, get_pk_format
 
 
 def test_get_uuid_primary_key(settings) -> None:
@@ -21,7 +20,7 @@ def test_get_char_primary_key(settings) -> None:
     assert isinstance(primary_field, models.CharField)
     assert primary_field.primary_key
     assert not primary_field.editable
-    assert primary_field.max_length == 40
+    assert primary_field.max_length == _DEFAULT_CHARFIELD_LEN
 
 
 def test_get_default_primary_key(settings) -> None:

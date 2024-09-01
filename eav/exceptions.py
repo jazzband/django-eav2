@@ -1,2 +1,2 @@
-class IllegalAssignmentException(Exception):
+class IllegalAssignmentException(Exception):  # noqa: N818
     pass

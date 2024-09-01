@@ -1,7 +1,8 @@
 from django.test import TestCase
+
+import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 from test_project.models import Patient
-import eav
 
 
 class ModelTest(TestCase):
@@ -38,7 +39,7 @@ class ModelTest(TestCase):
         enum_group = EnumGroup.objects.first()
         enum_group_natural_key = enum_group.natural_key()
         enum_group_retrieved_model = EnumGroup.objects.get_by_natural_key(
-            *enum_group_natural_key
+            *enum_group_natural_key,
         )
         self.assertEqual(enum_group_retrieved_model, enum_group)
 
@@ -46,6 +47,6 @@ class ModelTest(TestCase):
         enum_value = EnumValue.objects.first()
         enum_value_natural_key = enum_value.natural_key()
         enum_value_retrieved_model = EnumValue.objects.get_by_natural_key(
-            *enum_value_natural_key
+            *enum_value_natural_key,
         )
         self.assertEqual(enum_value_retrieved_model, enum_value)

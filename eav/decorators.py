@@ -19,7 +19,7 @@ def register_eav(**kwargs):
 
     def _model_eav_wrapper(model_class):
         if not issubclass(model_class, Model):
-            raise ValueError('Wrapped class must subclass Model.')
+            raise TypeError("Wrapped class must subclass Model.")
         register(model_class, **kwargs)
         return model_class
 

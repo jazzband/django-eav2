@@ -1,4 +1,4 @@
-from typing import Tuple
+from __future__ import annotations
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -35,20 +35,20 @@ class EnumValue(models.Model):
        the same *Yes* and *No* *EnumValues* for both *EnumGroups*.
     """
 
-    objects = EnumValueManager()
-
-    class Meta:
-        verbose_name = _('EnumValue')
-        verbose_name_plural = _('EnumValues')
-
     id = get_pk_format()
 
     value = models.CharField(
-        _('Value'),
+        _("Value"),
         db_index=True,
         unique=True,
         max_length=SLUGFIELD_MAX_LENGTH,
     )
+
+    objects = EnumValueManager()
+
+    class Meta:
+        verbose_name = _("EnumValue")
+        verbose_name_plural = _("EnumValues")
 
     def __str__(self) -> str:
         """String representation of `EnumValue` instance."""
@@ -58,9 +58,9 @@ class EnumValue(models.Model):
 
     def __repr__(self) -> str:
         """String representation of `EnumValue` object."""
-        return f'<EnumValue {self.value}>'
+        return f"<EnumValue {self.value}>"
 
-    def natural_key(self) -> Tuple[str]:
+    def natural_key(self) -> tuple[str]:
         """
         Retrieve the natural key for the EnumValue instance.
 

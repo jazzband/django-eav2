@@ -1,6 +1,5 @@
 import uuid
 from functools import partial
-from typing import Type
 
 from django.conf import settings
 from django.db import models
@@ -24,7 +23,7 @@ _FIELD_MAPPING = {
 }
 
 
-def get_pk_format() -> Type[models.Field]:
+def get_pk_format() -> models.Field:
     """
     Get the primary key field format based on the Django settings.
 

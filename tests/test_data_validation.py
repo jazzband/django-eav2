@@ -30,7 +30,7 @@ class DataValidation(TestCase):
         p.save()
 
         Attribute.objects.create(
-            name='Weight', datatype=Attribute.TYPE_INT, required=True
+            name='Weight', datatype=Attribute.TYPE_INT, required=True,
         )
         p.eav.age = 6
         self.assertRaises(ValidationError, p.save)
@@ -43,10 +43,10 @@ class DataValidation(TestCase):
 
     def test_create_required_field(self):
         Attribute.objects.create(
-            name='Weight', datatype=Attribute.TYPE_INT, required=True
+            name='Weight', datatype=Attribute.TYPE_INT, required=True,
         )
         self.assertRaises(
-            ValidationError, Patient.objects.create, name='Joe', eav__age=5
+            ValidationError, Patient.objects.create, name='Joe', eav__age=5,
         )
         self.assertEqual(Patient.objects.count(), 0)
         self.assertEqual(Value.objects.count(), 0)
@@ -57,7 +57,7 @@ class DataValidation(TestCase):
 
     def test_validation_error_create(self):
         self.assertRaises(
-            ValidationError, Patient.objects.create, name='Joe', eav__age='df'
+            ValidationError, Patient.objects.create, name='Joe', eav__age='df',
         )
         self.assertEqual(Patient.objects.count(), 0)
         self.assertEqual(Value.objects.count(), 0)
@@ -143,7 +143,7 @@ class DataValidation(TestCase):
         ynu.values.add(no)
         ynu.values.add(unkown)
         Attribute.objects.create(
-            name='Fever', datatype=Attribute.TYPE_ENUM, enum_group=ynu
+            name='Fever', datatype=Attribute.TYPE_ENUM, enum_group=ynu,
         )
 
         p = Patient.objects.create(name='Joe')
@@ -199,5 +199,5 @@ class DataValidation(TestCase):
         p.eav.multi = "one;two;three"
         p.save()
         self.assertEqual(
-            Patient.objects.get(pk=p.pk).eav.multi, ["one", "two", "three"]
+            Patient.objects.get(pk=p.pk).eav.multi, ["one", "two", "three"],
         )
