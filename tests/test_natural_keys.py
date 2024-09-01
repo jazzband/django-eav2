@@ -8,24 +8,24 @@ from test_project.models import Patient
 class ModelTest(TestCase):
     def setUp(self):
         eav.register(Patient)
-        Attribute.objects.create(name='age', datatype=Attribute.TYPE_INT)
-        Attribute.objects.create(name='height', datatype=Attribute.TYPE_FLOAT)
-        Attribute.objects.create(name='weight', datatype=Attribute.TYPE_FLOAT)
-        Attribute.objects.create(name='color', datatype=Attribute.TYPE_TEXT)
+        Attribute.objects.create(name="age", datatype=Attribute.TYPE_INT)
+        Attribute.objects.create(name="height", datatype=Attribute.TYPE_FLOAT)
+        Attribute.objects.create(name="weight", datatype=Attribute.TYPE_FLOAT)
+        Attribute.objects.create(name="color", datatype=Attribute.TYPE_TEXT)
 
-        EnumGroup.objects.create(name='Yes / No')
-        EnumValue.objects.create(value='yes')
-        EnumValue.objects.create(value='no')
-        EnumValue.objects.create(value='unknown')
+        EnumGroup.objects.create(name="Yes / No")
+        EnumValue.objects.create(value="yes")
+        EnumValue.objects.create(value="no")
+        EnumValue.objects.create(value="unknown")
 
     def test_attr_natural_keys(self):
-        attr = Attribute.objects.get(name='age')
+        attr = Attribute.objects.get(name="age")
         attr_natural_key = attr.natural_key()
         attr_retrieved_model = Attribute.objects.get_by_natural_key(*attr_natural_key)
         self.assertEqual(attr_retrieved_model, attr)
 
     def test_value_natural_keys(self):
-        p = Patient.objects.create(name='Jon')
+        p = Patient.objects.create(name="Jon")
         p.eav.age = 5
         p.save()
 
