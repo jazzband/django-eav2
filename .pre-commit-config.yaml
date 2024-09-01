@@ -9,12 +9,15 @@ repos:
   - id: check-added-large-files
   - id: mixed-line-ending
 
-- repo: https://github.com/psf/black
-  rev: 24.8.0
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  # Ruff version.
+  rev: v0.6.3
   hooks:
-  - id: black
-    language_version: python3
-    entry: black --target-version=py36
+    # Run the linter.
+    - id: ruff
+      args: [ --fix ]
+    # Run the formatter.
+    - id: ruff-format
 
 - repo: https://github.com/remastr/pre-commit-django-check-migrations
   rev: v0.1.0
