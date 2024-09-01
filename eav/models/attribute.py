@@ -306,10 +306,14 @@ class Attribute(models.Model):
         super().clean_fields(exclude=exclude)
 
         if not self.slug.isidentifier():
-            raise ValidationError({
-                'slug': _("Slug must be a valid Python identifier (no spaces, "
-                            "special characters, or leading digits).")
-            })
+            raise ValidationError(
+                {
+                    'slug': _(
+                        "Slug must be a valid Python identifier (no spaces, "
+                        "special characters, or leading digits)."
+                    )
+                }
+            )
 
     def get_choices(self):
         """

@@ -32,28 +32,33 @@ def test_generate_slug_uniqueness() -> None:
     generated_slugs: dict[str, str] = {}
     for input_str in inputs:
         slug = generate_slug(input_str)
-        assert slug not in generated_slugs.values(), \
-            f"Duplicate slug '{slug}' generated for input '{input_str}'"
+        assert (
+            slug not in generated_slugs.values()
+        ), f"Duplicate slug '{slug}' generated for input '{input_str}'"
         generated_slugs[input_str] = slug
 
-    assert len(generated_slugs) == len(inputs), \
-        "Number of unique slugs doesn't match number of inputs"
+    assert len(generated_slugs) == len(
+        inputs
+    ), "Number of unique slugs doesn't match number of inputs"
 
 
-@pytest.mark.parametrize("input_str", [
-    "01 age",
-    "? age",
-    "age 😊",
-    "class",
-    "def function",
-    "2nd place",
-    "@username",
-    "user-name",
-    "first.last",
-    "snake_case",
-    "CamelCase",
-    "  " # Empty
-])
+@pytest.mark.parametrize(
+    "input_str",
+    [
+        "01 age",
+        "? age",
+        "age 😊",
+        "class",
+        "def function",
+        "2nd place",
+        "@username",
+        "user-name",
+        "first.last",
+        "snake_case",
+        "CamelCase",
+        "  ",  # Empty
+    ],
+)
 def test_generate_slug_valid_identifier(input_str: str) -> None:
     """Test that generate_slug() produces valid Python identifiers.
 

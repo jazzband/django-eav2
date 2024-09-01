@@ -8,6 +8,7 @@ from django.utils.text import slugify
 
 SLUGFIELD_MAX_LENGTH: Final = 50
 
+
 def non_identifier_chars() -> dict[str, str]:
     """Generate a mapping of non-identifier characters to their Unicode representations.
 
@@ -20,11 +21,11 @@ def non_identifier_chars() -> dict[str, str]:
 
     # Filter out characters that are valid in Python identifiers
     special_chars = [
-        char for char in all_chars
-        if not char.isalnum() and char not in ["_", " "]
+        char for char in all_chars if not char.isalnum() and char not in ["_", " "]
     ]
 
     return {char: f"u{ord(char):04x}" for char in special_chars}
+
 
 def generate_slug(value: str) -> str:
     """Generate a valid slug based on the given value.

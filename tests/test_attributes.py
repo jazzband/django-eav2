@@ -136,7 +136,7 @@ class TestAttributeModel(django.TestCase):
             id=auto_field_strategy,
             datatype=just(Attribute.TYPE_TEXT),
             enum_group=just(None),
-            slug=just(None), # Let Attribute.save() handle
+            slug=just(None),  # Let Attribute.save() handle
         ),
     )
     @settings(deadline=None)
@@ -169,7 +169,5 @@ class TestAttributeModel(django.TestCase):
 def test_attribute_create_with_invalid_slug():
     with pytest.raises(ValidationError):
         Attribute.objects.create(
-            name="Test Attribute",
-            slug="123-invalid",
-            datatype=Attribute.TYPE_TEXT
+            name="Test Attribute", slug="123-invalid", datatype=Attribute.TYPE_TEXT
         )
