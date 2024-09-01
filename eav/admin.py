@@ -13,7 +13,7 @@ from eav.models import Attribute, EnumGroup, EnumValue, Value
 
 _FIELDSET_TYPE = List[Union[str, Dict[str, Any]]]  # type: ignore[misc]
 
-some_attribute = ClassVar[dict[str, str]]
+some_attribute = ClassVar[Dict[str, str]]
 
 
 class BaseEntityAdmin(ModelAdmin):
