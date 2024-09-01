@@ -2,7 +2,7 @@ from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms.widgets import Textarea
 
-EMPTY_VALUES = validators.EMPTY_VALUES + ('[]',)
+EMPTY_VALUES = (*validators.EMPTY_VALUES, "[]")
 
 
 class CSVWidget(Textarea):
@@ -12,11 +12,11 @@ class CSVWidget(Textarea):
         """Prepare value before effectively render widget"""
         if value in EMPTY_VALUES:
             return ""
-        elif isinstance(value, str):
+        if isinstance(value, str):
             return value
-        elif isinstance(value, list):
+        if isinstance(value, list):
             return ";".join(value)
-        raise ValidationError('Invalid format.')
+        raise ValidationError("Invalid format.")
 
     def render(self, name, value, **kwargs):
         value = self.prep_value(value)
@@ -31,11 +31,9 @@ class CSVWidget(Textarea):
         key, we need to loop through each field checking if the eav attribute
         exists with the given 'name'.
         """
-        widget_value = None
-        for data_value in data:
-            try:
-                widget_value = getattr(data.get(data_value), name)
-            except AttributeError:
-                pass  # noqa: WPS420
+        for data_value in data.values():
+            widget_value = getattr(data_value, name, None)
+            if widget_value is not None:
+                return widget_value
 
-        return widget_value
+        return None

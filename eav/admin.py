@@ -1,6 +1,8 @@
 """This module contains classes used for admin integration."""
 
-from typing import Any, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import Any, ClassVar, Dict, List, Sequence, Union
 
 from django.contrib import admin
 from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
@@ -10,6 +12,8 @@ from django.utils.safestring import mark_safe
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 
 _FIELDSET_TYPE = List[Union[str, Dict[str, Any]]]  # type: ignore[misc]
+
+some_attribute = ClassVar[dict[str, str]]
 
 
 class BaseEntityAdmin(ModelAdmin):
@@ -26,7 +30,7 @@ class BaseEntityAdmin(ModelAdmin):
     """
 
     eav_fieldset_title: str = "EAV Attributes"
-    eav_fieldset_description: Optional[str] = None
+    eav_fieldset_description: str | None = None
 
     def render_change_form(self, request, context, *args, **kwargs):
         """Dynamically modifies the admin form to include EAV fields.
@@ -45,7 +49,7 @@ class BaseEntityAdmin(ModelAdmin):
         Returns:
             HttpResponse object representing the rendered change form.
         """
-        form = context['adminform'].form
+        form = context["adminform"].form
 
         # Identify EAV fields based on the form instance's configuration.
         eav_fields = self._get_eav_fields(form.instance)
@@ -55,7 +59,7 @@ class BaseEntityAdmin(ModelAdmin):
             return super().render_change_form(request, context, *args, **kwargs)
 
         # Get the non-EAV fieldsets and then append our own
-        fieldsets = list(self.get_fieldsets(request, kwargs['obj']))
+        fieldsets = list(self.get_fieldsets(request, kwargs["obj"]))
         fieldsets.append(self._get_eav_fieldset(eav_fields))
 
         # Reconstruct the admin form with updated fieldsets.
@@ -65,18 +69,18 @@ class BaseEntityAdmin(ModelAdmin):
             # Clear prepopulated fields on a view-only form to avoid a crash.
             (
                 self.prepopulated_fields
-                if self.has_change_permission(request, kwargs['obj'])
+                if self.has_change_permission(request, kwargs["obj"])
                 else {}
             ),
             readonly_fields=self.readonly_fields,
             model_admin=self,
         )
-        media = mark_safe(context['media'] + adminform.media)
+        media = mark_safe(context["media"] + adminform.media)  # noqa: S308
         context.update(adminform=adminform, media=media)
 
         return super().render_change_form(request, context, *args, **kwargs)
 
-    def _get_eav_fields(self, instance) -> List[str]:
+    def _get_eav_fields(self, instance) -> list[str]:
         """Retrieves a list of EAV field slugs for the given instance.
 
         Args:
@@ -85,24 +89,24 @@ class BaseEntityAdmin(ModelAdmin):
         Returns:
             A list of strings representing the slugs of EAV fields.
         """
-        entity = getattr(instance, instance._eav_config_cls.eav_attr)
-        return list(entity.get_all_attributes().values_list('slug', flat=True))
+        entity = getattr(instance, instance._eav_config_cls.eav_attr)  # noqa: SLF001
+        return list(entity.get_all_attributes().values_list("slug", flat=True))
 
     def _get_eav_fieldset(self, eav_fields) -> _FIELDSET_TYPE:
         """Constructs an EAV Attributes fieldset for inclusion in admin form fieldsets.
 
-        Generates a list representing a fieldset specifically for Entity-Attribute-Value (EAV) fields,
-        intended to be appended to the admin form's fieldsets configuration. This facilitates the
-        dynamic inclusion of EAV fields within the Django admin interface by creating a designated
-        section for these attributes.
+        Generates a list representing a fieldset specifically for Entity-Attribute-Value
+        (EAV) fields, intended to be appended to the admin form's fieldsets
+        configuration. This facilitates the dynamic inclusion of EAV fields within the
+        Django admin interface by creating a designated section for these attributes.
 
         Args:
-            eav_fields (List[str]): A list of slugs representing the EAV fields to be included
-            in the EAV Attributes fieldset.
+            eav_fields (List[str]): A list of slugs representing the EAV fields to be
+                included in the EAV Attributes fieldset.
         """
         return [
             self.eav_fieldset_title,
-            {'fields': eav_fields, 'description': self.eav_fieldset_description},
+            {"fields": eav_fields, "description": self.eav_fieldset_description},
         ]
 
 
@@ -114,9 +118,9 @@ class BaseEntityInlineFormSet(BaseInlineFormSet):
     def add_fields(self, form, index):
         if self.instance:
             setattr(form.instance, self.fk.name, self.instance)
-            form._build_dynamic_fields()
+            form._build_dynamic_fields()  # noqa: SLF001
 
-        super(BaseEntityInlineFormSet, self).add_fields(form, index)
+        super().add_fields(form, index)
 
 
 class BaseEntityInline(InlineModelAdmin):
@@ -147,12 +151,12 @@ class BaseEntityInline(InlineModelAdmin):
         instance = self.model(**kw)
         form = formset.form(request.POST, instance=instance)
 
-        return [(None, {'fields': form.fields.keys()})]
+        return [(None, {"fields": form.fields.keys()})]
 
 
 class AttributeAdmin(ModelAdmin):
-    list_display = ('name', 'slug', 'datatype', 'description')
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ("name", "slug", "datatype", "description")
+    prepopulated_fields: ClassVar[dict[str, Sequence[str]]] = {"slug": ("name",)}
 
 
 admin.site.register(Attribute, AttributeAdmin)

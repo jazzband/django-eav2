@@ -1,6 +1,8 @@
 # ruff: noqa: UP007
 
-from typing import TYPE_CHECKING, Optional, Tuple  # noqa: UP035
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -79,40 +81,36 @@ class Attribute(models.Model):
         ynu = EnumGroup.objects.create(name='Yes / No / Unknown')
         ynu.values.add(yes, no, unknown)
 
-        Attribute.objects.create(name='has fever?', datatype=Attribute.TYPE_ENUM, enum_group=ynu)
+        Attribute.objects.create(name='has fever?',
+            datatype=Attribute.TYPE_ENUM,
+            enum_group=ynu
+        )
         # = <Attribute: has fever? (Multiple Choice)>
 
     .. warning:: Once an Attribute has been used by an entity, you can not
                  change it's datatype.
     """
 
-    objects = AttributeManager()
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = _('Attribute')
-        verbose_name_plural = _('Attributes')
-
-    TYPE_TEXT = 'text'
-    TYPE_FLOAT = 'float'
-    TYPE_INT = 'int'
-    TYPE_DATE = 'date'
-    TYPE_BOOLEAN = 'bool'
-    TYPE_OBJECT = 'object'
-    TYPE_ENUM = 'enum'
-    TYPE_JSON = 'json'
-    TYPE_CSV = 'csv'
+    TYPE_TEXT = "text"
+    TYPE_FLOAT = "float"
+    TYPE_INT = "int"
+    TYPE_DATE = "date"
+    TYPE_BOOLEAN = "bool"
+    TYPE_OBJECT = "object"
+    TYPE_ENUM = "enum"
+    TYPE_JSON = "json"
+    TYPE_CSV = "csv"
 
     DATATYPE_CHOICES = (
-        (TYPE_TEXT, _('Text')),
-        (TYPE_DATE, _('Date')),
-        (TYPE_FLOAT, _('Float')),
-        (TYPE_INT, _('Integer')),
-        (TYPE_BOOLEAN, _('True / False')),
-        (TYPE_OBJECT, _('Django Object')),
-        (TYPE_ENUM, _('Multiple Choice')),
-        (TYPE_JSON, _('JSON Object')),
-        (TYPE_CSV, _('Comma-Separated-Value')),
+        (TYPE_TEXT, _("Text")),
+        (TYPE_DATE, _("Date")),
+        (TYPE_FLOAT, _("Float")),
+        (TYPE_INT, _("Integer")),
+        (TYPE_BOOLEAN, _("True / False")),
+        (TYPE_OBJECT, _("Django Object")),
+        (TYPE_ENUM, _("Multiple Choice")),
+        (TYPE_JSON, _("JSON Object")),
+        (TYPE_CSV, _("Comma-Separated-Value")),
     )
 
     # Core attributes
@@ -121,13 +119,13 @@ class Attribute(models.Model):
     datatype = EavDatatypeField(
         choices=DATATYPE_CHOICES,
         max_length=6,
-        verbose_name=_('Data Type'),
+        verbose_name=_("Data Type"),
     )
 
     name = models.CharField(
         max_length=CHARFIELD_LENGTH,
-        help_text=_('User-friendly attribute name'),
-        verbose_name=_('Name'),
+        help_text=_("User-friendly attribute name"),
+        verbose_name=_("Name"),
     )
 
     """
@@ -139,8 +137,8 @@ class Attribute(models.Model):
         max_length=SLUGFIELD_MAX_LENGTH,
         db_index=True,
         unique=True,
-        help_text=_('Short unique attribute label'),
-        verbose_name=_('Slug'),
+        help_text=_("Short unique attribute label"),
+        verbose_name=_("Slug"),
     )
 
     """
@@ -151,13 +149,13 @@ class Attribute(models.Model):
     """
     required = models.BooleanField(
         default=False,
-        verbose_name=_('Required'),
+        verbose_name=_("Required"),
     )
 
     entity_ct = models.ManyToManyField(
         ContentType,
         blank=True,
-        verbose_name=_('Entity content type'),
+        verbose_name=_("Entity content type"),
     )
     """
     This field allows you to specify a relationship with any number of content types.
@@ -166,49 +164,67 @@ class Attribute(models.Model):
     :meth:`~eav.registry.EavConfig.get_attributes` method of that entity's config.
     """
 
-    enum_group: "ForeignKey[Optional[EnumGroup]]" = ForeignKey(
+    enum_group: ForeignKey[Optional[EnumGroup]] = ForeignKey(
         "eav.EnumGroup",
         on_delete=models.PROTECT,
         blank=True,
         null=True,
-        verbose_name=_('Choice Group'),
+        verbose_name=_("Choice Group"),
     )
 
     description = models.CharField(
         max_length=256,
         blank=True,
-        null=True,
-        help_text=_('Short description'),
-        verbose_name=_('Description'),
+        default="",
+        help_text=_("Short description"),
+        verbose_name=_("Description"),
     )
 
     # Useful meta-information
 
     display_order = models.PositiveIntegerField(
         default=1,
-        verbose_name=_('Display order'),
+        verbose_name=_("Display order"),
     )
 
     modified = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('Modified'),
+        verbose_name=_("Modified"),
     )
 
     created = models.DateTimeField(
         default=timezone.now,
         editable=False,
-        verbose_name=_('Created'),
+        verbose_name=_("Created"),
     )
 
-    def __str__(self) -> str:
-        return f'{self.name} ({self.get_datatype_display()})'
+    objects = AttributeManager()
 
-    def natural_key(self) -> Tuple[str, str]:  # noqa: UP006
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("Attribute")
+        verbose_name_plural = _("Attributes")
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.get_datatype_display()})"
+
+    def save(self, *args, **kwargs):
+        """
+        Saves the Attribute and auto-generates a slug field
+        if one wasn't provided.
+        """
+        if not self.slug:
+            self.slug = generate_slug(self.name)
+
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def natural_key(self) -> tuple[str, str]:
         """
         Retrieve the natural key for the Attribute instance.
 
-        The natural key for an Attribute is defined by its `name` and `slug`. This method
-        returns a tuple containing these two attributes of the instance.
+        The natural key for an Attribute is defined by its `name` and `slug`. This
+        method returns a tuple containing these two attributes of the instance.
 
         Returns
         -------
@@ -233,19 +249,19 @@ class Attribute(models.Model):
            method to look elsewhere for additional attribute specific
            validators to return as well as the default, built-in one.
         """
-        DATATYPE_VALIDATORS = {
-            'text': validate_text,
-            'float': validate_float,
-            'int': validate_int,
-            'date': validate_date,
-            'bool': validate_bool,
-            'object': validate_object,
-            'enum': validate_enum,
-            'json': validate_json,
-            'csv': validate_csv,
+        datatype_validators = {
+            "text": validate_text,
+            "float": validate_float,
+            "int": validate_int,
+            "date": validate_date,
+            "bool": validate_bool,
+            "object": validate_object,
+            "enum": validate_enum,
+            "json": validate_json,
+            "csv": validate_csv,
         }
 
-        return [DATATYPE_VALIDATORS[self.datatype]]
+        return [datatype_validators[self.datatype]]
 
     def validate_value(self, value):
         """
@@ -260,20 +276,9 @@ class Attribute(models.Model):
                 value = value.value
             if not self.enum_group.values.filter(value=value).exists():
                 raise ValidationError(
-                    _('%(val)s is not a valid choice for %(attr)s')
-                    % {'val': value, 'attr': self},
+                    _("%(val)s is not a valid choice for %(attr)s")
+                    % {"val": value, "attr": self},
                 )
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the Attribute and auto-generates a slug field
-        if one wasn't provided.
-        """
-        if not self.slug:
-            self.slug = generate_slug(self.name)
-
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     def clean(self):
         """
@@ -283,12 +288,12 @@ class Attribute(models.Model):
         """
         if self.datatype == self.TYPE_ENUM and not self.enum_group:
             raise ValidationError(
-                _('You must set the choice group for multiple choice attributes'),
+                _("You must set the choice group for multiple choice attributes"),
             )
 
         if self.datatype != self.TYPE_ENUM and self.enum_group:
             raise ValidationError(
-                _('You can only assign a choice group to multiple choice attributes'),
+                _("You can only assign a choice group to multiple choice attributes"),
             )
 
     def clean_fields(self, exclude=None):
@@ -308,11 +313,11 @@ class Attribute(models.Model):
         if not self.slug.isidentifier():
             raise ValidationError(
                 {
-                    'slug': _(
+                    "slug": _(
                         "Slug must be a valid Python identifier (no spaces, "
-                        "special characters, or leading digits)."
-                    )
-                }
+                        + "special characters, or leading digits).",
+                    ),
+                },
             )
 
     def get_choices(self):
@@ -342,20 +347,20 @@ class Attribute(models.Model):
         ct = ContentType.objects.get_for_model(entity)
 
         entity_filter = {
-            'entity_ct': ct,
-            'attribute': self,
-            f'{get_entity_pk_type(entity)}': entity.pk,
+            "entity_ct": ct,
+            "attribute": self,
+            f"{get_entity_pk_type(entity)}": entity.pk,
         }
 
         try:
             value_obj = self.value_set.get(**entity_filter)
         except Value.DoesNotExist:
-            if value is None or value == '':
+            if value is None or value == "":
                 return
 
             value_obj = Value.objects.create(**entity_filter)
 
-        if value is None or value == '':
+        if value is None or value == "":
             value_obj.delete()
             return
 

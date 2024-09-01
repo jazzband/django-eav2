@@ -7,6 +7,6 @@ def get_entity_pk_type(entity_cls) -> str:
     These values map to `models.Value` as potential fields to use to relate
     to the proper entity via the correct PK type.
     """
-    if isinstance(entity_cls._meta.pk, UUIDField):
-        return 'entity_uuid'
-    return 'entity_id'
+    if isinstance(entity_cls._meta.pk, UUIDField):  # noqa: SLF001
+        return "entity_uuid"
+    return "entity_id"
