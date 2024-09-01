@@ -2,6 +2,13 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
+## v1.7.0 (2024-09-01)
+
+### What's Changed
+
+- Enhance slug validation for Python identifier compliance
+- Migrate to ruff
+
 ## 1.6.1 (2024-06-23)
 
 ### What's Changed
