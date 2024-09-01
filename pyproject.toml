@@ -3,16 +3,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 
-[tool.nitpick]
-style = "https://raw.githubusercontent.com/wemake-services/wemake-python-styleguide/master/styles/nitpick-style-wemake.toml"
-
-
-[tool.black]
-target-version = ['py37', 'py38', 'py39', 'py310']
-skip-string-normalization = true
-include = '\.pyi?$'
-
-
 [tool.poetry]
 name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django"
