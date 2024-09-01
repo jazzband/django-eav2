@@ -1,12 +1,13 @@
-import uuid
 import string
+import uuid
 
+import pytest
+from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from hypothesis import given, settings
-from hypothesis.extra import django
-from django.conf import settings as django_settings
 from hypothesis import strategies as st
+from hypothesis.extra import django
 from hypothesis.strategies import just
 
 import eav
@@ -14,7 +15,6 @@ from eav.exceptions import IllegalAssignmentException
 from eav.models import Attribute, Value
 from eav.registry import EavConfig
 from test_project.models import Doctor, Encounter, Patient, RegisterTestModel
-
 
 if django_settings.EAV2_PRIMARY_KEY_FIELD == "django.db.models.UUIDField":
     auto_field_strategy = st.builds(uuid.uuid4, version=4, max_length=32)
@@ -162,3 +162,13 @@ class TestAttributeModel(django.TestCase):
         )
 
         assert isinstance(instance, Attribute)
+
+
+@pytest.mark.django_db
+def test_attribute_create_with_invalid_slug():
+    with pytest.raises(ValidationError):
+        Attribute.objects.create(
+            name="Test Attribute",
+            slug="123-invalid",
+            datatype=Attribute.TYPE_TEXT
+        )
