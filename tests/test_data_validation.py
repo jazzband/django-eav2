@@ -16,7 +16,7 @@ class DataValidation(TestCase):
         Attribute.objects.create(name='DoB', datatype=Attribute.TYPE_DATE)
         Attribute.objects.create(name='Height', datatype=Attribute.TYPE_FLOAT)
         Attribute.objects.create(name='City', datatype=Attribute.TYPE_TEXT)
-        Attribute.objects.create(name='Pregnant?', datatype=Attribute.TYPE_BOOLEAN)
+        Attribute.objects.create(name='Pregnant', datatype=Attribute.TYPE_BOOLEAN)
         Attribute.objects.create(name='User', datatype=Attribute.TYPE_OBJECT)
         Attribute.objects.create(name='Extra', datatype=Attribute.TYPE_JSON)
         Attribute.objects.create(name='Multi', datatype=Attribute.TYPE_CSV)
@@ -143,7 +143,7 @@ class DataValidation(TestCase):
         ynu.values.add(no)
         ynu.values.add(unkown)
         Attribute.objects.create(
-            name='Fever?', datatype=Attribute.TYPE_ENUM, enum_group=ynu
+            name='Fever', datatype=Attribute.TYPE_ENUM, enum_group=ynu
         )
 
         p = Patient.objects.create(name='Joe')
