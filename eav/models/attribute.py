@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING, Optional
 
 from django.contrib.contenttypes.models import ContentType
@@ -311,13 +312,10 @@ class Attribute(models.Model):
         super().clean_fields(exclude=exclude)
 
         if not self.slug.isidentifier():
-            raise ValidationError(
-                {
-                    "slug": _(
-                        "Slug must be a valid Python identifier (no spaces, "
-                        + "special characters, or leading digits).",
-                    ),
-                },
+            warnings.warn(
+                f"Slug '{self.slug}' is not a valid Python identifier. "
+                + "Consider updating it.",
+                stacklevel=3,
             )
 
     def get_choices(self):

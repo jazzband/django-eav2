@@ -167,8 +167,15 @@ class TestAttributeModel(django.TestCase):
 
 
 @pytest.mark.django_db
-def test_attribute_create_with_invalid_slug():
-    with pytest.raises(ValidationError):
+def test_attribute_create_with_invalid_slug() -> None:
+    """
+    Test that creating an Attribute with an invalid slug raises a UserWarning.
+
+    This test ensures that when an Attribute is created with a slug that is not
+    a valid Python identifier, a UserWarning is raised. The warning should
+    indicate that the slug is invalid and suggest updating it.
+    """
+    with pytest.warns(UserWarning):
         Attribute.objects.create(
             name="Test Attribute",
             slug="123-invalid",
