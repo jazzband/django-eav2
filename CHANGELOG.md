@@ -2,12 +2,19 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
-## v1.7.0 (2024-09-01)
+## 1.7.1 (2024-09-01)
+
+## What's Changed
+* Restore backward compatibility for Attribute creation with invalid slugs by @Dresdn in https://github.com/jazzband/django-eav2/pull/639
+
+## 1.7.0 (2024-09-01)
 
 ### What's Changed
 
 - Enhance slug validation for Python identifier compliance
 - Migrate to ruff
+- Drop support for Django 3.2
+- Add support for Django 5.1
 
 ## 1.6.1 (2024-06-23)
 
