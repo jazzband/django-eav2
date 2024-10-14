@@ -118,7 +118,9 @@ class Entity:
                 if commit:
                     attribute.save_value(self.instance, attribute_value)
                 values[attribute.slug] = attribute_value
-        self.save_bulk(values, attributes)
+        if not commit:
+            attributes_value = self.save_bulk(values, attributes)
+            Value.objects.bulk_create(attributes_value)
 
     def validate_attributes(self):
         """
@@ -233,8 +235,8 @@ class Entity:
 
         for attr_slug in attribute_slugs:
             entity_data = {
-                "entity_ct": ct,
-                "attribute": next(
+                'entity_ct': ct,
+                'attribute': next(
                     (
                         attribute
                         for attribute in attributes
@@ -243,7 +245,7 @@ class Entity:
                     None,
                 ),
                 get_entity_pk_type(self): self.pk,
-                "value": eav_values[attr_slug],
+                'value': eav_values[attr_slug],
             }
             eav_values_to_create.append(Value(**entity_data))
 
