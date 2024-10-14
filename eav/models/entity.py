@@ -99,7 +99,7 @@ class Entity:
         """
         return self.__dict__[attribute_slug]
 
-    def save(self, commit=True):
+    def save(self, *, commit=True):
         """Saves all the EAV values that have been set on this entity."""
         values = {}
         attributes = self.get_all_attributes()
