@@ -107,7 +107,7 @@ class BaseDynamicEntityForm(ModelForm):
 
             if datatype == attribute.TYPE_ENUM:
                 values = attribute.get_choices().values_list("id", "value")
-                choices = ["", "-----", *list(values)]
+                choices = [("", ""), ("-----", "-----"), *list(values)]
                 defaults.update({"choices": choices})
 
                 if value:
