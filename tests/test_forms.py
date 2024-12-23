@@ -211,3 +211,41 @@ def test_entity_admin_form_no_attributes(patient):
 
     # 3 for 'name', 'email', 'example'
     assert total_fields == expected_fields
+
+
+@pytest.mark.django_db
+def test_dynamic_form_renders_enum_choices():
+    """
+    Test that enum choices render correctly in BaseDynamicEntityForm.
+
+    This test verifies the fix for issue #648 where enum choices weren't
+    rendering correctly in Django 4.2.17 due to QuerySet unpacking issues.
+    """
+    # Setup
+    eav.register(Patient)
+
+    # Create enum values and group
+    female = EnumValue.objects.create(value="Female")
+    male = EnumValue.objects.create(value="Male")
+    gender_group = EnumGroup.objects.create(name="Gender")
+    gender_group.values.add(female, male)
+
+    Attribute.objects.create(
+        name="gender",
+        datatype=Attribute.TYPE_ENUM,
+        enum_group=gender_group,
+    )
+
+    # Create a patient
+    patient = Patient.objects.create(name="Test Patient")
+
+    # Initialize the dynamic form
+    form = PatientDynamicForm(instance=patient)
+
+    # Test rendering - should not raise any exceptions
+    rendered_form = form.as_p()
+
+    # Verify the form rendered and contains the enum choices
+    assert 'name="gender"' in rendered_form
+    assert f'value="{female.pk}">{female.value}' in rendered_form
+    assert f'value="{male.pk}">{male.value}' in rendered_form
