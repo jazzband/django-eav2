@@ -1,12 +1,12 @@
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.9"]
 build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry]
 name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django"
-version = "1.7.1"
+version = "1.8.4"
 license = "GNU Lesser General Public License (LGPL), Version 3"
 packages = [
   { include = "eav" }
