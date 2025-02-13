@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any, ClassVar, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
 
 from django.contrib import admin
 from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
@@ -11,6 +10,9 @@ from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
 from eav.models import Attribute, EnumGroup, EnumValue, Value
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 _FIELDSET_TYPE = List[Union[str, Dict[str, Any]]]  # type: ignore[misc]
 
