@@ -178,15 +178,15 @@ class Value(models.Model):
         entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return f'{self.attribute.name}: "{self.value}" ({entity})'
 
-    def save(self, *args, **kwargs):
-        """Validate and save this value."""
-        self.full_clean()
-        super().save(*args, **kwargs)
-
     def __repr__(self) -> str:
         """Representation of Value object."""
         entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return f'{self.attribute.name}: "{self.value}" ({entity})'
+
+    def save(self, *args, **kwargs):
+        """Validate and save this value."""
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def natural_key(self) -> tuple[tuple[str, str], int, str]:
         """

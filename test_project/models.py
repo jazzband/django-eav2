@@ -101,7 +101,7 @@ class Encounter(TestBase):
     patient = models.ForeignKey(Patient, on_delete=models.PROTECT)
 
     def __str__(self):
-        return "%s: encounter num %d" % (self.patient, self.num)
+        return f"{self.patient}: encounter num {self.num}"
 
     def __repr__(self):
         return self.name
