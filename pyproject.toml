@@ -90,6 +90,7 @@ tomlkit = ">=0.13.0,<0.14"
 
 [tool.ruff]
 line-length = 88
+target-version = "py38"
 
 [tool.ruff.lint]
 select = ["ALL"]
