@@ -1,7 +1,7 @@
 # ruff: noqa: UP007
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -172,6 +172,24 @@ class Value(models.Model):
     class Meta:
         verbose_name = _("Value")
         verbose_name_plural = _("Values")
+
+        constraints: ClassVar[list[models.Constraint]] = [
+            models.UniqueConstraint(
+                fields=["entity_ct", "attribute", "entity_uuid"],
+                name="unique_entity_uuid_per_attribute",
+            ),
+            models.UniqueConstraint(
+                fields=["entity_ct", "attribute", "entity_id"],
+                name="unique_entity_id_per_attribute",
+            ),
+            models.CheckConstraint(
+                check=(
+                    models.Q(entity_id__isnull=False, entity_uuid__isnull=True)
+                    | models.Q(entity_id__isnull=True, entity_uuid__isnull=False)
+                ),
+                name="ensure_entity_id_xor_entity_uuid",
+            ),
+        ]
 
     def __str__(self) -> str:
         """String representation of a Value."""
