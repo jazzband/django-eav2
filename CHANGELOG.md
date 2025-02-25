@@ -2,6 +2,13 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
+## 1.8.0 (2025-02-24)
+
+## What's Changed
+
+- Add database constraints to Value model for data integrity by @Dresdn in https://github.com/jazzband/django-eav2/pull/706
+- Fix for issue #648: Ensure choices are valid (value, label) tuples by @altimore in https://github.com/jazzband/django-eav2/pull/707
+
 ## 1.7.1 (2024-09-01)
 
 ## What's Changed

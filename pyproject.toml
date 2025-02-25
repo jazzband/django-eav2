@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "django-eav2"
 description = "Entity-Attribute-Value storage for Django"
-version = "1.8.4"
+version = "1.8.0"
 license = "GNU Lesser General Public License (LGPL), Version 3"
 packages = [
   { include = "eav" }
