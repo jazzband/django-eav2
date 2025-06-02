@@ -2,6 +2,13 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
+## 1.8.1 (2025-06-02)
+
+## What's Changed
+
+- Added support for Django 5.2
+- Updated dependencies to their latest versions
+
 ## 1.8.0 (2025-02-24)
 
 ## What's Changed
