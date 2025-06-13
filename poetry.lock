@@ -1723,14 +1723,14 @@ files = [
 
 [[package]]
 name = "safety"
-version = "3.5.1"
+version = "3.5.2"
 description = "Scan dependencies for known vulnerabilities and licenses."
 optional = false
 python-versions = ">=3.8"
 groups = ["test"]
 files = [
-    {file = "safety-3.5.1-py3-none-any.whl", hash = "sha256:535bba9e2c274fcabc508db7005407fc348635b29e516a68bb515a686f8e03d9"},
-    {file = "safety-3.5.1.tar.gz", hash = "sha256:7fde2dbb497f2a167fe2dd864c8ab3296bbcd6e8a4f0490b047d5c84a60a653f"},
+    {file = "safety-3.5.2-py3-none-any.whl", hash = "sha256:d5baff410c548393e80ba2bd2ab1de2701a690ca3577e457335917b9db4641e1"},
+    {file = "safety-3.5.2.tar.gz", hash = "sha256:ecbb2e76f9574284f2c0e168e71ec92b39018ae9516b3b00f132de57ecaa09cb"},
 ]
 
 [package.dependencies]
