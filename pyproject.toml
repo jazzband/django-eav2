@@ -121,8 +121,10 @@ allow-multiline = false
 "tests/*" = [
   "INP001",   # "Add an __init__.py"
   "PLR2004",  # "Magic value used in comparison"
+  "PLW0108",  # "Lambda may be unnecessary" - used with assertRaises
   "PT009",    # "Use a regular assert instead of unittest-style"
   "PT027",    # "Use pytest.raises instead of unittest-style"
+  "PT030",    # "pytest.warns match parameter" - broad warnings intentional in tests
   "S101",     # "Use of assert detected"
   "SLF001"    # "Private member accessed"
   ]
