@@ -24,4 +24,4 @@ repos:
   hooks:
     - id: check-migrations-created
       args: [--manage-path=manage.py]
-      additional_dependencies: [django==4.1]
+      additional_dependencies: [django==5.2]
