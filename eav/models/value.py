@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -136,7 +136,7 @@ class Value(models.Model):
         verbose_name=_("Value JSON"),
     )
 
-    value_enum: ForeignKey[Optional[EnumValue]] = ForeignKey(
+    value_enum: ForeignKey[EnumValue | None] = ForeignKey(
         "eav.EnumValue",
         blank=True,
         null=True,

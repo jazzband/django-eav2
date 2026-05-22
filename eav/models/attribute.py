@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -163,7 +163,7 @@ class Attribute(models.Model):
     :meth:`~eav.registry.EavConfig.get_attributes` method of that entity's config.
     """
 
-    enum_group: ForeignKey[Optional[EnumGroup]] = ForeignKey(
+    enum_group: ForeignKey[EnumGroup | None] = ForeignKey(
         "eav.EnumGroup",
         on_delete=models.PROTECT,
         blank=True,
