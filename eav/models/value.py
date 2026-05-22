@@ -183,7 +183,7 @@ class Value(models.Model):
                 name="unique_entity_id_per_attribute",
             ),
             models.CheckConstraint(
-                check=(
+                condition=(
                     models.Q(entity_id__isnull=False, entity_uuid__isnull=True)
                     | models.Q(entity_id__isnull=True, entity_uuid__isnull=False)
                 ),
