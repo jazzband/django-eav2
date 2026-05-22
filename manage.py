@@ -3,6 +3,15 @@
 import os
 import sys
 
+try:
+    from django.core import management
+except ImportError as err:
+    raise ImportError(
+        "Couldn't import Django. Are you sure it's installed and "
+        + "available on your PYTHONPATH environment variable? Did you "
+        + "forget to activate a virtual environment?",
+    ) from err
+
 
 def main() -> None:
     """
@@ -14,16 +23,6 @@ def main() -> None:
     3. Executes any given command
     """
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "test_project.settings")
-
-    try:
-        from django.core import management
-    except ImportError as err:
-        raise ImportError(
-            "Couldn't import Django. Are you sure it's installed and "
-            + "available on your PYTHONPATH environment variable? Did you "
-            + "forget to activate a virtual environment?",
-        ) from err
-
     management.execute_from_command_line(sys.argv)
 
 

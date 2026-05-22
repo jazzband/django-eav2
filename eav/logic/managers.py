@@ -86,7 +86,7 @@ class ValueManager(models.Manager):
         Returns:
             Value: The instance matching the provided keys.
         """
-        from eav.models import Attribute
+        from eav.models import Attribute  # noqa: PLC0415
 
         attribute = Attribute.objects.get(name=attribute[0], slug=attribute[1])
 
