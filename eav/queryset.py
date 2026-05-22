@@ -28,10 +28,10 @@ Q-expressions need to be rewritten for two reasons:
    The correct way to express "entities where attr A = x AND attr B ≠ y"
    is to chain ``.exclude()`` instead::
 
-       # Wrong – row-level negation, may return unexpected results
+       # Wrong - row-level negation, may return unexpected results
        MyModel.objects.filter(Q(eav__a=x) & ~Q(eav__b=y))
 
-       # Correct – entity-level negation
+       # Correct - entity-level negation
        MyModel.objects.filter(eav__a=x).exclude(eav__b=y)
 """
 
