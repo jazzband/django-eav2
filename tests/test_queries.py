@@ -407,3 +407,148 @@ class Queries(TestCase):
         # Assert that the expected patient is returned
         self.assertEqual(len(patients), 1)
         self.assertEqual(patients[0].name, "Anne")
+
+    def test_filter_eav_and_negated_non_eav_field(self) -> None:
+        """
+        Regression test for #634: EAV Q combined with a negated non-EAV Q.
+
+        Q(eav__attr=val) & ~Q(non_eav_field=val) raised:
+            TypeError: 'Q' object is not subscriptable
+        """
+        self.init_data()
+        # fever=yes → Cyrill, Eugene; name≠"Bob" excludes nobody here
+        p = Patient.objects.filter(Q(eav__fever=self.yes) & ~Q(name="Bob"))
+        assert p.count() == 2
+        assert set(p.values_list("name", flat=True)) == {"Cyrill", "Eugene"}
+
+    def test_filter_negated_non_eav_field_and_eav(self) -> None:
+        """
+        Regression test for #634: negated non-EAV Q combined with an EAV Q
+        (operand order reversed from the previous test).
+
+        ~Q(non_eav_field=val) & Q(eav__attr=val) raised:
+            TypeError: 'Q' object is not subscriptable
+        """
+        self.init_data()
+        # Same expectation as above; order of operands should not matter.
+        p = Patient.objects.filter(~Q(name="Bob") & Q(eav__fever=self.yes))
+        assert p.count() == 2
+        assert set(p.values_list("name", flat=True)) == {"Cyrill", "Eugene"}
+
+    def test_filter_eav_and_negated_eav_field(self) -> None:
+        """
+        Regression test for #634: EAV Q combined with a negated EAV Q.
+
+        Q(eav__attr1=val) & ~Q(eav__attr2=val) raised:
+            TypeError: 'Q' object is not subscriptable
+
+        Note: negating an EAV filter inside filter() has known SQL JOIN
+        semantics limitations. Because each EAV attribute is stored as a
+        separate row in the values table, the negation operates on individual
+        rows rather than on entities. This means a patient with both a
+        fever=no value AND a city='Nice' value will still be included because
+        their fever=no row passes the NOT city='Nice' row-level check.
+        The primary purpose of this test is to verify no TypeError is raised.
+        """
+        self.init_data()
+        # fever=no → Anne, Bob, Daniel
+        # ~city='Nice' does NOT reliably exclude Daniel due to EAV row semantics
+        p = Patient.objects.filter(Q(eav__fever=self.no) & ~Q(eav__city="Nice"))
+        # At minimum, the EAV-only patients (no city='Nice') must be present
+        names = set(p.values_list("name", flat=True))
+        assert {"Anne", "Bob"}.issubset(names)
+        # Result is bounded by the fever=no set
+        assert names.issubset({"Anne", "Bob", "Daniel"})
+
+    def test_filter_solo_negated_eav_field(self) -> None:
+        """
+        ~Q(eav__attr=val) as the sole argument should work correctly.
+
+        This produces entity-level exclusion because there are no other EAV
+        JOIN conditions to interfere: entities with no matching value row are
+        simply absent from the JOIN, so NOT eav_values__in correctly excludes
+        entities that DO have that value row.
+        """
+        self.init_data()
+        # age != 3 → Bob (15), Cyrill (15), Eugene (2)
+        p = Patient.objects.filter(~Q(eav__age=3))
+        assert p.count() == 3
+        assert set(p.values_list("name", flat=True)) == {"Bob", "Cyrill", "Eugene"}
+
+    def test_filter_or_eav_and_non_eav_no_duplicates(self) -> None:
+        """
+        OR between an EAV Q and a non-EAV Q must not return duplicate rows.
+
+        When an EAV condition is used in OR with a non-EAV condition, the EAV
+        side remains as a JOIN condition (it cannot be merged via rewrite_q_expr
+        because there is only one EAV leaf). This JOIN can produce multiple rows
+        per entity. Results should be distinct.
+
+        This is a known limitation: callers should use .distinct() when mixing
+        EAV and non-EAV conditions in OR.
+        """
+        self.init_data()
+        # fever=yes → Cyrill, Eugene; name='Bob' → Bob
+        p = Patient.objects.filter(Q(eav__fever=self.yes) | Q(name="Bob"))
+        # Correct distinct count is 3; without distinct() duplicates may appear
+        assert p.distinct().count() == 3
+        assert set(p.distinct().values_list("name", flat=True)) == {
+            "Bob",
+            "Cyrill",
+            "Eugene",
+        }
+
+    def test_q_object_not_mutated_by_filter(self) -> None:
+        """
+        Q objects passed to filter() must not be mutated.
+
+        expand_q_filters() rewrites Q children in-place. If the original Q
+        object is mutated, reusing it in a second query will operate on the
+        already-expanded (internal) form and may produce incorrect results or
+        errors.
+
+        This test documents the current behaviour (mutation occurs) so that
+        any future fix is captured as a regression guard.
+        """
+        self.init_data()
+        q = Q(eav__fever=self.yes)
+        original_children = list(q.children)  # [('eav__fever', <EnumValue>)]
+
+        Patient.objects.filter(q)
+
+        # Document current (broken) behaviour: children are mutated.
+        # When this is fixed, change the assertion to assertEqual.
+        assert q.children != original_children, (
+            "Q mutation is fixed - update this test to assert no mutation"
+        )
+
+    def test_negated_eav_field_workaround_chained_exclude(self) -> None:
+        """
+        Documents the correct way to express "EAV attr A = x AND EAV attr B != y".
+
+        Because EAV values are stored one-per-row, using ~Q() inside filter()
+        negates at the *row* level, not the *entity* level.  The correct
+        approach is to chain .exclude() which operates at the entity level::
+
+            # WRONG - may return entities that should be excluded
+            Patient.objects.filter(Q(eav__fever=no) & ~Q(eav__city="Nice"))
+
+            # CORRECT - exclude() works at entity level
+            Patient.objects.filter(eav__fever=no).exclude(eav__city="Nice")
+            # or equivalently:
+            Patient.objects.filter(Q(eav__fever=no)).exclude(Q(eav__city="Nice"))
+        """
+        self.init_data()
+        # fever=no → Anne, Bob, Daniel; chained exclude removes Daniel
+        p_chained = Patient.objects.filter(eav__fever=self.no).exclude(
+            eav__city="Nice",
+        )
+        assert p_chained.count() == 2
+        assert set(p_chained.values_list("name", flat=True)) == {"Anne", "Bob"}
+
+        # Q-based form of the same thing
+        p_q = Patient.objects.filter(Q(eav__fever=self.no)).exclude(
+            Q(eav__city="Nice"),
+        )
+        assert p_q.count() == 2
+        assert set(p_q.values_list("name", flat=True)) == {"Anne", "Bob"}

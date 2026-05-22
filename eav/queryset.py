@@ -12,11 +12,27 @@ Q-expressions need to be rewritten for two reasons:
 
        city_values = Value.objects.filter(value__text__startswith='New')
        Supplier.objects.filter(eav_values__in=city_values)
-
    For details see: :func:`eav_filter`.
 
 2. To ensure that Q-expression tree is compiled to valid SQL.
    For details see: :func:`rewrite_q_expr`.
+
+.. note:: EAV negation limitation
+
+   Because EAV values are stored as individual rows in a shared table,
+   using ``~Q(eav__attr=value)`` inside ``.filter()`` negates at the
+   **row** level rather than the **entity** level.  This can produce
+   unexpected results: an entity that has *other* EAV rows not matching
+   the negation will still appear in the result set.
+
+   The correct way to express "entities where attr A = x AND attr B ≠ y"
+   is to chain ``.exclude()`` instead::
+
+       # Wrong – row-level negation, may return unexpected results
+       MyModel.objects.filter(Q(eav__a=x) & ~Q(eav__b=y))
+
+       # Correct – entity-level negation
+       MyModel.objects.filter(eav__a=x).exclude(eav__b=y)
 """
 
 from functools import wraps
@@ -44,6 +60,7 @@ def is_eav_and_leaf(expr, gr_name):
     return (
         getattr(expr, "connector", None) == "AND"
         and len(expr.children) == 1
+        and isinstance(expr.children[0], tuple)
         and expr.children[0][0] in ["pk__in", f"{gr_name}__in"]
     )
 
