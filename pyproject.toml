@@ -37,7 +37,6 @@ classifiers = [
   "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -45,9 +44,8 @@ classifiers = [
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Framework :: Django",
-  "Framework :: Django :: 4.2",
-  "Framework :: Django :: 5.1",
   "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
 ]
 
 [tool.semantic_release]
@@ -60,8 +58,8 @@ upload_to_release = false
 build_command = "pip install poetry && poetry build"
 
 [tool.poetry.dependencies]
-python = "^3.9"
-django = ">=4.2,<5.3"
+python = "^3.10"
+django = ">=5.2"
 
 [tool.poetry.group.test.dependencies]
 mypy = "^1.6"
