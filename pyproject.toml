@@ -62,7 +62,7 @@ python = "^3.10"
 django = ">=5.2"
 
 [tool.poetry.group.test.dependencies]
-mypy = "^1.6"
+mypy = ">=1.6,<3.0"
 ruff = ">=0.6.3,<0.16.0"
 
 safety = ">=2.3,<4.0"
@@ -73,7 +73,7 @@ pytest-randomly = ">=3.15,<5.0"
 pytest-django = "^4.5.2"
 hypothesis = "^6.87.1"
 
-doc8 = ">=0.11.2,<1.2.0"
+doc8 = ">=0.11.2,<2.1.0"
 
 [tool.poetry.group.docs]
 optional = true
