@@ -1,15 +1,38 @@
 version: 2
 updates:
-- package-ecosystem: pip
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "02:00"
-  open-pull-requests-limit: 10
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "02:00"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    groups:
+      test-dependencies:
+        patterns:
+          - "pytest*"
+          - "mypy"
+          - "ruff"
+          - "hypothesis"
+          - "safety"
+          - "doc8"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
 
-- package-ecosystem: github-actions
-  directory: "/"
-  schedule:
-    interval: daily
-    time: "02:00"
-  open-pull-requests-limit: 10
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "02:00"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
