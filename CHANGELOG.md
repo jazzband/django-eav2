@@ -2,6 +2,20 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
+## 1.8.2 (2026-05-22)
+
+## What's Changed
+
+### Bug Fixes
+
+- Fixed `TypeError: 'Q' object is not subscriptable` when combining EAV filters with negated Q objects by @Dresdn in https://github.com/jazzband/django-eav2/pull/846
+
+### Compatibility
+
+- Added Django 6.0 support
+- Dropped support for EOL Django versions — minimum is now Django 5.2
+- Dropped support for EOL Python versions — minimum is now Python 3.10
+
 ## 1.8.1 (2025-06-02)
 
 ## What's Changed
