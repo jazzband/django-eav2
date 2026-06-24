@@ -23,7 +23,7 @@ jobs:
             django-version: '6.0'
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v7.0.0
 
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -39,7 +39,7 @@ jobs:
           installer-parallel: true
 
       - name: Set up cache
-        uses: actions/cache@v5
+        uses: actions/cache@v5.0.5
         with:
           path: .venv
           key: venv-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
@@ -57,6 +57,6 @@ jobs:
           poetry run pip check
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6.0.1
+        uses: codecov/codecov-action@v7.0.0
         with:
           files: ./coverage.xml
