@@ -106,7 +106,7 @@ INSTALLED_APPS = [
 Add `django.db.models.UUIDField` or `django.db.models.BigAutoField` as value of `EAV2_PRIMARY_KEY_FIELD` in your settings
 
 ``` python
-EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField" # as example
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField"  # as example
 ```
 
 ### Note: Primary key mandatory modification field
@@ -131,7 +131,7 @@ If the primary key of eav models are to be modified (UUIDField -> BigAutoField, 
  Change the value of `EAV2_PRIMARY_KEY_FIELD` into the desired value (`django.db.models.BigAutoField` or `django.db.models.UUIDField`) in your settings.
 
  ```python
- EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField" # as example
+ EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField"  # as example
  ```
 
   Run again the migrations.
@@ -161,6 +161,7 @@ INSTALLED_APPS = [
 
 ```python
 import eav
+
 eav.register(Supplier)
 ```
 
@@ -169,24 +170,24 @@ or with decorators:
 ```python
 from eav.decorators import register_eav
 
+
 @register_eav
-class Supplier(models.Model):
-    ...
+class Supplier(models.Model): ...
 ```
 
 **Step 2.** Create an attribute:
 
 ```python
-Attribute.objects.create(name='City', datatype=Attribute.TYPE_TEXT)
+Attribute.objects.create(name="City", datatype=Attribute.TYPE_TEXT)
 ```
 
 **Step 3.** That’s it! You’re ready to go:
 
 ```python
-supplier.eav.city = 'London'
+supplier.eav.city = "London"
 supplier.save()
 
-Supplier.objects.filter(eav__city='London')
+Supplier.objects.filter(eav__city="London")
 # = <EavQuerySet [<Supplier: Supplier object (1)>]>
 ```
 
