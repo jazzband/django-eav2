@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -64,12 +65,35 @@ TEMPLATES = [
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
-    },
+# SQLite by default. Set ``EAV_TEST_DB`` to ``postgres`` or ``mysql`` to run
+# the suite against a real server (see ``docker-compose.yml``).
+_DB_ENGINES = {
+    # engine, default port, default user (MySQL needs a user that can create
+    # the ``test_*`` database):
+    "postgres": ("django.db.backends.postgresql", "15432", "eav"),
+    "mysql": ("django.db.backends.mysql", "13306", "root"),
 }
+_DB_NAME = os.environ.get("EAV_TEST_DB", "sqlite")
+
+if _DB_NAME in _DB_ENGINES:
+    _engine, _port, _user = _DB_ENGINES[_DB_NAME]
+    DATABASES = {
+        "default": {
+            "ENGINE": _engine,
+            "NAME": os.environ.get("EAV_TEST_DB_NAME", "eav"),
+            "USER": os.environ.get("EAV_TEST_DB_USER", _user),
+            "PASSWORD": os.environ.get("EAV_TEST_DB_PASSWORD", "eav"),
+            "HOST": os.environ.get("EAV_TEST_DB_HOST", "127.0.0.1"),
+            "PORT": os.environ.get("EAV_TEST_DB_PORT", _port),
+        },
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        },
+    }
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
