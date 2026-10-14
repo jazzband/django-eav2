@@ -201,9 +201,7 @@ class Value(models.Model):
         entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return f'{self.attribute.name}: "{self.value}" ({entity})'
 
-    def __repr__(self) -> str:
-        """Representation of Value object."""
-        return str(self)
+    __repr__ = __str__
 
     def save(self, *args, **kwargs):
         """Validate and save this value."""
@@ -219,8 +217,16 @@ class Value(models.Model):
         used by ``Entity.save``, which has already validated the value and
         loaded the existing rows; the database still enforces the constraints.
         """
-        self.clean_fields(exclude=_RELATION_FIELDS)
+        self.clean_own_fields()
         models.Model.save(self, *args, **kwargs)
+
+    def clean_own_fields(self) -> None:
+        """
+        Clean the fields that hold this value, converting them to Python types.
+
+        Related fields are skipped, as checking they exist costs a query each.
+        """
+        self.clean_fields(exclude=_RELATION_FIELDS)
 
     def natural_key(self) -> tuple[tuple[str, str], int, str]:
         """

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from django.contrib.contenttypes.models import ContentType
@@ -274,11 +275,42 @@ class Attribute(models.Model):
         if self.datatype == self.TYPE_ENUM:
             if isinstance(value, EnumValue):
                 value = value.value
-            if not self.enum_group.values.filter(value=value).exists():
+            if value not in self.enum_choices:
                 raise ValidationError(
                     _("%(val)s is not a valid choice for %(attr)s")
                     % {"val": value, "attr": self},
                 )
+
+    def validate_assignment(self, value: object) -> None:
+        """
+        Check a value assigned to this attribute of an entity.
+
+        Raises ``ValidationError`` if the attribute is required and the value is
+        ``None``, or if the value is not valid for the attribute.
+        """
+        if value is None:
+            if self.required:
+                raise ValidationError(_("%s EAV field cannot be blank") % self.slug)
+            return
+
+        try:
+            self.validate_value(value)
+        except ValidationError as err:
+            raise ValidationError(
+                _("%(attr)s EAV field %(err)s") % {"attr": self.slug, "err": err},
+            ) from err
+
+    @cached_property
+    def enum_choices(self) -> dict[str, EnumValue]:
+        """
+        The choices of an enum attribute by value, loaded once per instance.
+
+        Empty for attributes that are not of the enum datatype.
+        """
+        if self.enum_group is None:
+            return {}
+
+        return {choice.value: choice for choice in self.enum_group.values.all()}
 
     def clean(self):
         """
