@@ -58,12 +58,10 @@ class CSVField(models.TextField):  # (models.Field):
         return super().formfield(**defaults)
 
     def from_db_value(self, value, expression, connection):
-        if value is None:
-            return []
-        return value.split(self.separator)
+        return self.to_python(value)
 
     def to_python(self, value):
-        if value is None:
+        if not value:
             return []
         if isinstance(value, list):
             return value
