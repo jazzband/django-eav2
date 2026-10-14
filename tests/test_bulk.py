@@ -11,8 +11,10 @@ from django.utils import timezone
 
 import eav
 from eav.exceptions import IllegalAssignmentException
+from eav.logic.bulk import BulkValueWriter
 from eav.models import Attribute, EnumGroup, EnumValue, Value
-from test_project.models import Doctor, Patient
+from eav.registry import EavConfig
+from test_project.models import Doctor, ExampleModel, Patient
 
 pytestmark = pytest.mark.django_db
 
@@ -273,3 +275,48 @@ def test_batch_size_argument_overrides_the_config(
     # One chunk: the doctors and two upserts, plus the savepoint pair and attributes.
     with django_assert_num_queries(2 + 1 + 3):
         Doctor.objects.bulk_create(_doctors(25), batch_size=100)
+
+
+def test_bulk_create_stores_object_and_enum_instances() -> None:
+    Attribute.objects.create(name="owner", datatype=Attribute.TYPE_OBJECT)
+    # Object attributes can only point at integer-keyed models.
+    owner = ExampleModel.objects.create(name="owner")
+    yes = EnumValue.objects.get(value="yes")
+    patient = Patient(name="p")
+    patient.eav.owner = owner
+    patient.eav.fever = yes
+
+    if not connection.features.can_return_rows_from_bulk_insert:
+        pytest.skip("integer primary keys are not returned by this database")
+
+    Patient.objects.bulk_create([patient])
+
+    stored = Patient.objects.get(name="p")
+    assert stored.eav.fever == yes
+    assert stored.eav.owner == owner
+
+
+def test_models_registered_as_manager_only_use_plain_bulk_create() -> None:
+    class ManagerOnly(EavConfig):
+        manager_only = True
+
+    eav.unregister(Patient)
+    eav.register(Patient, ManagerOnly)
+
+    created = Patient.objects.bulk_create([Patient(name="plain")])
+
+    assert created[0].name == "plain"
+    assert Value.objects.count() == 0
+
+
+def test_writing_values_needs_primary_keys() -> None:
+    patient = Patient(name="unsaved")
+    patient.eav.age = 1
+
+    with pytest.raises(NotSupportedError, match="Primary keys are needed"):
+        BulkValueWriter(Patient).write([patient])
+
+
+def test_enum_choices_are_empty_for_other_datatypes() -> None:
+    assert Attribute.objects.get(slug="age").enum_choices == {}
+    assert set(Attribute.objects.get(slug="fever").enum_choices) == {"yes", "no"}
