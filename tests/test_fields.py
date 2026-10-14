@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from django.core.exceptions import ValidationError
 
 import eav
 from eav.fields import CSVField
@@ -34,3 +35,14 @@ def test_empty_csv_attribute_round_trips_as_empty_list() -> None:
     patient.save()
 
     assert Patient.objects.get(pk=patient.pk).eav.tags == []
+
+
+def test_datatype_cannot_change_once_in_use() -> None:
+    eav.register(Patient)
+    attribute = Attribute.objects.create(name="age", datatype=Attribute.TYPE_INT)
+    Patient.objects.create(name="Joe", eav__age=3)
+
+    attribute.datatype = Attribute.TYPE_TEXT
+
+    with pytest.raises(ValidationError):
+        attribute.full_clean()
