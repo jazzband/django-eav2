@@ -150,19 +150,19 @@ def rewrite_q_expr(model_cls, expr):
 
                 if attrval[0] == fname or hasattr(attrval[1], "__contains__"):
                     # Create model queryset.
-                    _q = model_cls.objects.filter(**{fname: attrval[1]})
+                    leaf_qs = model_cls.objects.filter(**{fname: attrval[1]})
                 else:
                     # Second val in tuple is a queryset.
-                    _q = attrval[1]
+                    leaf_qs = attrval[1]
 
                 # Explicitly check for None. 'or' doesn't work here
                 # as empty QuerySet, which is valid, is falsy.
-                q = q if q is not None else _q
+                q = leaf_qs if q is None else q
 
                 if expr.connector == "AND":
-                    q &= _q
+                    q &= leaf_qs
                 else:
-                    q |= _q
+                    q |= leaf_qs
 
             # If any two children were merged,
             # update parent expression.
@@ -365,7 +365,6 @@ class EavQuerySet(QuerySet):
                 #         WHEN id = 9 THEN 2
                 #         WHEN id = 4 THEN 3
                 #     END
-                #
                 when_clauses = [When(id=pk, then=i) for pk, i in entities_pk]
 
                 order_clause = Case(*when_clauses, output_field=IntegerField())

@@ -56,6 +56,6 @@ def generate_slug(value: str) -> str:
 
     # Ensure the slug doesn't start with a digit to make it a valid Python identifier.
     if slug[0].isdigit():
-        slug = "_" + slug
+        slug = f"_{slug}"
 
     return slug[:SLUGFIELD_MAX_LENGTH]

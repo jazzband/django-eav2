@@ -8,10 +8,9 @@ from django.utils.translation import gettext_lazy as _
 from eav import register
 from eav.exceptions import IllegalAssignmentException
 from eav.logic.entity_pk import get_entity_pk_type
-
-from .attribute import Attribute
-from .enum_value import EnumValue
-from .value import Value
+from eav.models.attribute import Attribute
+from eav.models.enum_value import EnumValue
+from eav.models.value import Value
 
 
 class Entity:
