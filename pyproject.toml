@@ -35,6 +35,7 @@ classifiers = [
   "Programming Language :: Python :: 3.15",
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
 ]
 dependencies = [
   "django>=5.2,<6.2",
@@ -67,7 +68,9 @@ docs = [
   "sphinx-rtd-theme>=1.3,<4",
 ]
 lint = [
+  "django-stubs[compatible-mypy]>=6,<7",
   "mypy>=1.6,<3",
+  "pyright>=1.1,<2",
   "ruff>=0.6.3,<0.18",
   "wemake-python-styleguide>=1.8,<2",
 ]
@@ -144,24 +147,117 @@ table_format = "long"
 extend-exclude = [ "*.lock", "*.po", "CONTRIBUTORS.md", "eav/migrations" ]
 
 [tool.mypy]
-ignore_missing_imports = true
-disallow_any_explicit = true
-disallow_any_generics = true
-disallow_untyped_calls = true
-check_untyped_defs = true
-strict_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
+files = [ "eav" ]
+exclude = [ "eav/migrations/" ]
 warn_unreachable = true
-ignore_errors = false
-# mypy config: https://mypy.readthedocs.io/en/stable/config_file.html
-allow_redefinition = false
 local_partial_types = true
-implicit_reexport = false
-strict_equality = true
-warn_unused_configs = true
-no_implicit_optional = true
+enable_error_code = [
+  "ignore-without-code",
+  "redundant-expr",
+  "truthy-bool",
+  "truthy-iterable",
+]
+strict_equality_for_none = true
+strict = true
+# mypy config: https://mypy.readthedocs.io/en/stable/config_file.html
+plugins = [ "mypy_django_plugin.main" ]
+# BASELINE: each module below disables the error codes it currently trips.
+# Remove codes as the module gets typed; new modules get no entries.
+[[tool.mypy.overrides]]
+module = [ "eav", "eav.decorators", "eav.models.entity", "eav.registry" ]
+disable_error_code = [ "no-untyped-call", "no-untyped-def" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.admin" ]
+disable_error_code = [
+  "arg-type",
+  "attr-defined",
+  "no-untyped-def",
+  "type-arg",
+  "unused-ignore"
+]
+
+[[tool.mypy.overrides]]
+module = [ "eav.fields" ]
+disable_error_code = [ "arg-type", "no-untyped-call", "no-untyped-def", "type-arg" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.forms" ]
+disable_error_code = [
+  "attr-defined",
+  "dict-item",
+  "no-untyped-call",
+  "no-untyped-def",
+  "operator",
+  "override",
+  "type-arg",
+]
+
+[[tool.mypy.overrides]]
+module = [ "eav.logic.entity_pk", "eav.validators" ]
+disable_error_code = [ "no-untyped-def" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.logic.managers" ]
+disable_error_code = [ "no-untyped-def", "type-arg" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.logic.object_pk" ]
+disable_error_code = [ "no-any-return", "operator", "type-arg" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.managers" ]
+disable_error_code = [ "no-untyped-call", "no-untyped-def", "type-arg" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.models.attribute" ]
+disable_error_code = [ "no-untyped-call", "no-untyped-def", "union-attr" ]
+
+[[tool.mypy.overrides]]
+module = [ "eav.models.value" ]
+disable_error_code = [
+  "name-defined",
+  "no-untyped-call",
+  "no-untyped-def",
+  "return-value"
+]
+
+[[tool.mypy.overrides]]
+module = [ "eav.queryset" ]
+disable_error_code = [
+  "no-untyped-call",
+  "no-untyped-def",
+  "type-arg",
+  "union-attr",
+  "var-annotated"
+]
+
+[[tool.mypy.overrides]]
+module = [ "eav.widgets" ]
+disable_error_code = [ "no-untyped-call", "no-untyped-def", "override" ]
+
+[tool.pyright]
+venv = ".venv"
+venvPath = "."
+typeCheckingMode = "standard"
+# pyright config: https://microsoft.github.io/pyright/#/configuration
+include = [ "eav" ]
+exclude = [ "**/migrations" ]
+# BASELINE: pyright skips these files until they are cleaned. Remove entries as
+# files pass; new files must pass without being listed here.
+ignore = [
+  "eav/admin.py",
+  "eav/fields.py",
+  "eav/forms.py",
+  "eav/models/attribute.py",
+  "eav/models/value.py",
+  "eav/queryset.py",
+  "eav/registry.py",
+  "eav/widgets.py",
+]
+
+[tool.django-stubs]
+django_settings_module = "test_project.settings"
 
 [tool.pytest.ini_options]
 addopts = [
@@ -201,6 +297,8 @@ lint = [
   { cmd = "ruff check" },
   { cmd = "ruff format --check --diff" },
   { cmd = "flake8 ." },
+  { cmd = "mypy" },
+  { cmd = "pyright" },
 ]
 unit = "pytest"
 migrations = "python manage.py makemigrations --check --dry-run"
