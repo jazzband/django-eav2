@@ -74,7 +74,7 @@ def validate_object(candidate):
     if not isinstance(candidate, models.Model):
         raise ValidationError(_("Must be a django model object instance"))
 
-    if not candidate.pk:
+    if candidate._state.adding:  # noqa: SLF001
         raise ValidationError(_("Model has not been saved yet"))
 
 
@@ -85,7 +85,7 @@ def validate_enum(candidate):
     """
     from eav.models import EnumValue  # noqa: PLC0415
 
-    if isinstance(candidate, EnumValue) and not candidate.pk:
+    if isinstance(candidate, EnumValue) and candidate._state.adding:  # noqa: SLF001
         raise ValidationError(_("EnumValue has not been saved yet"))
 
 
