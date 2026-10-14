@@ -37,13 +37,11 @@ Q-expressions need to be rewritten for two reasons:
 """
 
 from functools import wraps
-from itertools import count
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, IntegerField, Q, When
+from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.db.utils import NotSupportedError
 
+from eav.logic.ordering import eav_order_slug, order_subquery
 from eav.models import Attribute, EnumValue, Value
 
 
@@ -303,85 +301,30 @@ class EavQuerySet(QuerySet):
         return super().get(*args, **kwargs)
 
     def order_by(self, *fields):
-        # Django only allows to order querysets by direct fields and
-        # foreign-key chains. In order to bypass this behaviour and order
-        # by EAV attributes, it is required to construct custom order-by
-        # clause manually using Django's conditional expressions.
-        # This will be slow, of course.
-        order_clauses = []
-        query_clause = self
+        """
+        Order by EAV attributes (``eav__<slug>``, optionally prefixed with ``-``)
+        as well as regular fields.
+
+        Each EAV attribute is annotated with a correlated subquery that reads
+        the entity's value, so this works for integer and UUID primary keys,
+        for empty querysets, and for any value type the database can sort.
+        """
         config_cls = self.model._eav_config_cls  # noqa: SLF001
+        queryset = self
+        ordering = []
 
-        for term in [t.split("__") for t in fields]:
-            # Continue only for EAV attributes.
-            if len(term) == 2 and term[0] == config_cls.eav_attr:  # noqa: PLR2004
-                # Retrieve Attribute over which the ordering is performed.
-                try:
-                    attr = Attribute.objects.get(slug=term[1])
-                except ObjectDoesNotExist as err:
-                    raise ObjectDoesNotExist(
-                        f'Cannot find EAV attribute "{term[1]}"',
-                    ) from err
+        for field in fields:
+            slug = eav_order_slug(field, config_cls.eav_attr)
 
-                field_name = f"value_{attr.datatype}"
+            if slug is None:
+                ordering.append(field)
+                continue
 
-                pks_values = (
-                    Value.objects.filter(
-                        # Retrieve pk-values pairs of the related values
-                        # (i.e. values for the specified attribute and
-                        # belonging to entities in the queryset).
-                        attribute__slug=attr.slug,
-                        entity_id__in=self,
-                    )
-                    .order_by(
-                        # Order values by their value-field of
-                        # appropriate attribute data-type.
-                        field_name,
-                    )
-                    .values_list(
-                        # Retrieve only primary-keys of the entities
-                        # in the current queryset.
-                        "entity_id",
-                        field_name,
-                    )
+            alias = f"_eav_order_{slug}"
+            if alias not in queryset.query.annotations:
+                queryset = queryset.annotate(
+                    **{alias: order_subquery(self.model, slug)},
                 )
+            ordering.append(f"-{alias}" if field.startswith("-") else alias)
 
-                # Retrieve ordered values from pk-value list.
-                _, ordered_values = zip(*pks_values)
-
-                # Add explicit ordering and turn
-                # list of pairs into look-up table.
-                val2ind = dict(zip(ordered_values, count()))
-
-                # Finally, zip ordered pks with their grouped orderings.
-                entities_pk = [(pk, val2ind[val]) for pk, val in pks_values]
-
-                # Using ordered primary-keys, construct
-                # CASE clause of the form:
-                #
-                #     CASE
-                #         WHEN id = 2 THEN 1
-                #         WHEN id = 5 THEN 2
-                #         WHEN id = 9 THEN 2
-                #         WHEN id = 4 THEN 3
-                #     END
-                when_clauses = [When(id=pk, then=i) for pk, i in entities_pk]
-
-                order_clause = Case(*when_clauses, output_field=IntegerField())
-
-                clause_name = "__".join(term)
-                # Use when-clause to construct
-                # custom order-by clause.
-                query_clause = query_clause.annotate(**{clause_name: order_clause})
-
-                order_clauses.append(clause_name)
-
-            elif len(term) >= 2 and term[0] == config_cls.eav_attr:  # noqa: PLR2004
-                raise NotSupportedError(
-                    "EAV does not support ordering through foreign-key chains",
-                )
-
-            else:
-                order_clauses.append(term[0])
-
-        return QuerySet.order_by(query_clause, *order_clauses)
+        return QuerySet.order_by(queryset, *ordering)

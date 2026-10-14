@@ -350,13 +350,17 @@ class Queries(TestCase):
             "Anne",
         ]
 
-        # Ordering by a related model field
+        # Ordering by a related model field (ranked opposite to the names)
+        for rank, name in enumerate(["Eugene", "Daniel", "Cyrill", "Bob", "Anne"]):
+            example = ExampleModel.objects.create(name=str(rank))
+            Patient.objects.filter(name=name).update(example=example)
+
         assert self._order(["example__name"]) == [
-            "Anne",
-            "Bob",
-            "Cyrill",
-            "Daniel",
             "Eugene",
+            "Daniel",
+            "Cyrill",
+            "Bob",
+            "Anne",
         ]
 
         # Error handling for unsupported nested EAV attributes
