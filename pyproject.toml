@@ -1,89 +1,118 @@
 [build-system]
-requires = ["poetry-core>=1.9"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "hatchling.build"
+requires = [ "hatchling" ]
 
 
-[tool.poetry]
+[project]
 name = "django-eav2"
-description = "Entity-Attribute-Value storage for Django"
 version = "1.8.2"
-license = "GNU Lesser General Public License (LGPL), Version 3"
-packages = [
-  { include = "eav" }
-]
-
-
-authors = [
-  "Mauro Lizaur <mauro@sdf.org>",
-]
-
+description = "Entity-Attribute-Value storage for Django"
 readme = "README.md"
-
-repository = "https://github.com/jazzband/django-eav2"
-
 keywords = [
+  "database",
   "django",
   "django-eav2",
-  "database",
   "eav",
   "sql",
 ]
-
+license = "LGPL-3.0-or-later"
+license-files = [ "LICENSE" ]
+requires-python = ">=3.10"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Web Environment",
   "Framework :: Django",
+  "Framework :: Django :: 5.2",
+  "Framework :: Django :: 6.0",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
-  "Framework :: Django",
-  "Framework :: Django :: 5.2",
-  "Framework :: Django :: 6.0",
+]
+dependencies = [
+  "django>=5.2,<6.2",
 ]
 
-[tool.semantic_release]
-version_variable = [
-    "pyproject.toml:version"
+[[project.authors]]
+name = "Mauro Lizaur"
+email = "mauro@sdf.org"
+
+[project.urls]
+Documentation = "https://django-eav2.readthedocs.io/en/latest/"
+Changelog = "https://github.com/jazzband/django-eav2/blob/master/CHANGELOG.md"
+Repository = "https://github.com/jazzband/django-eav2"
+Issues = "https://github.com/jazzband/django-eav2/issues"
+
+
+[dependency-groups]
+dev = [
+  "poethepoet>=0.34,<1",
+  { include-group = "lint" },
+  { include-group = "test" },
 ]
-branch = "master"
-upload_to_pypi = false
-upload_to_release = false
-build_command = "pip install poetry && poetry build"
+lint = [
+  "mypy>=1.6,<3",
+  "ruff>=0.6.3,<0.18",
+]
+test = [
+  "hypothesis>=6.87.1,<7",
+  "pytest>=7.4.3,<10",
+  "pytest-cov>=4.1,<8",
+  "pytest-django>=4.5.2,<5",
+  "pytest-randomly>=3.15,<5",
+]
+docs = [
+  "sphinx>=5,<9",
+  "sphinx-rtd-theme>=1.3,<4",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-django = ">=5.2"
 
-[tool.poetry.group.test.dependencies]
-mypy = ">=1.6,<3.0"
-ruff = ">=0.6.3,<0.17.0"
+[tool.hatch.build]
+# Compiled translations are gitignored but must still ship:
+artifacts = [ "*.mo" ]
 
-safety = ">=2.3,<4.0"
+[tool.hatch.build.targets.wheel]
+packages = [ "eav" ]
 
-pytest = ">=7.4.3,<10.0.0"
-pytest-cov = ">=4.1,<8.0"
-pytest-randomly = ">=3.15,<5.0"
-pytest-django = "^4.5.2"
-hypothesis = "^6.87.1"
+[tool.hatch.build.targets.sdist]
+include = [
+  "eav/",
+  "CHANGELOG.md",
+  "LICENSE",
+  "README.md",
+]
 
-doc8 = ">=0.11.2,<2.1.0"
 
-[tool.poetry.group.docs]
-optional = true
+[tool.uv]
+# Docs: https://docs.astral.sh/uv/reference/settings
+add-bounds = "major"
+default-groups = [ "dev" ]
 
-[tool.poetry.group.docs.dependencies]
-sphinx = ">=5.0,<9.0"
-sphinx-rtd-theme = ">=1.3,<4.0"
-sphinx-autodoc-typehints = ">=1.19.5,<4.0.0"
-m2r2 = "^0.3"
-tomlkit = ">=0.13.0,<0.16"
+
+[tool.poe.tasks]
+# Docs: https://poethepoet.natn.io
+format = [
+  { cmd = "ruff format" },
+  { cmd = "ruff check --fix" },
+]
+lint = [
+  { cmd = "ruff check" },
+  { cmd = "ruff format --check --diff" },
+]
+unit = "pytest"
+package = [
+  { cmd = "uv lock --check" },
+  { cmd = "uv build" },
+  { cmd = "uv pip check" },
+]
+docs = "sphinx-build -W -b html docs/source docs/build"
+test = [ "lint", "unit", "package" ]
 
 
 [tool.ruff]
@@ -95,6 +124,7 @@ select = ["ALL"]
 ignore = [
   "ANN",      # Type hints related, let mypy handle these.
   "ARG",      # Unused arguments
+  "CPY001",   # Copyright notices
   "D",        # Docstrings related
   "EM101",    # "Exception must not use a string literal, assign to variable first"
   "EM102",    # "Exception must not use an f-string literal, assign to variable first"

@@ -1,22 +1,17 @@
-# .readthedocs.yaml
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 version: 2
 
-# Set the version of Python and other tools you might need
 build:
-  os: ubuntu-20.04
+  os: ubuntu-24.04
   tools:
-    python: '3.9'
+    python: '3.13'
+    uv: latest
   jobs:
-    # See https://github.com/readthedocs/readthedocs.org/issues/4912
-    pre_create_environment:
-      - asdf plugin add poetry
-      - asdf install poetry latest
-      - asdf global poetry latest
-      - poetry config virtualenvs.create false
-    post_install:
-      - . "$(pwd | rev | sed 's/stuokcehc/svne/' | rev)/bin/activate" && poetry install --only main --only docs
+    create_environment:
+      - uv venv "${READTHEDOCS_VIRTUALENV_PATH}"
+    install:
+      - UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}" uv sync --frozen --no-default-groups --group docs
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
