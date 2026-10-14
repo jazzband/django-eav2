@@ -130,7 +130,7 @@ def test_default_manager_stays() -> None:
     assert instance_meta.default_manager_name is None
     assert isinstance(instance_meta.default_manager, EntityManager)
 
-    # Explicity test this as for our test setup, we want to have a state where
+    # Explicitly test this as for our test setup, we want to have a state where
     # the default manager is 'objects'
     assert instance_meta.default_manager.name == "objects"
     assert len(instance_meta.managers) == 2
