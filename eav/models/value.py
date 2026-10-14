@@ -15,8 +15,8 @@ from eav.logic.managers import ValueManager
 from eav.logic.object_pk import get_pk_format
 
 if TYPE_CHECKING:
-    from .attribute import Attribute
-    from .enum_value import EnumValue
+    from eav.models.attribute import Attribute
+    from eav.models.enum_value import EnumValue
 
 
 class Value(models.Model):

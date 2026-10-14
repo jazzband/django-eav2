@@ -9,11 +9,11 @@ Along with the :class:`Entity` helper class and :class:`EAVModelMeta`
 optional metaclass for each eav model class.
 """
 
-from .attribute import Attribute
-from .entity import EAVModelMeta, Entity
-from .enum_group import EnumGroup
-from .enum_value import EnumValue
-from .value import Value
+from eav.models.attribute import Attribute
+from eav.models.entity import EAVModelMeta, Entity
+from eav.models.enum_group import EnumGroup
+from eav.models.enum_value import EnumValue
+from eav.models.value import Value
 
 __all__ = [
     "Attribute",

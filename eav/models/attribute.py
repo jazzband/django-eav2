@@ -15,6 +15,8 @@ from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.managers import AttributeManager
 from eav.logic.object_pk import get_pk_format
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
+from eav.models.enum_value import EnumValue
+from eav.models.value import Value
 from eav.settings import CHARFIELD_LENGTH
 from eav.validators import (
     validate_bool,
@@ -28,11 +30,8 @@ from eav.validators import (
     validate_text,
 )
 
-from .enum_value import EnumValue
-from .value import Value
-
 if TYPE_CHECKING:
-    from .enum_group import EnumGroup
+    from eav.models.enum_group import EnumGroup
 
 
 class Attribute(models.Model):

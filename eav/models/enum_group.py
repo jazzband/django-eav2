@@ -11,7 +11,7 @@ from eav.logic.object_pk import get_pk_format
 from eav.settings import CHARFIELD_LENGTH
 
 if TYPE_CHECKING:
-    from .enum_value import EnumValue
+    from eav.models.enum_value import EnumValue
 
 
 class EnumGroup(models.Model):
