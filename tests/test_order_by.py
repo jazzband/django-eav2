@@ -67,3 +67,19 @@ def test_order_by_object_attribute_is_not_supported() -> None:
 
     with pytest.raises(NotSupportedError):
         Patient.objects.order_by("eav__owner")
+
+
+@pytest.mark.parametrize(
+    "lookup",
+    [
+        lambda: Patient.objects.order_by("eav__missing"),
+        lambda: Patient.objects.filter(eav__missing=1),
+        lambda: Patient.objects.exclude(eav__missing=1),
+    ],
+)
+def test_unknown_attribute_raises_a_descriptive_error(lookup) -> None:
+    with pytest.raises(
+        Attribute.DoesNotExist,
+        match='Cannot find EAV attribute "missing"',
+    ):
+        lookup()

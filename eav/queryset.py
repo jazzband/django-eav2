@@ -41,7 +41,7 @@ from functools import wraps
 from django.db.models import Q
 from django.db.models.query import QuerySet
 
-from eav.logic.ordering import eav_order_slug, order_subquery
+from eav.logic.ordering import eav_order_slug, get_attribute, order_subquery
 from eav.models import Attribute, EnumValue, Value
 
 
@@ -251,7 +251,7 @@ def expand_eav_filter(model_cls, key, value):
     if len(fields) > 1 and config_cls and fields[0] == config_cls.eav_attr:
         slug = fields[1]
         gr_name = config_cls.generic_relation_attr
-        datatype = Attribute.objects.get(slug=slug).datatype
+        datatype = get_attribute(slug).datatype
 
         value_key = ""
         if datatype == Attribute.TYPE_ENUM and not isinstance(value, EnumValue):
