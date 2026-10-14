@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.db import models
 
 
@@ -86,9 +87,8 @@ class ValueManager(models.Manager):
         Returns:
             Value: The instance matching the provided keys.
         """
-        from eav.models import Attribute  # noqa: PLC0415
-
-        attribute = Attribute.objects.get(name=attribute[0], slug=attribute[1])
+        attribute_model = apps.get_model("eav", "Attribute")
+        attribute = attribute_model.objects.get(name=attribute[0], slug=attribute[1])
 
         return self.get(
             attribute=attribute,

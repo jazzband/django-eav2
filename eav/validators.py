@@ -13,6 +13,7 @@ These validators are called by the
 import datetime as dt
 import json
 
+from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -66,9 +67,9 @@ def validate_object(candidate):
 
 def validate_enum(candidate):
     """Raise ``ValidationError`` unless *candidate* is a saved ``EnumValue``."""
-    from eav.models import EnumValue  # noqa: PLC0415
+    enum_value_model = apps.get_model("eav", "EnumValue")
 
-    if isinstance(candidate, EnumValue) and candidate._state.adding:  # noqa: SLF001
+    if isinstance(candidate, enum_value_model) and candidate._state.adding:  # noqa: SLF001
         raise ValidationError(_("EnumValue has not been saved yet"))
 
 

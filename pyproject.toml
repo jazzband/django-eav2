@@ -69,6 +69,7 @@ docs = [
 ]
 lint = [
   "django-stubs[compatible-mypy]>=6,<7",
+  "import-linter>=2.5,<3",
   "mypy>=1.6,<3",
   "pyright>=1.1,<2",
   "ruff>=0.6.3,<0.18",
@@ -301,6 +302,7 @@ lint = [
   { cmd = "ruff check" },
   { cmd = "ruff format --check --diff" },
   { cmd = "flake8 ." },
+  { cmd = "lint-imports" },
   { cmd = "mypy" },
   { cmd = "pyright" },
 ]
