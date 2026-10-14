@@ -169,12 +169,7 @@ disable_error_code = [ "no-untyped-call", "no-untyped-def" ]
 
 [[tool.mypy.overrides]]
 module = [ "eav.admin" ]
-disable_error_code = [
-  "arg-type",
-  "attr-defined",
-  "no-untyped-def",
-  "type-arg",
-]
+disable_error_code = [ "arg-type", "attr-defined", "no-untyped-def", "type-arg" ]
 
 [[tool.mypy.overrides]]
 module = [ "eav.fields" ]
