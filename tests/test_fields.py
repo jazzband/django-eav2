@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 from django.core.exceptions import ValidationError
 
 import eav
 from eav.fields import CSVField
-from eav.models import Attribute
+from eav.forms import CSVFormField
+from eav.models import Attribute, Value
+from eav.widgets import CSVWidget
 from test_project.models import Patient
 
 pytestmark = pytest.mark.django_db
@@ -46,3 +50,50 @@ def test_datatype_cannot_change_once_in_use() -> None:
 
     with pytest.raises(ValidationError):
         attribute.full_clean()
+
+
+def test_csv_field_deconstructs_a_custom_separator() -> None:
+    assert "separator" not in CSVField().deconstruct()[3]
+    assert CSVField(separator=",").deconstruct()[3]["separator"] == ","
+
+
+def test_csv_field_formfield_and_serialization() -> None:
+    assert isinstance(CSVField().formfield(), CSVFormField)
+    assert CSVField().get_prep_value("a;b") == "a;b"
+    assert CSVField().get_prep_value(5) == 5
+
+
+def test_csv_field_value_to_string() -> None:
+    eav.register(Patient)
+    Attribute.objects.create(name="tags", datatype=Attribute.TYPE_CSV)
+    patient = Patient.objects.create(name="Joe", eav__tags=["a", "b"])
+    eav_value = Value.objects.get(entity_id=patient.pk)
+
+    assert Value._meta.get_field("value_csv").value_to_string(eav_value) == "a;b"
+
+
+@pytest.mark.parametrize(
+    ("raw", "rendered"),
+    [(None, ""), ("", ""), ("[]", ""), ("a;b", "a;b"), (["a", "b"], "a;b")],
+)
+def test_csv_widget_prepares_values(raw, rendered) -> None:
+    assert CSVWidget().prep_value(raw) == rendered
+
+
+def test_csv_widget_rejects_other_types() -> None:
+    with pytest.raises(ValidationError):
+        CSVWidget().prep_value(5)
+
+
+def test_csv_widget_renders_and_reads_values() -> None:
+    widget = CSVWidget()
+
+    assert "a;b" in widget.render("tags", ["a", "b"])
+    assert widget.value_from_datadict(
+        {"x": SimpleNamespace(tags=["a"])},
+        {},
+        "tags",
+    ) == [
+        "a",
+    ]
+    assert widget.value_from_datadict({"x": SimpleNamespace()}, {}, "tags") is None
