@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
@@ -17,6 +17,12 @@ from eav.logic.object_pk import get_pk_format
 if TYPE_CHECKING:
     from eav.models.attribute import Attribute
     from eav.models.enum_value import EnumValue
+
+
+#: Related fields whose existence checks cost a query each.
+_RELATION_FIELDS = frozenset(
+    ("attribute", "entity_ct", "value_enum", "generic_value_ct"),
+)
 
 
 class Value(models.Model):
@@ -203,6 +209,18 @@ class Value(models.Model):
         """Validate and save this value."""
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def save_checked(self, *args: Any, **kwargs: Any) -> None:
+        """
+        Clean this value's own fields, then save.
+
+        Unlike :meth:`save` this skips the checks that query the database
+        (that related objects exist, that the unique constraints hold). It is
+        used by ``Entity.save``, which has already validated the value and
+        loaded the existing rows; the database still enforces the constraints.
+        """
+        self.clean_fields(exclude=_RELATION_FIELDS)
+        models.Model.save(self, *args, **kwargs)
 
     def natural_key(self) -> tuple[tuple[str, str], int, str]:
         """

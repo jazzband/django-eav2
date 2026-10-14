@@ -31,6 +31,8 @@ from eav.validators import (
 )
 
 if TYPE_CHECKING:
+    from django.db.models import Model
+
     from eav.models.enum_group import EnumGroup
 
 
@@ -339,26 +341,39 @@ class Attribute(models.Model):
            If *value* is None and a :class:`Value` object exists for this
            Attribute and *entity*, it will delete that :class:`Value` object.
         """
-        ct = ContentType.objects.get_for_model(entity)
+        existing = self.value_set.filter(**self._entity_filter(entity)).first()
+        return self.store_value(entity, value, existing)
 
-        entity_filter = {
-            "entity_ct": ct,
-            "attribute": self,
+    def store_value(
+        self,
+        entity: Model,
+        value: object,
+        existing: Value | None,
+    ) -> Value | None:
+        """
+        Store *value* for *entity*, given the *existing* :class:`Value` object
+        (or ``None``) the caller has already loaded. This is what
+        :meth:`save_value` does once it has looked the object up, and what
+        ``Entity.save`` calls with values it already holds.
+
+        Returns the stored :class:`Value`, or ``None`` when nothing is stored.
+        """
+        if value is None or value == "":
+            if existing is not None:
+                existing.delete()
+            return None
+
+        if existing is None:
+            existing = Value(attribute=self, **self._entity_filter(entity))
+        elif value == existing.value:
+            return existing
+
+        existing.value = value
+        existing.save_checked()
+        return existing
+
+    def _entity_filter(self, entity: Model) -> dict[str, object]:
+        return {
+            "entity_ct": ContentType.objects.get_for_model(entity),
             f"{get_entity_pk_type(entity)}": entity.pk,
         }
-
-        try:
-            value_obj = self.value_set.get(**entity_filter)
-        except Value.DoesNotExist:
-            if value is None or value == "":
-                return
-
-            value_obj = Value.objects.create(**entity_filter)
-
-        if value is None or value == "":
-            value_obj.delete()
-            return
-
-        if value != value_obj.value:
-            value_obj.value = value
-            value_obj.save()
