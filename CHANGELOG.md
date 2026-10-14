@@ -11,6 +11,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - `prefetch_related("eav_values__attribute")` is now used when reading attributes, and entities from one queryset (including `.iterator()`) share a single attribute lookup. Reading one attribute across 10 prefetched entities takes 3 queries instead of 23.
 - New `Attribute.store_value`, `Value.save_checked`, `Entity.clear_cache` and `EavConfig.shares_attributes`; `Attribute.save_value` keeps its behaviour.
 
+- Migration `0013` adds indexes on `(attribute, value_int)`, `(attribute, value_float)`, `(attribute, value_date)` and `(attribute, value_enum)`, so filters such as `eav__age__gt=5` and `eav__score=500` read the matching rows instead of every value of the attribute. On a table of 500,000 values an equality filter took 0.3 ms instead of 6.5 ms and a range filter 7 ms instead of 13 ms. Text values are not indexed.
+
 ### Features
 
 - `bulk_create()` and `bulk_update()` on EAV managers store EAV values in about one query per 1000 rows instead of one or more per entity: `Patient.objects.bulk_create(patients)` writes the values assigned with `patient.eav.<slug> = ...`, and `bulk_update(patients, ["name", "eav__age"])` updates them. Instances are validated first, written in chunks inside one transaction, and no signals are sent. Creating entities needs primary keys, so integer keys are not supported on MySQL.
@@ -18,6 +20,9 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - `Attribute.enum_choices`, `Attribute.validate_assignment`, `Entity.assigned_values` and `Value.clean_own_fields`. Saving an enum attribute no longer queries the choices more than once.
 
 ### Bug Fixes
+
+- `Value.entity_id` and `Value.generic_value_id` are now `BigIntegerField`, so entities with primary keys above 2,147,483,647 can store values (migration `0014`). On PostgreSQL and MySQL this rewrites the `eav_value` table, which takes a lock for as long as the rewrite runs on a large table, so plan the upgrade accordingly.
+- Assigning a plain `date` to a date attribute stores midnight in the default timezone, as before, but no longer emits Django's "naive datetime" `RuntimeWarning` when `USE_TZ` is on, and saving the same date again no longer rewrites the value.
 
 - `order_by("eav__<slug>")` no longer fails on UUID-keyed entities or empty querysets, no longer mixes in values of other models that share a primary key, and now accepts `-eav__<slug>` for descending order. Ordering by an `object` attribute raises `NotSupportedError` (it was a `FieldError`). Ordering by a related field such as `order_by("example__name")` now sorts by that field; it used to sort by the foreign key column only.
 - `validate_int` and `validate_float` raise `ValidationError` instead of `TypeError` for `None` and other non-numeric types.
