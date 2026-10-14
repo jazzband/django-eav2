@@ -60,6 +60,7 @@ test = [
   "pytest-cov>=4.1,<8",
   "pytest-django>=4.5.2,<5",
   "pytest-randomly>=3.15,<5",
+  "pytest-timeout>=2.4,<3",
 ]
 docs = [
   "sphinx>=5,<9",
@@ -140,6 +141,53 @@ table_format = "long"
 [tool.typos.files]
 # Docs: https://github.com/crate-ci/typos
 extend-exclude = [ "*.lock", "*.po", "CONTRIBUTORS.md", "eav/migrations" ]
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_untyped_calls = true
+check_untyped_defs = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+ignore_errors = false
+# mypy config: https://mypy.readthedocs.io/en/stable/config_file.html
+allow_redefinition = false
+local_partial_types = true
+implicit_reexport = false
+strict_equality = true
+warn_unused_configs = true
+no_implicit_optional = true
+
+[tool.pytest.ini_options]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+  "--doctest-modules",
+  "--ignore=docs",
+  "--cov=eav",
+  "--cov-report=term-missing:skip-covered",
+  "--cov-report=xml",
+  "--cov-branch",
+  "--cov-fail-under=90",
+]
+xfail_strict = true
+filterwarnings = [ "error" ]
+# pytest config: https://docs.pytest.org/en/stable/reference/customize.html
+DJANGO_SETTINGS_MODULE = "test_project.settings"
+timeout = 20
+
+[tool.coverage.report]
+exclude_lines = [
+  "if TYPE_CHECKING:",
+  "pragma: no cover",
+]
+skip_covered = true
+show_missing = true
+sort = "Cover"
 
 [tool.poe]
 [tool.poe.tasks]
