@@ -38,9 +38,12 @@ Q-expressions need to be rewritten for two reasons:
 
 from functools import wraps
 
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.query import ModelIterable, QuerySet
+from django.db.utils import NotSupportedError
 
+from eav.logic.bulk import BulkValueWriter, chunked
 from eav.logic.ordering import eav_order_slug, get_attribute, order_subquery
 from eav.logic.schema import shared_schema_for
 from eav.models import Attribute, EnumValue, Value
@@ -318,6 +321,92 @@ class EavQuerySet(QuerySet):
         the ``Manager`` get method.
         """
         return super().get(*args, **kwargs)
+
+    def bulk_create(  # noqa: PLR0913, PLR0917
+        self,
+        objs,
+        batch_size=None,
+        ignore_conflicts=False,  # noqa: FBT002
+        update_conflicts=False,  # noqa: FBT002
+        update_fields=None,
+        unique_fields=None,
+    ):
+        """
+        Create *objs* and store the EAV values assigned to them.
+
+        Assign values as for a single instance (``obj.eav.color = "red"``)
+        before calling this. All instances are validated first, then created and
+        their values written in batches of ``batch_size`` instances (1000 by
+        default), about one query per 1000 rows, inside one transaction. Like
+        Django's ``bulk_create`` this sends no signals, and the primary keys
+        must be available afterwards (UUID keys, or a database that returns
+        them).
+        """
+        objs = list(objs)
+        writer = BulkValueWriter.for_objects(self.model, objs, batch_size)
+        options = {
+            "ignore_conflicts": ignore_conflicts,
+            "update_conflicts": update_conflicts,
+            "update_fields": update_fields,
+            "unique_fields": unique_fields,
+        }
+
+        if writer is None:
+            return super().bulk_create(objs, batch_size=batch_size, **options)
+
+        if ignore_conflicts or update_conflicts:
+            raise NotSupportedError(
+                "bulk_create() cannot store EAV values together with conflict handling",
+            )
+
+        created = []
+        with transaction.atomic(using=self.db):
+            writer.validate_new(objs)
+
+            for chunk in chunked(objs, writer.chunk_size):
+                chunk_created = super().bulk_create(chunk, batch_size=batch_size)
+                writer.write(chunk_created)
+                created.extend(chunk_created)
+
+        return created
+
+    def bulk_update(self, objs, fields, batch_size=None):
+        """
+        Update *objs*, including EAV attributes named like ``eav__<slug>``.
+
+        EAV attributes are written from the values assigned on each instance
+        (``obj.eav.color = "red"``); instances without an assigned value for a
+        listed attribute are left alone, and a value of ``None`` deletes it.
+        Like Django's ``bulk_update`` this sends no signals.
+        """
+        objs = list(objs)
+        eav_attr = self.model._eav_config_cls.eav_attr  # noqa: SLF001
+        prefix = f"{eav_attr}__"
+        eav_slugs = [
+            name.removeprefix(prefix) for name in fields if name.startswith(prefix)
+        ]
+        model_fields = [name for name in fields if not name.startswith(prefix)]
+
+        if not eav_slugs:
+            return super().bulk_update(objs, fields, batch_size)
+
+        if any(obj.pk is None for obj in objs):
+            raise ValueError("All bulk_update() objects must have a primary key set.")
+
+        writer = BulkValueWriter(self.model, batch_size)
+
+        with transaction.atomic(using=self.db):
+            updated = (
+                super().bulk_update(objs, model_fields, batch_size)
+                if model_fields
+                else 0
+            )
+            writer.validate_assigned(objs, eav_slugs)
+
+            for chunk in chunked(objs, writer.chunk_size):
+                writer.write(chunk, eav_slugs)
+
+        return updated
 
     def order_by(self, *fields):
         """
