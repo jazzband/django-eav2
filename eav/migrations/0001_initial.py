@@ -5,6 +5,7 @@ import django.utils.timezone
 from django.db import migrations, models
 
 import eav.fields
+from eav.logic.object_pk import get_pk_format
 
 
 class Migration(migrations.Migration):
@@ -22,12 +23,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
+                    get_pk_format(),
                 ),
                 (
                     "name",
@@ -104,12 +100,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
+                    get_pk_format(),
                 ),
                 (
                     "name",
@@ -122,12 +113,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
+                    get_pk_format(),
                 ),
                 (
                     "value",
@@ -145,12 +131,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
+                    get_pk_format(),
                 ),
                 ("entity_id", models.IntegerField()),
                 ("value_text", models.TextField(blank=True, null=True)),

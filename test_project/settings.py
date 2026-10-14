@@ -97,7 +97,11 @@ else:
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-EAV2_PRIMARY_KEY_FIELD = "django.db.models.AutoField"
+# ``BigAutoField`` or ``UUIDField``; the CI matrix runs the suite with both.
+EAV2_PRIMARY_KEY_FIELD = os.environ.get(
+    "EAV_TEST_PK_FIELD",
+    "django.db.models.BigAutoField",
+)
 
 
 # Password validation

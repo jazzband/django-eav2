@@ -1,8 +1,10 @@
-from django.db import migrations, models
+from django.db import migrations
+
+from eav.logic.object_pk import get_pk_format
 
 
 class Migration(migrations.Migration):
-    """Migration to use BigAutoField as default for all models."""
+    """Use the primary key chosen by ``EAV2_PRIMARY_KEY_FIELD`` for all models."""
 
     dependencies = [
         ("eav", "0009_enchance_naming"),
@@ -12,37 +14,21 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="attribute",
             name="id",
-            field=models.BigAutoField(
-                editable=False,
-                primary_key=True,
-                serialize=False,
-            ),
+            field=get_pk_format(),
         ),
         migrations.AlterField(
             model_name="enumgroup",
             name="id",
-            field=models.BigAutoField(
-                editable=False,
-                primary_key=True,
-                serialize=False,
-            ),
+            field=get_pk_format(),
         ),
         migrations.AlterField(
             model_name="enumvalue",
             name="id",
-            field=models.BigAutoField(
-                editable=False,
-                primary_key=True,
-                serialize=False,
-            ),
+            field=get_pk_format(),
         ),
         migrations.AlterField(
             model_name="value",
             name="id",
-            field=models.BigAutoField(
-                editable=False,
-                primary_key=True,
-                serialize=False,
-            ),
+            field=get_pk_format(),
         ),
     ]
