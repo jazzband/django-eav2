@@ -1,0 +1,30 @@
+# Databases for running the test suite locally:
+#   docker compose up --wait postgres
+#   EAV_TEST_DB=postgres uv run poe unit
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: eav
+      POSTGRES_USER: eav
+      POSTGRES_PASSWORD: eav
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eav"]
+      interval: 2s
+      retries: 30
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: eav
+      MYSQL_USER: eav
+      MYSQL_PASSWORD: eav
+      MYSQL_ROOT_PASSWORD: eav
+    ports:
+      - "13306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-peav"]
+      interval: 2s
+      retries: 30

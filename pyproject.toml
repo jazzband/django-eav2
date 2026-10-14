@@ -2,7 +2,6 @@
 build-backend = "hatchling.build"
 requires = [ "hatchling" ]
 
-
 [project]
 name = "django-eav2"
 version = "1.8.2"
@@ -24,41 +23,36 @@ classifiers = [
   "Framework :: Django",
   "Framework :: Django :: 5.2",
   "Framework :: Django :: 6.0",
+  "Framework :: Django :: 6.1",
   "Intended Audience :: Developers",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
   "django>=5.2,<6.2",
 ]
-
 [[project.authors]]
 name = "Mauro Lizaur"
 email = "mauro@sdf.org"
-
 [project.urls]
-Documentation = "https://django-eav2.readthedocs.io/en/latest/"
 Changelog = "https://github.com/jazzband/django-eav2/blob/master/CHANGELOG.md"
-Repository = "https://github.com/jazzband/django-eav2"
+Documentation = "https://django-eav2.readthedocs.io/en/latest/"
 Issues = "https://github.com/jazzband/django-eav2/issues"
-
+Repository = "https://github.com/jazzband/django-eav2"
 
 [dependency-groups]
 dev = [
   "poethepoet>=0.34,<1",
   { include-group = "lint" },
   { include-group = "test" },
-]
-lint = [
-  "mypy>=1.6,<3",
-  "ruff>=0.6.3,<0.18",
 ]
 test = [
   "hypothesis>=6.87.1,<7",
@@ -71,30 +65,83 @@ docs = [
   "sphinx>=5,<9",
   "sphinx-rtd-theme>=1.3,<4",
 ]
+lint = [
+  "mypy>=1.6,<3",
+  "ruff>=0.6.3,<0.18",
+]
+mysql = [ "mysqlclient>=2.2,<3" ]
+postgres = [ "psycopg[binary]>=3.2,<4" ]
 
-
+[tool.hatch]
 [tool.hatch.build]
 # Compiled translations are gitignored but must still ship:
 artifacts = [ "*.mo" ]
-
-[tool.hatch.build.targets.wheel]
-packages = [ "eav" ]
-
-[tool.hatch.build.targets.sdist]
-include = [
+targets.wheel.packages = [ "eav" ]
+targets.sdist.include = [
   "eav/",
   "CHANGELOG.md",
   "LICENSE",
   "README.md",
 ]
 
-
 [tool.uv]
+default-groups = [ "dev" ]
 # Docs: https://docs.astral.sh/uv/reference/settings
 add-bounds = "major"
-default-groups = [ "dev" ]
 
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+[tool.ruff.lint]
+select = [ "ALL" ]
+ignore = [
+  "ANN",    # Type hints related, let mypy handle these.
+  "ARG",    # Unused arguments
+  "CPY001", # Copyright notices
+  "D",      # Docstrings related
+  "EM101",  # "Exception must not use a string literal, assign to variable first"
+  "EM102",  # "Exception must not use an f-string literal, assign to variable first"
+  "PD",     # Pandas related
+  "Q000",   # For now
+  "SIM105", # "Use contextlib.suppress({exception}) instead of try-except-pass"
+  "TRY003", # "Avoid specifying long messages outside the exception class"
+]
+# Migrations are special
+per-file-ignores."**/migrations/*" = [ "RUF012" ]
+# Sphinx specific
+per-file-ignores."docs/source/conf.py" = [ "INP001" ]
+# Allow private member access for Registry
+per-file-ignores."eav/registry.py" = [ "SLF001" ]
+# pytest is even more special
+per-file-ignores."tests/*" = [
+  "INP001",  # "Add an __init__.py"
+  "PLR2004", # "Magic value used in comparison"
+  "PLW0108", # "Lambda may be unnecessary" - used with assertRaises
+  "PT009",   # "Use a regular assert instead of unittest-style"
+  "PT027",   # "Use pytest.raises instead of unittest-style"
+  "PT030",   # "pytest.warns match parameter" - broad warnings intentional in tests
+  "S101",    # "Use of assert detected"
+  "SLF001"  # "Private member accessed"
+]
+flake8-implicit-str-concat.allow-multiline = false
+# Use Google-style docstrings.
+pydocstyle.convention = "google"
 
+[tool.codespell]
+# Docs: https://github.com/codespell-project/codespell
+skip = "*.lock,*.po,CONTRIBUTORS.md,eav/migrations,htmlcov"
+
+[tool.pyproject-fmt]
+# Docs: https://pyproject-fmt.readthedocs.io/en/latest/configuration.html
+column_width = 88
+generate_python_version_classifiers = false
+table_format = "long"
+
+[tool.typos.files]
+# Docs: https://github.com/crate-ci/typos
+extend-exclude = [ "*.lock", "*.po", "CONTRIBUTORS.md", "eav/migrations" ]
+
+[tool.poe]
 [tool.poe.tasks]
 # Docs: https://poethepoet.natn.io
 format = [
@@ -106,59 +153,11 @@ lint = [
   { cmd = "ruff format --check --diff" },
 ]
 unit = "pytest"
+migrations = "python manage.py makemigrations --check --dry-run"
 package = [
   { cmd = "uv lock --check" },
   { cmd = "uv build" },
   { cmd = "uv pip check" },
 ]
 docs = "sphinx-build -W -b html docs/source docs/build"
-test = [ "lint", "unit", "package" ]
-
-
-[tool.ruff]
-line-length = 88
-target-version = "py38"
-
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-  "ANN",      # Type hints related, let mypy handle these.
-  "ARG",      # Unused arguments
-  "CPY001",   # Copyright notices
-  "D",        # Docstrings related
-  "EM101",    # "Exception must not use a string literal, assign to variable first"
-  "EM102",    # "Exception must not use an f-string literal, assign to variable first"
-  "PD",       # Pandas related
-  "Q000",     # For now
-  "SIM105",   # "Use contextlib.suppress({exception}) instead of try-except-pass"
-  "TRY003",   # "Avoid specifying long messages outside the exception class"
-  ]
-
-[tool.ruff.lint.flake8-implicit-str-concat]
-allow-multiline = false
-
-[tool.ruff.lint.per-file-ignores]
-# Allow private member access for Registry
-"eav/registry.py" = ["SLF001"]
-
-# Migrations are special
-"**/migrations/*" = ["RUF012"]
-
-# Sphinx specific
-"docs/source/conf.py" = ["INP001"]
-
-# pytest is even more special
-"tests/*" = [
-  "INP001",   # "Add an __init__.py"
-  "PLR2004",  # "Magic value used in comparison"
-  "PLW0108",  # "Lambda may be unnecessary" - used with assertRaises
-  "PT009",    # "Use a regular assert instead of unittest-style"
-  "PT027",    # "Use pytest.raises instead of unittest-style"
-  "PT030",    # "pytest.warns match parameter" - broad warnings intentional in tests
-  "S101",     # "Use of assert detected"
-  "SLF001"    # "Private member accessed"
-  ]
-
-[tool.ruff.lint.pydocstyle]
-# Use Google-style docstrings.
-convention = "google"
+test = [ "lint", "migrations", "unit", "package" ]

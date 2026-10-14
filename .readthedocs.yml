@@ -6,8 +6,11 @@ build:
   os: ubuntu-24.04
   tools:
     python: '3.13'
-    uv: latest
   jobs:
+    pre_create_environment:
+      - asdf plugin add uv
+      - asdf install uv latest
+      - asdf global uv latest
     create_environment:
       - uv venv "${READTHEDOCS_VIRTUALENV_PATH}"
     install:
