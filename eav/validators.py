@@ -20,13 +20,13 @@ from django.utils.translation import gettext_lazy as _
 
 
 def validate_text(candidate):
-    """Raises ``ValidationError`` unless *candidate* type is ``str`` or ``unicode``."""
+    """Raise ``ValidationError`` unless *candidate* type is ``str`` or ``unicode``."""
     if not isinstance(candidate, str):
         raise ValidationError(_("Must be str or unicode"))
 
 
 def validate_float(candidate):
-    """Raises ``ValidationError`` unless *candidate* can be cast as a ``float``."""
+    """Raise ``ValidationError`` unless *candidate* can be cast as a ``float``."""
     try:
         float(candidate)
     except (TypeError, ValueError) as err:
@@ -34,7 +34,7 @@ def validate_float(candidate):
 
 
 def validate_int(candidate):
-    """Raises ``ValidationError`` unless *candidate* can be cast as an ``int``."""
+    """Raise ``ValidationError`` unless *candidate* can be cast as an ``int``."""
     try:
         int(candidate)
     except (TypeError, ValueError) as err:
@@ -51,7 +51,7 @@ def validate_date(candidate):
 
 
 def validate_bool(candidate):
-    """Raises ``ValidationError`` unless *candidate* type is ``bool``."""
+    """Raise ``ValidationError`` unless *candidate* type is ``bool``."""
     if not isinstance(candidate, bool):
         raise ValidationError(_("Must be a boolean"))
 
@@ -85,7 +85,7 @@ def validate_json(candidate):
 
 
 def validate_csv(candidate):
-    """Raises ``ValidationError`` unless *candidate* is a c-s-v value."""
+    """Raise ``ValidationError`` unless *candidate* is a c-s-v value."""
     if isinstance(candidate, str):
         candidate = candidate.split(";")
     if not isinstance(candidate, list):

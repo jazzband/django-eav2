@@ -51,13 +51,13 @@ class EnumValue(models.Model):
         verbose_name_plural = _("EnumValues")
 
     def __str__(self) -> str:
-        """String representation of `EnumValue` instance."""
+        """Return the string representation of the choice."""
         return str(
             self.value,
         )
 
     def __repr__(self) -> str:
-        """String representation of `EnumValue` object."""
+        """Return the representation of the choice."""
         return f"<EnumValue {self.value}>"
 
     def natural_key(self) -> tuple[str]:

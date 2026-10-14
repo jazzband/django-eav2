@@ -217,7 +217,7 @@ class Value(models.Model):
         ]
 
     def __str__(self) -> str:
-        """String representation of a Value."""
+        """Return the string representation of a Value."""
         entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
         return f'{self.attribute.name}: "{self.value}" ({entity})'
 

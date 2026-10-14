@@ -51,7 +51,7 @@ from eav.models import Attribute, EnumValue, Value
 
 def is_eav_and_leaf(expr, gr_name):
     """
-    Checks whether Q-expression is an EAV AND leaf.
+    Check whether Q-expression is an EAV AND leaf.
 
     Args:
         expr (Union[Q, tuple]): Q-expression to be checked.
@@ -275,7 +275,7 @@ def expand_eav_filter(model_cls, key, value):
 
 
 class EavModelIterable(ModelIterable):
-    """Yields model instances that share one lookup of their attributes."""
+    """An iterable of model instances that share one lookup of their attributes."""
 
     def __iter__(self):
         """Yield the instances, pointing each entity at the shared schema."""
@@ -288,7 +288,7 @@ class EavModelIterable(ModelIterable):
 
 
 class EavQuerySet(QuerySet):
-    """Overrides relational operators for EAV models."""
+    """A queryset of EAV models that understands ``eav__<slug>`` lookups."""
 
     def __init__(self, *args, **kwargs):
         """Evaluate into instances that share one attribute lookup."""

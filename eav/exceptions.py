@@ -1,2 +1,2 @@
 class IllegalAssignmentException(Exception):  # noqa: N818
-    """Raised when a value is assigned to an attribute the entity cannot have."""
+    """An attempt to assign a value to an attribute the entity cannot have."""

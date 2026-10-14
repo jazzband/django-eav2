@@ -11,7 +11,7 @@ class EnumValueManager(models.Manager):
 
     def get_by_natural_key(self, value):
         """
-        Retrieves an EnumValue instance using its `value` as a natural key.
+        Retrieve an EnumValue instance using its `value` as a natural key.
 
         Args:
             value (str): The value of the EnumValue instance.
@@ -31,7 +31,7 @@ class EnumGroupManager(models.Manager):
 
     def get_by_natural_key(self, name):
         """
-        Retrieves an EnumGroup instance using its `name` as a natural key.
+        Retrieve an EnumGroup instance using its `name` as a natural key.
 
         Args:
             name (str): The name of the EnumGroup instance.
@@ -51,7 +51,7 @@ class AttributeManager(models.Manager):
 
     def get_by_natural_key(self, name, slug):
         """
-        Retrieves an Attribute instance using its `name` and `slug` as natural keys.
+        Retrieve an Attribute instance using its `name` and `slug` as natural keys.
 
         Args:
             name (str): The name of the Attribute instance.

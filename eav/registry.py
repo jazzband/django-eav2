@@ -63,7 +63,7 @@ class EavConfig:
 
 
 class Registry:
-    """Handles registration with :meth:`register` and :meth:`unregister`."""
+    """The registration of models with eav: :meth:`register` and :meth:`unregister`."""
 
     @staticmethod
     def register(model_cls, config_cls=None):
