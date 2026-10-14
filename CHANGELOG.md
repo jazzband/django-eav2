@@ -2,6 +2,23 @@
 
 We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` release.
 
+## Unreleased
+
+### Bug Fixes
+
+- `order_by("eav__<slug>")` no longer fails on UUID-keyed entities or empty querysets, no longer mixes in values of other models that share a primary key, and now accepts `-eav__<slug>` for descending order. Ordering by an `object` attribute raises `NotSupportedError`.
+- `validate_int` and `validate_float` raise `ValidationError` instead of `TypeError` for `None` and other non-numeric types.
+- An empty CSV value is read back as `[]` instead of `['']`.
+- `BaseEntityInline.get_fieldsets` no longer recurses infinitely, and honours `fieldsets`.
+- `EAV2_PRIMARY_KEY_FIELD` defaults to `BigAutoField` when it is not set, instead of raising `AttributeError`.
+- Unknown attribute slugs raise `Attribute.DoesNotExist` with the same message from `filter`, `exclude`, `get` and `order_by`.
+- `Entity.get_values` names the related fields it loads, which removes a Django 6.1 deprecation warning.
+
+### Internal
+
+- Moved from Poetry to uv, hatchling and poethepoet.
+- Added `py.typed`, wemake-python-styleguide, mypy and pyright with baselines, Postgres and MySQL CI jobs, and Python 3.14 and Django 6.1 to the test matrix.
+
 ## 1.8.2 (2026-05-22)
 
 ## What's Changed
