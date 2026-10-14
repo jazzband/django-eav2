@@ -141,20 +141,6 @@ If the primary key of eav models are to be modified (UUIDField -> BigAutoField, 
  python manage.py migrate
  ```
 
-### Note: Django 2.2 Users
-
-Since `models.JSONField()` isn't supported in Django 2.2, we use [django-jsonfield-backport](https://github.com/laymonage/django-jsonfield-backport) to provide [JSONField](https://docs.djangoproject.com/en/dev/releases/3.1/#jsonfield-for-all-supported-database-backends) functionality.
-
-This requires adding `django_jsonfield_backport` to your `INSTALLED_APPS` as well.
-
-```python
-INSTALLED_APPS = [
-    ...
-    'eav',
-    'django_jsonfield_backport',
-]
-```
-
 ## Getting started
 
 **Step 1.** Register a model:

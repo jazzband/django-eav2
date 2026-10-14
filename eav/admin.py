@@ -134,10 +134,9 @@ class BaseEntityInline(InlineModelAdmin):
             model = Item
             form = forms.ItemForm
 
-    .. warning:: ``TabularInline`` does *not* work out of the box. There is,
-        however, a patched template ``admin/edit_inline/tabular.html`` bundled
-        with EAV-Django. You can copy or symlink the ``admin`` directory to
-        your templates search path (see Django documentation).
+    .. warning:: ``TabularInline`` is not supported: the patched template
+        this docstring used to mention is not shipped with the package. Use
+        ``StackedInline``.
     """
 
     formset = BaseEntityInlineFormSet
