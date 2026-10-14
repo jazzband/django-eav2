@@ -63,7 +63,7 @@ class Value(models.Model):
     # Entity generic relationships. Rather than rely on database casting,
     # this will instead use a separate ForeignKey field attribute that matches
     # the FK type of the entity.
-    entity_id = models.IntegerField(
+    entity_id = models.BigIntegerField(
         blank=True,
         null=True,
         verbose_name=_("Entity id"),
@@ -153,7 +153,7 @@ class Value(models.Model):
     )
 
     # Value object relationship
-    generic_value_id = models.IntegerField(
+    generic_value_id = models.BigIntegerField(
         blank=True,
         null=True,
         verbose_name=_("Generic value id"),
