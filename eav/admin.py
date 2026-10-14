@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django.contrib import admin
 from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
@@ -14,9 +14,7 @@ from eav.models import Attribute, EnumGroup, EnumValue, Value
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-_FIELDSET_TYPE = List[Union[str, Dict[str, Any]]]  # type: ignore[misc]
-
-some_attribute = ClassVar[Dict[str, str]]
+_FIELDSET_TYPE = list[str | dict[str, Any]]
 
 
 class BaseEntityAdmin(ModelAdmin):
@@ -145,16 +143,17 @@ class BaseEntityInline(InlineModelAdmin):
     formset = BaseEntityInlineFormSet
 
     def get_fieldsets(self, request, obj=None):
-        if self.declared_fieldsets:
-            return self.declared_fieldsets
+        if self.fieldsets:
+            return self.fieldsets
 
-        formset = self.get_formset(request)
+        # Passing ``fields`` stops Django from calling ``get_fieldsets`` again.
+        formset = self.get_formset(request, obj, fields=None)
         fk_name = self.fk_name or formset.fk.name
         kw = {fk_name: obj} if obj else {}
         instance = self.model(**kw)
         form = formset.form(request.POST, instance=instance)
 
-        return [(None, {"fields": form.fields.keys()})]
+        return [(None, {"fields": list(form.fields)})]
 
 
 class AttributeAdmin(ModelAdmin):
