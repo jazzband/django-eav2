@@ -39,9 +39,10 @@ Q-expressions need to be rewritten for two reasons:
 from functools import wraps
 
 from django.db.models import Q
-from django.db.models.query import QuerySet
+from django.db.models.query import ModelIterable, QuerySet
 
 from eav.logic.ordering import eav_order_slug, get_attribute, order_subquery
+from eav.logic.schema import shared_schema_for
 from eav.models import Attribute, EnumValue, Value
 
 
@@ -271,10 +272,28 @@ def expand_eav_filter(model_cls, key, value):
     return key, value
 
 
+class EavModelIterable(ModelIterable):
+    """Yields model instances that share one lookup of their attributes."""
+
+    def __iter__(self):
+        """Yield the instances, pointing each entity at the shared schema."""
+        schema = shared_schema_for(self.queryset.model)
+
+        for instance in super().__iter__():
+            if schema is not None:
+                schema.attach(instance)
+            yield instance
+
+
 class EavQuerySet(QuerySet):
     """
     Overrides relational operators for EAV models.
     """
+
+    def __init__(self, *args, **kwargs):
+        """Evaluate into instances that share one attribute lookup."""
+        super().__init__(*args, **kwargs)
+        self._iterable_class = EavModelIterable
 
     @eav_filter
     def filter(self, *args, **kwargs):

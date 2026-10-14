@@ -35,6 +35,20 @@ class EavConfig:
     generic_relation_related_name = None
 
     @classmethod
+    def shares_attributes(cls) -> bool:
+        """
+        Whether every entity of the model has the same attributes.
+
+        This is the case unless :meth:`get_attributes` is overridden, since an
+        override may choose attributes per instance.
+        """
+        return all(
+            "get_attributes" not in klass.__dict__
+            for klass in cls.__mro__
+            if klass is not EavConfig
+        )
+
+    @classmethod
     def get_attributes(cls, instance=None):
         """
         By default, all :class:`~eav.models.Attribute` object apply to an
