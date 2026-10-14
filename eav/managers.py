@@ -6,7 +6,7 @@ from eav.queryset import EavQuerySet
 
 
 class EntityManager(models.Manager):
-    """Our custom manager, overrides ``models.Manager``."""
+    """A manager for EAV models that creates entities together with their attributes."""
 
     _queryset_class = EavQuerySet
 

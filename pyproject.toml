@@ -111,7 +111,6 @@ ignore = [
   "D106",   # Nested class docstrings, such as Meta
   "D107",   # __init__ docstrings
   "D212",   # Multi-line summaries may start on the second line
-  "D401",   # Imperative mood
   "D404",   # First word of the docstring
   "D405",   # Section name capitalization
   "EM101",  # "Exception must not use a string literal, assign to variable first"

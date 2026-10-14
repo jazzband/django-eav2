@@ -82,7 +82,7 @@ class BaseEntityAdmin(ModelAdmin):
         return super().render_change_form(request, context, *args, **kwargs)
 
     def _get_eav_fields(self, instance) -> list[str]:
-        """Retrieves a list of EAV field slugs for the given instance.
+        """Retrieve a list of EAV field slugs for the given instance.
 
         Args:
             instance: The model instance for which EAV fields are determined.
@@ -94,7 +94,7 @@ class BaseEntityAdmin(ModelAdmin):
         return list(entity.get_all_attributes().values_list("slug", flat=True))
 
     def _get_eav_fieldset(self, eav_fields) -> _FIELDSET_TYPE:
-        """Constructs an EAV Attributes fieldset for inclusion in admin form fieldsets.
+        """Construct an EAV Attributes fieldset for inclusion in admin form fieldsets.
 
         Generates a list representing a fieldset specifically for Entity-Attribute-Value
         (EAV) fields, intended to be appended to the admin form's fieldsets

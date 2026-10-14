@@ -45,7 +45,7 @@ def chunked(sequence: Sequence[Any], size: int) -> Iterator[Sequence[Any]]:
 
 
 def entity_of(instance: Model) -> Any:
-    """The EAV helper attached to *instance*."""
+    """Return the EAV helper attached to *instance*."""
     config_cls = getattr(type(instance), "_eav_config_cls")  # noqa: B009
     return getattr(instance, config_cls.eav_attr)
 
@@ -64,7 +64,7 @@ def assigned_pairs(
 
 
 class ValueBuilder:
-    """Builds unsaved :class:`Value` objects for the instances of one model."""
+    """A builder of unsaved :class:`Value` objects for the instances of one model."""
 
     def __init__(self, model_cls: type[Model]) -> None:
         """Prepare to build values for instances of *model_cls*."""
@@ -161,7 +161,7 @@ class WritePlan:
 
 class BulkValueWriter:
     """
-    Validates and writes the EAV values assigned to many instances of a model.
+    A writer of the EAV values assigned to many instances of a model.
 
     Attributes are loaded once for the whole batch. Values are written with one
     upsert per datatype per chunk and one delete per attribute that is being

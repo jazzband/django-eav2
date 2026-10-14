@@ -21,7 +21,7 @@ class SchemaSource(Protocol):
 
 
 class OwnSchema:
-    """Loads the attributes of a single entity, once, on first use."""
+    """The attributes of a single entity, loaded once on first use."""
 
     def __init__(self, entity: Entity) -> None:
         """Remember the *entity* whose attributes are loaded."""
@@ -40,7 +40,7 @@ class OwnSchema:
 
 class SharedSchema:
     """
-    Loads the attributes once for all the entities of a queryset.
+    The attributes shared by all the entities of a queryset, loaded once.
 
     Only used when every entity of the model has the same attributes, see
     :meth:`eav.registry.EavConfig.shares_attributes`. Nothing is queried unless

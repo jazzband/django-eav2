@@ -43,11 +43,11 @@ class EnumGroup(models.Model):
         verbose_name_plural = _("EnumGroups")
 
     def __str__(self) -> str:
-        """String representation of `EnumGroup` instance."""
+        """Return the string representation of the group."""
         return str(self.name)
 
     def __repr__(self) -> str:
-        """String representation of `EnumGroup` object."""
+        """Return the representation of the group."""
         return f"<EnumGroup {self.name}>"
 
     def natural_key(self) -> tuple[str]:

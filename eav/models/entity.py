@@ -101,7 +101,7 @@ class Entity:
         )
 
     def _values(self) -> dict[Any, Value]:
-        """The entity's :class:`Value` objects by attribute primary key."""
+        """Return the entity's :class:`Value` objects by attribute primary key."""
         if self.instance._state.adding:  # noqa: SLF001
             return {}
 
@@ -131,7 +131,7 @@ class Entity:
         return None
 
     def __getattr__(self, name):
-        """The magic getattr helper.
+        """Return the value of the EAV attribute called *name*.
 
         This is called whenever the user invokes::
 
@@ -188,7 +188,7 @@ class Entity:
 
     def save(self, *, created: bool = False) -> None:
         """
-        Saves all the EAV values that have been set on this entity.
+        Save all the EAV values that have been set on this entity.
 
         Pass ``created=True`` for an entity that was just inserted, which has no
         values to look up.
@@ -272,11 +272,11 @@ class Entity:
         )
 
     def get_all_attribute_slugs(self):
-        """Returns a list of slugs for all attributes available to this entity."""
+        """Return the slugs of all attributes available to this entity."""
         return set(self._attributes())
 
     def get_attribute_by_slug(self, slug):
-        """Returns a single :class:`Attribute` with *slug*."""
+        """Return the :class:`Attribute` with *slug*."""
         if slug not in self._attributes():
             # The attributes may have changed since they were loaded.
             self._schema = OwnSchema(self)
@@ -287,7 +287,7 @@ class Entity:
             raise Attribute.DoesNotExist(slug) from err
 
     def get_value_by_attribute(self, attribute):
-        """Returns a single :class:`Value` for *attribute*."""
+        """Return the :class:`Value` for *attribute*."""
         try:
             return self._values()[attribute.pk]
         except KeyError as err:
@@ -295,7 +295,7 @@ class Entity:
 
     def assigned_values(self) -> dict[str, Any]:
         """
-        The values assigned to this entity and not yet saved, by attribute slug.
+        Return the values assigned to this entity and not yet saved, by attribute slug.
 
         Names that are not attributes of the entity are included too, so that
         callers can reject them.
