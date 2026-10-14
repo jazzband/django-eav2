@@ -6,7 +6,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
-- `order_by("eav__<slug>")` no longer fails on UUID-keyed entities or empty querysets, no longer mixes in values of other models that share a primary key, and now accepts `-eav__<slug>` for descending order. Ordering by an `object` attribute raises `NotSupportedError`.
+- `order_by("eav__<slug>")` no longer fails on UUID-keyed entities or empty querysets, no longer mixes in values of other models that share a primary key, and now accepts `-eav__<slug>` for descending order. Ordering by an `object` attribute raises `NotSupportedError` (it was a `FieldError`). Ordering by a related field such as `order_by("example__name")` now sorts by that field; it used to sort by the foreign key column only.
 - `validate_int` and `validate_float` raise `ValidationError` instead of `TypeError` for `None` and other non-numeric types.
 - An empty CSV value is read back as `[]` instead of `['']`.
 - `BaseEntityInline.get_fieldsets` no longer recurses infinitely, and honours `fieldsets`.
