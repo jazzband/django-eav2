@@ -103,43 +103,15 @@ INSTALLED_APPS = [
 ]
 ```
 
-Add `django.db.models.UUIDField` or `django.db.models.BigAutoField` as value of `EAV2_PRIMARY_KEY_FIELD` in your settings
+By default the EAV tables use `BigAutoField` primary keys. To use UUIDs instead, set `EAV2_PRIMARY_KEY_FIELD` in your settings **before you run `migrate` for the first time**:
 
 ``` python
-EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField"  # as example
+EAV2_PRIMARY_KEY_FIELD = "django.db.models.UUIDField"
 ```
 
-### Note: Primary key mandatory modification field
+The only supported values are `django.db.models.BigAutoField` (the default) and `django.db.models.UUIDField`; anything else raises `ImproperlyConfigured`. The setting is read by both the models and the migrations, so a new project gets the key type it asked for without any extra steps. It only concerns the tables django-eav2 creates: your own models can use any primary key that is an integer or a UUID.
 
-If the primary key of eav models are to be modified (UUIDField -> BigAutoField, BigAutoField -> UUIDField) in the middle of the project when the migrations are already done, you have to change the value of `EAV2_PRIMARY_KEY_FIELD` in your settings.
-
-##### Step 1
- Change the value of `EAV2_PRIMARY_KEY_FIELD` into `django.db.models.CharField` in your settings.
-
- ```python
- EAV2_PRIMARY_KEY_FIELD = "django.db.models.CharField"
- ```
-
- Run the migrations
-
- ```bash
- python manage.py makemigrations
- python manage.py migrate
- ```
-
-##### Step 2
- Change the value of `EAV2_PRIMARY_KEY_FIELD` into the desired value (`django.db.models.BigAutoField` or `django.db.models.UUIDField`) in your settings.
-
- ```python
- EAV2_PRIMARY_KEY_FIELD = "django.db.models.BigAutoField"  # as example
- ```
-
-  Run again the migrations.
-
-```bash
- python manage.py makemigrations
- python manage.py migrate
- ```
+Changing the setting for tables that already exist is not supported, and there is no migration that converts the keys of existing rows. If you need to switch, migrate your data yourself.
 
 ## Getting started
 

@@ -4,6 +4,12 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ## Unreleased
 
+### Breaking Changes
+
+- `EAV2_PRIMARY_KEY_FIELD` accepts only `django.db.models.BigAutoField` (the default) and `django.db.models.UUIDField`. `django.db.models.CharField`, `django.db.models.AutoField` and any other value now raise `ImproperlyConfigured` instead of being ignored. A `CharField` key never worked on its own, because nothing generates the ids; it only existed as the middle step of a conversion described in the README.
+- Migrations `0001` and `0010` use the configured key type, so a new project with `UUIDField` gets UUID keys from its first `migrate`; this fixes `cannot cast type bigint to uuid` on PostgreSQL (#455). Existing databases are unaffected. The README's two-step conversion, which generated migration files inside the installed package, is gone: converting the keys of existing tables is not supported.
+- `order_by("eav__<enum attribute>")` now sorts by the text of the choice, so it does not depend on how the database orders keys. It used to sort by the choice's id.
+
 ### Performance
 
 - `instance.eav.<slug>` loads an entity's attributes and values once and reuses them, so reading three attributes takes 2 queries instead of 6. The values are held in the instance's `prefetch_related` cache, so `refresh_from_db()` and `save()` clear them; use `instance.eav.clear_cache()` after changing values elsewhere.
@@ -20,6 +26,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - `Attribute.enum_choices`, `Attribute.validate_assignment`, `Entity.assigned_values` and `Value.clean_own_fields`. Saving an enum attribute no longer queries the choices more than once.
 
 ### Bug Fixes
+
+- `validate_enum` and `validate_object` use Django's `_state.adding` to detect unsaved instances, because a model with a UUID default key always has a primary key, so an unsaved `EnumValue` was accepted and then failed with an integrity error.
 
 - `Value.entity_id` and `Value.generic_value_id` are now `BigIntegerField`, so entities with primary keys above 2,147,483,647 can store values (migration `0014`). On PostgreSQL and MySQL this rewrites the `eav_value` table, which takes a lock for as long as the rewrite runs on a large table, so plan the upgrade accordingly.
 - Assigning a plain `date` to a date attribute stores midnight in the default timezone, as before, but no longer emits Django's "naive datetime" `RuntimeWarning` when `USE_TZ` is on, and saving the same date again no longer rewrites the value.
