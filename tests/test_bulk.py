@@ -86,7 +86,7 @@ def test_bulk_create_with_integer_primary_keys() -> None:
 def test_bulk_create_covers_every_datatype() -> None:
     doctor = Doctor(name="all")
     doctor.eav.age = 3
-    moment = timezone.now().replace(microsecond=0)
+    moment = timezone.now().date()
     doctor.eav.dob = moment
     doctor.eav.tags = ["a", "b"]
     doctor.eav.extra = {"k": "v"}
@@ -99,7 +99,7 @@ def test_bulk_create_covers_every_datatype() -> None:
     assert stored.eav.tags == ["a", "b"]
     assert stored.eav.extra == {"k": "v"}
     assert stored.eav.fever.value == "yes"
-    assert stored.eav.dob == moment
+    assert stored.eav.dob.date() == moment
 
 
 def test_bulk_create_skips_empty_values() -> None:

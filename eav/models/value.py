@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from eav.fields import CSVField
+from eav.logic.dates import as_datetime
 from eav.logic.managers import ValueManager
 from eav.logic.object_pk import get_pk_format
 
@@ -249,6 +250,9 @@ class Value(models.Model):
 
     def _set_value(self, new_value):
         """Set the object this value is holding."""
+        if self.attribute.datatype == "date":
+            new_value = as_datetime(new_value)
+
         setattr(self, f"value_{self.attribute.datatype}", new_value)
 
     value = property(_get_value, _set_value)

@@ -12,6 +12,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from eav.fields import EavDatatypeField
+from eav.logic.dates import as_datetime
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.managers import AttributeManager
 from eav.logic.object_pk import get_pk_format
@@ -394,6 +395,9 @@ class Attribute(models.Model):
             if existing is not None:
                 existing.delete()
             return None
+
+        if self.datatype == self.TYPE_DATE:
+            value = as_datetime(value)
 
         if existing is None:
             existing = Value(attribute=self, **self._entity_filter(entity))

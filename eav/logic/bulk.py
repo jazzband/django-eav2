@@ -10,6 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import connections
 from django.db.utils import NotSupportedError
 
+from eav.logic.dates import as_datetime
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.schema import SharedSchema
 from eav.models import Attribute, EnumValue, Value
@@ -94,7 +95,8 @@ class ValueBuilder:
         else:
             column = _VALUE_COLUMNS[attribute.datatype][0]
             field = cast("Field[Any, Any]", Value._meta.get_field(column))  # noqa: SLF001
-            setattr(eav_value, column, field.clean(raw_value, eav_value))
+            cleaned = field.clean(as_datetime(raw_value), eav_value)
+            setattr(eav_value, column, cleaned)
 
         return eav_value
 

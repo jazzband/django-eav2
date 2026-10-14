@@ -1,3 +1,5 @@
+import datetime as dt
+
 import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -214,15 +216,30 @@ class DataValidation(TestCase):
 
 
 @pytest.mark.django_db
-@pytest.mark.xfail(
-    strict=True,
-    reason="A plain date becomes a naive datetime when USE_TZ is enabled.",
-)
-def test_date_value_is_stored_timezone_aware():
+def test_date_value_is_stored_as_midnight_in_the_default_timezone():
     eav.register(Patient)
     Attribute.objects.create(name="DoB", datatype=Attribute.TYPE_DATE)
     today = timezone.now().date()
     patient = Patient.objects.create(name="Joe")
     patient.eav.dob = today
     patient.save()
-    assert Patient.objects.get(pk=patient.pk).eav.dob.date() == today
+
+    stored = Patient.objects.get(pk=patient.pk).eav.dob
+
+    assert stored.date() == today
+    assert stored.time() == dt.time.min
+    assert timezone.is_aware(stored)
+
+
+@pytest.mark.django_db
+def test_saving_the_same_date_again_writes_nothing(django_assert_num_queries):
+    eav.register(Patient)
+    Attribute.objects.create(name="DoB", datatype=Attribute.TYPE_DATE)
+    today = timezone.now().date()
+    patient = Patient.objects.create(name="Joe", eav__dob=today)
+    patient = Patient.objects.get(pk=patient.pk)
+    patient.eav.dob = today
+
+    # The update, the attributes and the values; no write for the date.
+    with django_assert_num_queries(3):
+        patient.save()
