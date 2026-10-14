@@ -104,8 +104,9 @@ def test_saving_an_enum_value(patient: Patient, django_assert_num_queries) -> No
     )
     patient.eav.fever = "yes"
 
-    # The update, attributes, values, the enum lookup and check, and the insert.
-    with django_assert_num_queries(6):
+    # The update, attributes, values, the enum choices (used to check and to
+    # convert the value), and the insert.
+    with django_assert_num_queries(5):
         patient.save()
 
     assert Patient.objects.get(pk=patient.pk).eav.fever == yes

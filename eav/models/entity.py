@@ -5,7 +5,6 @@ from functools import cached_property
 from typing import Any
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, QuerySet, prefetch_related_objects
 from django.db.models.base import ModelBase
 from django.utils.translation import gettext_lazy as _
@@ -212,7 +211,9 @@ class Entity:
                     )
                     and attribute_value is not None
                 ):
-                    attribute_value = EnumValue.objects.get(value=attribute_value)
+                    attribute_value = attribute.enum_choices.get(
+                        attribute_value,
+                    ) or EnumValue.objects.get(value=attribute_value)
 
                 attribute.store_value(
                     self.instance,
@@ -242,19 +243,7 @@ class Entity:
             else:
                 value = values_dict.pop(attribute.slug, None)
 
-            if value is None:
-                if attribute.required:
-                    raise ValidationError(
-                        _("%s EAV field cannot be blank") % attribute.slug,
-                    )
-            else:
-                try:
-                    attribute.validate_value(value)
-                except ValidationError as err:
-                    raise ValidationError(
-                        _("%(attr)s EAV field %(err)s")
-                        % {"attr": attribute.slug, "err": err},
-                    ) from err
+            attribute.validate_assignment(value)
 
         illegal = values_dict or (
             self.get_object_attributes() - self.get_all_attribute_slugs()
@@ -308,6 +297,15 @@ class Entity:
             return self._values()[attribute.pk]
         except KeyError as err:
             raise Value.DoesNotExist(attribute.slug) from err
+
+    def assigned_values(self) -> dict[str, Any]:
+        """
+        The values assigned to this entity and not yet saved, by attribute slug.
+
+        Names that are not attributes of the entity are included too, so that
+        callers can reject them.
+        """
+        return {name: self.__dict__[name] for name in self.get_object_attributes()}
 
     def get_object_attributes(self):
         """
