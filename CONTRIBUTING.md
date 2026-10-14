@@ -13,26 +13,32 @@ We love your input! We want to make contributing to this project as easy and tra
 
 ## Dependencies
 
-We use [poetry](https://github.com/sdispater/poetry) to manage the dependencies.
+We use [uv](https://docs.astral.sh/uv/) to manage the dependencies
+and [poethepoet](https://poethepoet.natn.io) as the task runner.
 
-To install them you would need to run `install` command:
+To install everything you need for development:
 
 ```bash
-poetry install
+uv sync
 ```
 
-To activate your `virtualenv` run `poetry shell`.
+To activate your `virtualenv` run `source .venv/bin/activate`,
+or prefix commands with `uv run`.
 
 
 ## Tests
 
-We use `pytest` and `flake8` for quality control.
-
-To run all tests:
+We use `pytest` and `ruff` for quality control.
 
 ```bash
-pytest
+uv run poe unit      # tests
+uv run poe lint      # ruff check and format check
+uv run poe format    # apply ruff fixes and formatting
+uv run poe package   # lockfile check, build, dependency check
+uv run poe test      # all of the above
 ```
+
+To build the docs: `uv sync --group docs && uv run poe docs`.
 
 ## We develop with Github
 We use github to host code, to track issues and feature requests, as well as accept pull requests.
