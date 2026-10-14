@@ -197,8 +197,7 @@ class Value(models.Model):
 
     def __repr__(self) -> str:
         """Representation of Value object."""
-        entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
-        return f'{self.attribute.name}: "{self.value}" ({entity})'
+        return str(self)
 
     def save(self, *args, **kwargs):
         """Validate and save this value."""
