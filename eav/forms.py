@@ -62,8 +62,8 @@ class BaseDynamicEntityForm(ModelForm):
     Type      Field
     =====  =============
     text   CharField
-    float  IntegerField
-    int    DateTimeField
+    float  FloatField
+    int    IntegerField
     date   SplitDateTimeField
     bool   BooleanField
     enum   ChoiceField
