@@ -6,15 +6,13 @@ from eav.forms import CSVFormField
 
 
 class EavDatatypeField(models.CharField):
-    """
-    The datatype field used by :class:`~eav.models.Attribute`.
-    """
+    """The datatype field used by :class:`~eav.models.Attribute`."""
 
     def validate(self, value, instance):
-        """
-        Raise ``ValidationError`` if they try to change the datatype of an
-        :class:`~eav.models.Attribute` that is already used by
-        :class:`~eav.models.Value` objects.
+        """Raise ``ValidationError`` if the datatype of a used attribute is changed.
+
+        :class:`~eav.models.Attribute` objects that are already used by
+        :class:`~eav.models.Value` objects cannot change their datatype.
         """
         super().validate(value, instance)
 
@@ -41,6 +39,8 @@ class EavDatatypeField(models.CharField):
 
 
 class CSVField(models.TextField):  # (models.Field):
+    """A text field holding a list of values joined by a separator."""
+
     description = _("A Comma-Separated-Value field.")
     default_separator = ";"
 
@@ -50,20 +50,24 @@ class CSVField(models.TextField):  # (models.Field):
         super().__init__(*args, **kwargs)
 
     def deconstruct(self):
+        """Describe the field for migrations, including a non-default separator."""
         name, path, args, kwargs = super().deconstruct()
         if self.separator != self.default_separator:
             kwargs["separator"] = self.separator
         return name, path, args, kwargs
 
     def formfield(self, **kwargs):
+        """Use :class:`~eav.forms.CSVFormField` as the form field."""
         defaults = {"form_class": CSVFormField}
         defaults.update(kwargs)
         return super().formfield(**defaults)
 
     def from_db_value(self, value, expression, connection):
+        """Convert the stored text to a list."""
         return self.to_python(value)
 
     def to_python(self, value):
+        """Convert text, a list or ``None`` to a list."""
         if not value:
             return []
         if isinstance(value, list):
@@ -71,6 +75,7 @@ class CSVField(models.TextField):  # (models.Field):
         return value.split(self.separator)
 
     def get_prep_value(self, value):
+        """Convert a list to the text that is stored."""
         if not value:
             return ""
         if isinstance(value, str):
@@ -80,5 +85,6 @@ class CSVField(models.TextField):  # (models.Field):
         return value
 
     def value_to_string(self, obj):
+        """Serialize the value as stored text."""
         value = self.value_from_object(obj)
         return self.get_prep_value(value)

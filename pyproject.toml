@@ -103,7 +103,15 @@ ignore = [
   "ANN",    # Type hints related, let mypy handle these.
   "ARG",    # Unused arguments
   "CPY001", # Copyright notices
-  "D",      # Docstrings related
+  "D100",   # Module docstrings
+  "D104",   # Package docstrings
+  "D105",   # Magic method docstrings
+  "D106",   # Nested class docstrings, such as Meta
+  "D107",   # __init__ docstrings
+  "D212",   # Multi-line summaries may start on the second line
+  "D401",   # Imperative mood
+  "D404",   # First word of the docstring
+  "D405",   # Section name capitalization
   "EM101",  # "Exception must not use a string literal, assign to variable first"
   "EM102",  # "Exception must not use an f-string literal, assign to variable first"
   "PD",     # Pandas related
@@ -112,13 +120,15 @@ ignore = [
   "TRY003", # "Avoid specifying long messages outside the exception class"
 ]
 # Migrations are special
-per-file-ignores."**/migrations/*" = [ "RUF012" ]
+per-file-ignores."**/migrations/*" = [ "D", "RUF012" ]
 # Sphinx specific
-per-file-ignores."docs/source/conf.py" = [ "INP001" ]
+per-file-ignores."docs/source/conf.py" = [ "D", "INP001" ]
 # Allow private member access for Registry
 per-file-ignores."eav/registry.py" = [ "SLF001" ]
+per-file-ignores."test_project/**" = [ "D" ]
 # pytest is even more special
 per-file-ignores."tests/*" = [
+  "D",       # Tests are named for what they check
   "INP001",  # "Add an __init__.py"
   "PLR2004", # "Magic value used in comparison"
   "PLW0108", # "Lambda may be unnecessary" - used with assertRaises

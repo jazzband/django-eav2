@@ -24,6 +24,8 @@ from eav.widgets import CSVWidget
 
 
 class CSVFormField(Field):
+    """A form field for a list of values joined by a separator."""
+
     message = _("Enter comma-separated-values. eg: one;two;three.")
     code = "invalid"
     widget = CSVWidget
@@ -35,11 +37,13 @@ class CSVFormField(Field):
         super().__init__(*args, **kwargs)
 
     def to_python(self, value):
+        """Split the text into a list of stripped values."""
         if not value:
             return []
         return [v.strip() for v in value.split(self.separator) if v]
 
     def validate(self, field_value):
+        """Require the cleaned value to be a list."""
         super().validate(field_value)
 
         if not isinstance(field_value, list):
@@ -47,14 +51,14 @@ class CSVFormField(Field):
 
 
 class BaseDynamicEntityForm(ModelForm):
-    """
-    ``ModelForm`` for entity with support for EAV attributes. Form fields are
-    created on the fly depending on schema defined for given entity instance.
-    If no schema is defined (i.e. the entity instance has not been saved yet),
-    only static fields are used. However, on form validation the schema will be
-    retrieved and EAV fields dynamically added to the form, so when the
-    validation is actually done, all EAV fields are present in it (unless
-    Rubric is not defined).
+    """``ModelForm`` for an entity with support for EAV attributes.
+
+    Form fields are created on the fly depending on the schema defined for the
+    given entity instance. If no schema is defined (i.e. the entity instance has
+    not been saved yet), only static fields are used. However, on form
+    validation the schema will be retrieved and EAV fields dynamically added to
+    the form, so when the validation is actually done, all EAV fields are present
+    in it (unless Rubric is not defined).
 
     Mapping between attribute types and field classes is as follows:
 
@@ -126,9 +130,9 @@ class BaseDynamicEntityForm(ModelForm):
                 self.initial[attribute.slug] = value
 
     def save(self, *, commit=True):
-        """
-        Saves this ``form``'s cleaned_data into model instance
-        ``self.instance`` and related EAV attributes. Returns ``instance``.
+        """Save the cleaned data into the instance and its EAV attributes.
+
+        Returns ``instance``.
         """
         if self.errors:
             raise ValueError(

@@ -112,11 +112,10 @@ class BaseEntityAdmin(ModelAdmin):
 
 
 class BaseEntityInlineFormSet(BaseInlineFormSet):
-    """
-    An inline formset that correctly initializes EAV forms.
-    """
+    """An inline formset that correctly initializes EAV forms."""
 
     def add_fields(self, form, index):
+        """Attach the parent instance to the inline form and build its EAV fields."""
         if self.instance:
             setattr(form.instance, self.fk.name, self.instance)
             form._build_dynamic_fields()  # noqa: SLF001
@@ -125,10 +124,10 @@ class BaseEntityInlineFormSet(BaseInlineFormSet):
 
 
 class BaseEntityInline(InlineModelAdmin):
-    """
-    Inline model admin that works correctly with EAV attributes. You should mix
-    in the standard ``StackedInline`` or ``TabularInline`` classes in order to
-    define formset representation, e.g.::
+    """Inline model admin that works correctly with EAV attributes.
+
+    Mix in the standard ``StackedInline`` or ``TabularInline`` classes to define the
+    formset representation, e.g.::
 
         class ItemInline(BaseEntityInline, StackedInline):
             model = Item
@@ -142,6 +141,7 @@ class BaseEntityInline(InlineModelAdmin):
     formset = BaseEntityInlineFormSet
 
     def get_fieldsets(self, request, obj=None):
+        """Return the declared fieldsets, or build them from the form's fields."""
         if self.fieldsets:
             return self.fieldsets
 
@@ -156,6 +156,8 @@ class BaseEntityInline(InlineModelAdmin):
 
 
 class AttributeAdmin(ModelAdmin):
+    """Admin for :class:`~eav.models.Attribute`."""
+
     list_display = ("name", "slug", "datatype", "description")
     prepopulated_fields: ClassVar[dict[str, Sequence[str]]] = {"slug": ("name",)}
 

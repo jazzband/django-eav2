@@ -15,10 +15,11 @@ if TYPE_CHECKING:
 
 
 class EnumGroup(models.Model):
-    """
-    *EnumGroup* objects have two fields - a *name* ``CharField`` and *values*,
-    a ``ManyToManyField`` to :class:`EnumValue`. :class:`Attribute` classes
-    with datatype *TYPE_ENUM* have a ``ForeignKey`` field to *EnumGroup*.
+    """A group of :class:`EnumValue` choices for enum attributes.
+
+    *EnumGroup* objects have two fields: a *name* ``CharField`` and *values*, a
+    ``ManyToManyField`` to :class:`EnumValue`. :class:`Attribute` classes with
+    datatype *TYPE_ENUM* have a ``ForeignKey`` field to *EnumGroup*.
 
     See :class:`EnumValue` for an example.
     """
@@ -56,8 +57,7 @@ class EnumGroup(models.Model):
         The natural key for an EnumGroup is defined by its `name`. This method
         returns the name of the instance as a single-element tuple.
 
-        Returns
-        -------
+        Returns:
             tuple: A tuple containing the name of the EnumGroup instance.
         """
         return (self.name,)

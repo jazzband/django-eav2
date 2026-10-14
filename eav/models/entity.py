@@ -26,10 +26,10 @@ class Entity:
 
     @staticmethod
     def pre_save_handler(sender, *args, **kwargs):
-        """
-        Pre save handler attached to self.instance.  Called before the
-        model instance we are attached to is saved. This allows us to call
-        :meth:`validate_attributes` before the entity is saved.
+        """Validate the entity's attributes before the model instance is saved.
+
+        Attached to the instance as a ``pre_save`` handler; it calls
+        :meth:`validate_attributes`.
         """
         instance = kwargs["instance"]
         entity = getattr(kwargs["instance"], instance._eav_config_cls.eav_attr)  # noqa: SLF001
@@ -38,19 +38,16 @@ class Entity:
 
     @staticmethod
     def post_save_handler(sender, *args, **kwargs):
-        """
-        Post save handler attached to self.instance.  Calls :meth:`save` when
-        the model instance we are attached to is saved.
+        """Save the entity's EAV values after the model instance is saved.
+
+        Attached to the instance as a ``post_save`` handler; it calls :meth:`save`.
         """
         instance = kwargs["instance"]
         entity = getattr(instance, instance._eav_config_cls.eav_attr)  # noqa: SLF001
         entity.save(created=kwargs.get("created", False))
 
     def __init__(self, instance) -> None:
-        """
-        Set self.instance equal to the instance of the model that we're attached
-        to.
-        """
+        """Attach the helper to *instance*, the model instance it belongs to."""
         self.instance = instance
         self._schema: SchemaSource = OwnSchema(self)
 
@@ -134,8 +131,9 @@ class Entity:
         return None
 
     def __getattr__(self, name):
-        """
-        The magic getattr helper. This is called whenever user invokes::
+        """The magic getattr helper.
+
+        This is called whenever the user invokes::
 
             instance.<attribute>
 
@@ -165,10 +163,7 @@ class Entity:
         return None if eav_value is None else eav_value.value
 
     def get_all_attributes(self) -> QuerySet[Attribute]:
-        """
-        Return a query set of all :class:`Attribute` objects that can be set
-        for this entity.
-        """
+        """Return a query set of the :class:`Attribute` objects this entity can set."""
         config_cls = self.instance._eav_config_cls  # noqa: SLF001
         attributes: QuerySet[Attribute] = config_cls.get_attributes(
             instance=self.instance,
@@ -176,18 +171,18 @@ class Entity:
         return attributes.order_by("display_order").select_related("enum_group")
 
     def _hasattr(self, attribute_slug):
-        """
-        Since we override __getattr__ with a backdown to the database, this
-        exists as a way of checking whether a user has set a real attribute on
-        ourselves, without going to the db if not.
+        """Check whether a user has set a real attribute on this helper.
+
+        Since we override ``__getattr__`` with a fallback to the database, this checks
+        without going to the database.
         """
         return attribute_slug in self.__dict__
 
     def _getattr(self, attribute_slug):
-        """
-        Since we override __getattr__ with a backdown to the database, this
-        exists as a way of getting the value a user set for one of our
-        attributes, without going to the db to check.
+        """Get the value a user set for one of our attributes.
+
+        Since we override ``__getattr__`` with a fallback to the database, this reads
+        it without going to the database.
         """
         return self.__dict__[attribute_slug]
 
@@ -225,10 +220,9 @@ class Entity:
         self._evict_values()
 
     def validate_attributes(self):
-        """
-        Called before :meth:`save`, first validate all the entity values to
-        make sure they can be created / saved cleanly.
-        Raises ``ValidationError`` if they can't be.
+        """Validate all the entity's values so they can be saved cleanly.
+
+        Called before :meth:`save`. Raises ``ValidationError`` if they can't be.
         """
         values_dict = self.get_values_dict()
 
@@ -259,6 +253,7 @@ class Entity:
             raise IllegalAssignmentException(message)
 
     def get_values_dict(self):
+        """Return the entity's values by attribute slug."""
         return {
             eav_value.attribute.slug: eav_value.value
             for eav_value in self._values().values()
@@ -308,15 +303,16 @@ class Entity:
         return {name: self.__dict__[name] for name in self.get_object_attributes()}
 
     def get_object_attributes(self):
-        """
-        Returns entity instance attributes, except for
-        ``instance`` and ``ct`` which are used internally.
+        """Return the names of the attributes assigned to this entity instance.
+
+        Names used internally are excluded.
         """
         return set(copy(self.__dict__).keys()) - _INTERNAL_NAMES
 
     def __iter__(self):
-        """
-        Iterate over set eav values. This would allow you to do::
+        """Iterate over set EAV values.
+
+        This would allow you to do::
 
             for i in m.eav: print(i)
         """
@@ -324,7 +320,10 @@ class Entity:
 
 
 class EAVModelMeta(ModelBase):
+    """Metaclass that registers each model class with eav when it is created."""
+
     def __new__(cls, name, bases, namespace, **kwds):
+        """Create the model class and register it with eav."""
         result = super().__new__(cls, name, bases, dict(namespace))
         register(result)
         return result
