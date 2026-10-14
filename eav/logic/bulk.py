@@ -19,9 +19,6 @@ if TYPE_CHECKING:
 
     from django.db.models import Field, Model
 
-#: How many entities are written together, bounding memory for large inputs.
-DEFAULT_CHUNK_SIZE: Final = 1000
-
 _NO_PRIMARY_KEYS: Final = "Primary keys are needed to store EAV values; use UUID keys."
 
 #: The :class:`Value` columns that hold each datatype.
@@ -174,7 +171,8 @@ class BulkValueWriter:
 
     def __init__(self, model_cls: type[Model], chunk_size: int | None = None) -> None:
         """Prepare to write values for instances of *model_cls*."""
-        self.chunk_size = chunk_size or DEFAULT_CHUNK_SIZE
+        config_cls = getattr(model_cls, "_eav_config_cls")  # noqa: B009
+        self.chunk_size = chunk_size or config_cls.bulk_batch_size
         self._schema = SharedSchema(model_cls)
         self._builder = ValueBuilder(model_cls)
 

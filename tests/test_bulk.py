@@ -248,3 +248,28 @@ def test_bulk_update_without_eav_fields_is_plain_bulk_update() -> None:
 
     assert Doctor.objects.bulk_update(doctors, ["name"]) == 1
     assert Doctor.objects.get().name == "b"
+
+
+def test_batch_size_comes_from_the_config(
+    monkeypatch: pytest.MonkeyPatch,
+    django_assert_num_queries,
+) -> None:
+    monkeypatch.setattr(Doctor._eav_config_cls, "bulk_batch_size", 10)
+    ContentType.objects.get_for_model(Doctor)
+
+    # The savepoint and its release, the attributes, then three chunks of 10, 10
+    # and 5 doctors, each with the doctors and two upserts.
+    with django_assert_num_queries(2 + 1 + 3 * 3):
+        Doctor.objects.bulk_create(_doctors(25))
+
+
+def test_batch_size_argument_overrides_the_config(
+    monkeypatch: pytest.MonkeyPatch,
+    django_assert_num_queries,
+) -> None:
+    monkeypatch.setattr(Doctor._eav_config_cls, "bulk_batch_size", 10)
+    ContentType.objects.get_for_model(Doctor)
+
+    # One chunk: the doctors and two upserts, plus the savepoint pair and attributes.
+    with django_assert_num_queries(2 + 1 + 3):
+        Doctor.objects.bulk_create(_doctors(25), batch_size=100)
