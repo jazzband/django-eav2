@@ -52,7 +52,7 @@ class Attributes(TestCase):
         self.assertEqual(Patient._eav_config_cls.get_attributes().count(), 4)
         self.assertEqual(Encounter._eav_config_cls.get_attributes().count(), 1)
 
-    def test_duplicate_attributs(self):
+    def test_duplicate_attributes(self):
         """
         Ensure that no two Attributes with the same slug can exist.
         """
@@ -87,7 +87,7 @@ class Attributes(TestCase):
         assert isinstance(repr(v1), str)
         assert isinstance(str(v1), str)
 
-    def test_illegal_assignemnt(self):
+    def test_illegal_assignment(self):
         class EncounterEavConfig(EavConfig):
             @classmethod
             def get_attributes(cls, instance=None):

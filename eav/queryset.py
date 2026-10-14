@@ -235,7 +235,7 @@ def expand_q_filters(q, root_cls):
 def expand_eav_filter(model_cls, key, value):
     """
     Accepts a model class and a key, value.
-    Recurisively replaces any eav filter with a subquery.
+    Recursively replaces any eav filter with a subquery.
 
     For example::
 

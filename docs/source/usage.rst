@@ -51,7 +51,7 @@ Under the hood, registration does a couple of things:
 
 3. Binds your model's *pre_save* and *post_save* signals to
    :meth:`~eav.models.Entity.pre_save_handler` and
-   :meth:`~eav.models.Entity.post_save_hander`, respectively.
+   :meth:`~eav.models.Entity.post_save_handler`, respectively.
    Those methods are responsible for validation and storage
    of attribute values.
 

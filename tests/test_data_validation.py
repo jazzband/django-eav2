@@ -146,12 +146,12 @@ class DataValidation(TestCase):
     def test_enum_validation(self):
         yes = EnumValue.objects.create(value="yes")
         no = EnumValue.objects.create(value="no")
-        unkown = EnumValue.objects.create(value="unkown")
+        unknown = EnumValue.objects.create(value="unknown")
         green = EnumValue.objects.create(value="green")
         ynu = EnumGroup.objects.create(name="Yes / No / Unknown")
         ynu.values.add(yes)
         ynu.values.add(no)
-        ynu.values.add(unkown)
+        ynu.values.add(unknown)
         Attribute.objects.create(
             name="Fever",
             datatype=Attribute.TYPE_ENUM,
@@ -176,22 +176,22 @@ class DataValidation(TestCase):
         self.assertRaises(ValidationError, a.save)
         yes = EnumValue.objects.create(value="yes")
         no = EnumValue.objects.create(value="no")
-        unkown = EnumValue.objects.create(value="unkown")
+        unknown = EnumValue.objects.create(value="unknown")
         ynu = EnumGroup.objects.create(name="Yes / No / Unknown")
         ynu.values.add(yes)
         ynu.values.add(no)
-        ynu.values.add(unkown)
+        ynu.values.add(unknown)
         a = Attribute(name="Age Bracket", datatype=Attribute.TYPE_ENUM, enum_group=ynu)
         a.save()
 
     def test_enum_group_on_other_datatype(self):
         yes = EnumValue.objects.create(value="yes")
         no = EnumValue.objects.create(value="no")
-        unkown = EnumValue.objects.create(value="unkown")
+        unknown = EnumValue.objects.create(value="unknown")
         ynu = EnumGroup.objects.create(name="Yes / No / Unknown")
         ynu.values.add(yes)
         ynu.values.add(no)
-        ynu.values.add(unkown)
+        ynu.values.add(unknown)
         a = Attribute(name="color", datatype=Attribute.TYPE_TEXT, enum_group=ynu)
         self.assertRaises(ValidationError, a.save)
 
