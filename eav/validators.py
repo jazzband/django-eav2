@@ -10,7 +10,7 @@ These validators are called by the
 :class:`~eav.models.Attribute` model.
 """
 
-import datetime
+import datetime as dt
 import json
 
 from django.core.exceptions import ValidationError
@@ -51,9 +51,9 @@ def validate_date(value):
     Raises ``ValidationError`` unless *value* is an instance of ``datetime``
     or ``date``
     """
-    if not isinstance(value, datetime.datetime) and not isinstance(
+    if not isinstance(value, dt.datetime) and not isinstance(
         value,
-        datetime.date,
+        dt.date,
     ):
         raise ValidationError(_("Must be a date or datetime"))
 
