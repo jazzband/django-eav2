@@ -12,6 +12,7 @@ Q-expressions need to be rewritten for two reasons:
 
        city_values = Value.objects.filter(value__text__startswith='New')
        Supplier.objects.filter(eav_values__in=city_values)
+
    For details see: :func:`eav_filter`.
 
 2. To ensure that Q-expression tree is compiled to valid SQL.
