@@ -27,6 +27,7 @@ jobs:
       - run: uv sync
       - run: uv run --no-sync poe lint
       - run: uv run --no-sync poe migrations
+      - run: uv run --no-sync poe smoke
 
   test-matrix:
     runs-on: ubuntu-latest

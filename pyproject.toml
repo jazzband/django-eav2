@@ -308,10 +308,26 @@ lint = [
 ]
 unit = "pytest"
 migrations = "python manage.py makemigrations --check --dry-run"
+# Modules that settings, models and migrations import must work before
+# ``django.setup()``; each is imported in a fresh interpreter.
+smoke = [
+  { cmd = "python -c 'import eav'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.decorators'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.exceptions'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.fields'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.forms'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.settings'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.validators'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.widgets'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.logic.managers'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.logic.slug'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.logic.entity_pk'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+  { cmd = "python -c 'import eav.logic.object_pk'", env = { DJANGO_SETTINGS_MODULE = "test_project.settings" } },
+]
 package = [
   { cmd = "uv lock --check" },
   { cmd = "uv build" },
   { cmd = "uv pip check" },
 ]
 docs = "sphinx-build -W -b html docs/source docs/build"
-test = [ "lint", "migrations", "unit", "package" ]
+test = [ "lint", "migrations", "smoke", "unit", "package" ]
