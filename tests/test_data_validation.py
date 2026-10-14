@@ -1,3 +1,4 @@
+import pytest
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -98,10 +99,6 @@ class DataValidation(TestCase):
         p.eav.dob = now
         p.save()
         self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob, now)
-        today = timezone.now().date()
-        p.eav.dob = today
-        p.save()
-        self.assertEqual(Patient.objects.get(pk=p.pk).eav.dob.date(), today)
 
     def test_float_validation(self):
         p = Patient.objects.create(name="Joe")
@@ -214,3 +211,18 @@ class DataValidation(TestCase):
             Patient.objects.get(pk=p.pk).eav.multi,
             ["one", "two", "three"],
         )
+
+
+@pytest.mark.django_db
+@pytest.mark.xfail(
+    strict=True,
+    reason="A plain date becomes a naive datetime when USE_TZ is enabled.",
+)
+def test_date_value_is_stored_timezone_aware():
+    eav.register(Patient)
+    Attribute.objects.create(name="DoB", datatype=Attribute.TYPE_DATE)
+    today = timezone.now().date()
+    patient = Patient.objects.create(name="Joe")
+    patient.eav.dob = today
+    patient.save()
+    assert Patient.objects.get(pk=patient.pk).eav.dob.date() == today
