@@ -69,6 +69,7 @@ docs = [
 lint = [
   "mypy>=1.6,<3",
   "ruff>=0.6.3,<0.18",
+  "wemake-python-styleguide>=1.8,<2",
 ]
 mysql = [ "mysqlclient>=2.2,<3" ]
 postgres = [ "psycopg[binary]>=3.2,<4" ]
@@ -199,6 +200,7 @@ format = [
 lint = [
   { cmd = "ruff check" },
   { cmd = "ruff format --check --diff" },
+  { cmd = "flake8 ." },
 ]
 unit = "pytest"
 migrations = "python manage.py makemigrations --check --dry-run"
