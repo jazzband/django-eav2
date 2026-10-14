@@ -323,22 +323,23 @@ class Queries(TestCase):
             "Cyrill",
         ]
 
-        # Ordering by EAV attributes with different data types
+        # Ordering by EAV attributes with different data types; enum choices
+        # sort by their text ("no" before "yes")
         assert self._order([f"{eav_attr}__fever", f"{eav_attr}__age"]) == [
-            "Eugene",
-            "Cyrill",
             "Anne",
             "Daniel",
             "Bob",
+            "Eugene",
+            "Cyrill",
         ]
 
         # Combining EAV and regular model field ordering
         assert self._order([f"{eav_attr}__fever", "-name"]) == [
-            "Eugene",
-            "Cyrill",
             "Daniel",
             "Bob",
             "Anne",
+            "Eugene",
+            "Cyrill",
         ]
 
         # Mixing regular and EAV field ordering

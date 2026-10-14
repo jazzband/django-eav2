@@ -55,4 +55,10 @@ def order_subquery(model_cls: type[Model], slug: str) -> Subquery:
         entity_ct=ContentType.objects.get_for_model(model_cls),
         **{get_entity_pk_type(model_cls): OuterRef("pk")},
     )
-    return Subquery(entity_values.values(f"value_{attribute.datatype}")[:1])
+    # Enum choices sort by their text, which is the same for every key type.
+    column = (
+        "value_enum__value"
+        if attribute.datatype == Attribute.TYPE_ENUM
+        else f"value_{attribute.datatype}"
+    )
+    return Subquery(entity_values.values(column)[:1])
