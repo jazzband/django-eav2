@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 
 import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
+from eav.registry import EavConfig
 from test_project.models import Patient
 
 pytestmark = pytest.mark.django_db
@@ -208,3 +209,64 @@ def test_the_next_read_after_a_save_reloads_the_values(
     # Saving evicts the values; the attributes stay loaded.
     with django_assert_num_queries(1):
         assert patient.eav.city == "Rome"
+
+
+def test_list_shares_one_attribute_lookup(django_assert_num_queries) -> None:
+    for number in range(10):
+        Patient.objects.create(name=f"p{number}", eav__age=number)
+
+    # The patients, one lookup of the attributes, then each patient's values.
+    with django_assert_num_queries(1 + 1 + 10):
+        ages = [patient.eav.age for patient in Patient.objects.all()]
+
+    assert sorted(a for a in ages if a is not None) == list(range(10))
+
+
+def test_iterator_shares_one_attribute_lookup(django_assert_num_queries) -> None:
+    for number in range(5):
+        Patient.objects.create(name=f"p{number}", eav__age=number)
+
+    with django_assert_num_queries(1 + 1 + 5):
+        assert len([patient.eav.age for patient in Patient.objects.iterator()]) == 5
+
+
+def test_values_querysets_are_unaffected() -> None:
+    Patient.objects.create(name="a", eav__age=1)
+
+    assert list(Patient.objects.values("name")) == [{"name": "a"}]
+    assert list(Patient.objects.values_list("name", flat=True)) == ["a"]
+
+
+def test_config_shares_attributes_unless_get_attributes_is_overridden() -> None:
+    class Overriding(EavConfig):
+        @classmethod
+        def get_attributes(cls, instance=None):
+            return Attribute.objects.none()
+
+    class Inheriting(EavConfig):
+        manager_attr = "objects"
+
+    class InheritingOverride(Overriding):
+        pass
+
+    assert EavConfig.shares_attributes()
+    assert Inheriting.shares_attributes()
+    assert not Overriding.shares_attributes()
+    assert not InheritingOverride.shares_attributes()
+
+
+def test_entities_of_a_custom_config_do_not_share_attributes() -> None:
+    class Scoped(EavConfig):
+        @classmethod
+        def get_attributes(cls, instance=None):
+            return Attribute.objects.filter(slug="age")
+
+    eav.unregister(Patient)
+    eav.register(Patient, Scoped)
+    for name in ("a", "b"):
+        Patient.objects.create(name=name, eav__age=1)
+
+    first, second = Patient.objects.order_by("name")
+
+    assert first.eav.age == second.eav.age == 1
+    assert first.eav._schema is not second.eav._schema
