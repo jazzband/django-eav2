@@ -171,7 +171,10 @@ class Entity:
             f"{get_entity_pk_type(self.instance)}": self.instance.pk,
         }
 
-        return Value.objects.filter(**entity_filter).select_related()
+        return Value.objects.filter(**entity_filter).select_related(
+            "attribute",
+            "value_enum",
+        )
 
     def get_all_attribute_slugs(self):
         """Returns a list of slugs for all attributes available to this entity."""
