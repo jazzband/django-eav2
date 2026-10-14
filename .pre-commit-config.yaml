@@ -28,6 +28,13 @@ repos:
   hooks:
     - id: pyproject-fmt
 
+- repo: https://github.com/sphinx-contrib/sphinx-lint
+  rev: c883505f64b59c3c5c9375191e4ad9f98e727ccd  # frozen: v1.0.2
+  hooks:
+    - id: sphinx-lint
+      args: ["--enable=all", "--disable=line-too-long"]
+      files: ^docs/
+
 - repo: https://github.com/crate-ci/typos
   rev: 9023c1f779400877cafdd98052113fc777e2cfdc  # frozen: v1.51.1
   hooks:
