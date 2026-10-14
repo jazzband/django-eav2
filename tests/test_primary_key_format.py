@@ -30,3 +30,8 @@ def test_get_default_primary_key(settings) -> None:
     assert isinstance(primary_field, models.BigAutoField)
     assert primary_field.primary_key
     assert not primary_field.editable
+
+
+def test_unset_primary_key_setting_defaults_to_big_auto_field(settings) -> None:
+    del settings.EAV2_PRIMARY_KEY_FIELD
+    assert isinstance(get_pk_format(), models.BigAutoField)

@@ -36,7 +36,7 @@ def get_pk_format() -> models.Field:
         create the primary key field instance.
     """
     field_factory = _FIELD_MAPPING.get(
-        settings.EAV2_PRIMARY_KEY_FIELD,
+        getattr(settings, "EAV2_PRIMARY_KEY_FIELD", ""),
         partial(models.BigAutoField, primary_key=True, editable=False),
     )
 
