@@ -18,95 +18,96 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-def validate_text(value):
+def validate_text(candidate):
     """
-    Raises ``ValidationError`` unless *value* type is ``str`` or ``unicode``
+    Raises ``ValidationError`` unless *candidate* type is ``str`` or ``unicode``
     """
-    if not isinstance(value, str):
+    if not isinstance(candidate, str):
         raise ValidationError(_("Must be str or unicode"))
 
 
-def validate_float(value):
+def validate_float(candidate):
     """
-    Raises ``ValidationError`` unless *value* can be cast as a ``float``
+    Raises ``ValidationError`` unless *candidate* can be cast as a ``float``
     """
     try:
-        float(value)
-    except ValueError as err:
+        float(candidate)
+    except (TypeError, ValueError) as err:
         raise ValidationError(_("Must be a float")) from err
 
 
-def validate_int(value):
+def validate_int(candidate):
     """
-    Raises ``ValidationError`` unless *value* can be cast as an ``int``
+    Raises ``ValidationError`` unless *candidate* can be cast as an ``int``
     """
     try:
-        int(value)
-    except ValueError as err:
+        int(candidate)
+    except (TypeError, ValueError) as err:
         raise ValidationError(_("Must be an integer")) from err
 
 
-def validate_date(value):
+def validate_date(candidate):
     """
-    Raises ``ValidationError`` unless *value* is an instance of ``datetime``
+    Raises ``ValidationError`` unless *candidate* is an instance of ``datetime``
     or ``date``
     """
-    if not isinstance(value, dt.datetime) and not isinstance(
-        value,
+    if not isinstance(candidate, dt.datetime) and not isinstance(
+        candidate,
         dt.date,
     ):
         raise ValidationError(_("Must be a date or datetime"))
 
 
-def validate_bool(value):
+def validate_bool(candidate):
     """
-    Raises ``ValidationError`` unless *value* type is ``bool``
+    Raises ``ValidationError`` unless *candidate* type is ``bool``
     """
-    if not isinstance(value, bool):
+    if not isinstance(candidate, bool):
         raise ValidationError(_("Must be a boolean"))
 
 
-def validate_object(value):
+def validate_object(candidate):
     """
-    Raises ``ValidationError`` unless *value* is a saved
+    Raises ``ValidationError`` unless *candidate* is a saved
     django model instance.
     """
-    if not isinstance(value, models.Model):
+    if not isinstance(candidate, models.Model):
         raise ValidationError(_("Must be a django model object instance"))
 
-    if not value.pk:
+    if not candidate.pk:
         raise ValidationError(_("Model has not been saved yet"))
 
 
-def validate_enum(value):
+def validate_enum(candidate):
     """
-    Raises ``ValidationError`` unless *value* is a saved
+    Raises ``ValidationError`` unless *candidate* is a saved
     :class:`~eav.models.EnumValue` model instance.
     """
     from eav.models import EnumValue  # noqa: PLC0415
 
-    if isinstance(value, EnumValue) and not value.pk:
+    if isinstance(candidate, EnumValue) and not candidate.pk:
         raise ValidationError(_("EnumValue has not been saved yet"))
 
 
-def validate_json(value):
+def validate_json(candidate):
     """
-    Raises ``ValidationError`` unless *value* can be cast as an ``json object`` (a dict)
+    Raises ``ValidationError`` unless *candidate* can be cast as an ``json object``
+    (a dict)
     """
     try:
-        if isinstance(value, str):
-            value = json.loads(value)
-        if not isinstance(value, dict):
-            raise ValidationError(_("Must be a JSON Serializable object"))
+        parsed = json.loads(candidate) if isinstance(candidate, str) else candidate
     except ValueError as err:
         raise ValidationError(_("Must be a JSON Serializable object")) from err
 
+    if not isinstance(parsed, dict):
+        raise ValidationError(_("Must be a JSON Serializable object"))
 
-def validate_csv(value):
+
+def validate_csv(candidate):
     """
-    Raises ``ValidationError`` unless *value* is a c-s-v value.
+    Raises ``ValidationError`` unless *candidate* is a c-s-v value.
     """
-    if isinstance(value, str):
-        value = value.split(";")
-    if not isinstance(value, list):
+    if isinstance(candidate, str):
+        candidate = candidate.split(";")
+    if not isinstance(candidate, list):
         raise ValidationError(_("Must be Comma-Separated-Value."))
