@@ -1,0 +1,41 @@
+name: Bug report
+description: Report something that does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How can we reproduce it?
+      description: Models, attributes and code that show the problem, as small as you can make it.
+      render: python
+  - type: input
+    id: eav-version
+    attributes:
+      label: django-eav2 version
+    validations:
+      required: true
+  - type: input
+    id: django-version
+    attributes:
+      label: Django and Python versions
+      placeholder: Django 5.2, Python 3.13
+    validations:
+      required: true
+  - type: dropdown
+    id: database
+    attributes:
+      label: Database
+      options:
+        - PostgreSQL
+        - MySQL or MariaDB
+        - SQLite
+        - Other
+    validations:
+      required: true

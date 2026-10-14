@@ -132,7 +132,7 @@ Creating Attributes
 Once your models are registered, you can starting creating attributes for
 them. Two most important attributes of ``Attribute`` class are *slug* and
 *datatype*. *slug* is a unique global identifier (there must be at most
-one ``Attribute`` instance with given `slug`) and must be a valid Python
+one ``Attribute`` instance with given ``slug``) and must be a valid Python
 variable name, as it's used to access values for that attribute from
 :class:`~eav.models.Entity` helper:
 
@@ -190,19 +190,19 @@ The attribute type *json* allows to store them in JSON format, which internally 
     Attribute.objects.create(name='name_intl', datatype=Attribute.TYPE_JSON)
 
     prod = Product.objects.create(sku='PRD00001', eav__name_intl={
-	"es": "Escoba Verde",
-	"en": "Green Broom",
-	"it": "Scopa Verde"
+    "es": "Escoba Verde",
+    "en": "Green Broom",
+    "it": "Scopa Verde"
     })
 
     prod2 = Product.objects.create(sku='PRD00002', eav__name_intl={
-	"es": "Escoba Roja",
-	"en": "Red Broom"
+    "es": "Escoba Roja",
+    "en": "Red Broom"
     })
 
     prod3 = Product.objects.create(sku='PRD00003', eav__name_intl={
-	"es": "Escoba Azul",
-	"it": "Scopa Blu"
+    "es": "Escoba Azul",
+    "it": "Scopa Blu"
     })
 
     prod.eav.name_intl
