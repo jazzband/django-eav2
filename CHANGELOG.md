@@ -27,6 +27,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+- The Indonesian translation is compiled and ships with the package; its `.mo` file was missing. A test now fails if any compiled catalog differs from its `.po` source.
+
 - `validate_enum` and `validate_object` use Django's `_state.adding` to detect unsaved instances, because a model with a UUID default key always has a primary key, so an unsaved `EnumValue` was accepted and then failed with an integrity error.
 
 - `Value.entity_id` and `Value.generic_value_id` are now `BigIntegerField`, so entities with primary keys above 2,147,483,647 can store values (migration `0014`). On PostgreSQL and MySQL this rewrites the `eav_value` table, which takes a lock for as long as the rewrite runs on a large table, so plan the upgrade accordingly.
@@ -43,6 +45,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ### Internal
 
 - Moved from Poetry to uv, hatchling and poethepoet.
+- Docstrings are required in `eav/`, module layers are enforced with `import-linter`, and the docs are linted with `sphinx-lint`.
 - Added `py.typed`, wemake-python-styleguide, mypy and pyright with baselines, Postgres and MySQL CI jobs, and Python 3.14 and Django 6.1 to the test matrix.
 
 ## 1.8.2 (2026-05-22)
