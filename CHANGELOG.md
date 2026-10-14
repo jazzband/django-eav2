@@ -11,6 +11,11 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - `prefetch_related("eav_values__attribute")` is now used when reading attributes, and entities from one queryset (including `.iterator()`) share a single attribute lookup. Reading one attribute across 10 prefetched entities takes 3 queries instead of 23.
 - New `Attribute.store_value`, `Value.save_checked`, `Entity.clear_cache` and `EavConfig.shares_attributes`; `Attribute.save_value` keeps its behaviour.
 
+### Features
+
+- `bulk_create()` and `bulk_update()` on EAV managers store EAV values in about one query per 1000 rows instead of one or more per entity: `Patient.objects.bulk_create(patients)` writes the values assigned with `patient.eav.<slug> = ...`, and `bulk_update(patients, ["name", "eav__age"])` updates them. Instances are validated first, written in chunks inside one transaction, and no signals are sent. Creating entities needs primary keys, so integer keys are not supported on MySQL.
+- `Attribute.enum_choices`, `Attribute.validate_assignment`, `Entity.assigned_values` and `Value.clean_own_fields`. Saving an enum attribute no longer queries the choices more than once.
+
 ### Bug Fixes
 
 - `order_by("eav__<slug>")` no longer fails on UUID-keyed entities or empty querysets, no longer mixes in values of other models that share a primary key, and now accepts `-eav__<slug>` for descending order. Ordering by an `object` attribute raises `NotSupportedError` (it was a `FieldError`). Ordering by a related field such as `order_by("example__name")` now sorts by that field; it used to sort by the foreign key column only.

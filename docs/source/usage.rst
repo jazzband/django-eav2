@@ -314,6 +314,49 @@ its values. With the prefetch it is 3 queries, however long the list is.
 The shared attribute lookup is only used when the model uses the default
 ``EavConfig.get_attributes``.
 
+Bulk Operations
+---------------
+
+``bulk_create()`` and ``bulk_update()`` on an EAV model's manager store EAV
+values too, in about one query per 1000 rows instead of one or more per
+entity.
+Assign values on each instance before calling them, as you would for a single
+save::
+
+    patients = []
+    for name, age in rows:
+        patient = Patient(name=name)
+        patient.eav.age = age
+        patient.eav.city = "London"
+        patients.append(patient)
+
+    Patient.objects.bulk_create(patients)
+
+``bulk_create()`` validates every instance first (required attributes, value
+types, enum choices, unknown attributes), and raises before anything is
+written. The instances, then their values, are written inside one transaction,
+in chunks of ``batch_size`` instances (1000 by default), so memory stays
+bounded for large inputs.
+
+To update, list EAV attributes as ``eav__<slug>`` next to ordinary fields::
+
+    for patient in patients:
+        patient.name = patient.name.title()
+        patient.eav.age += 1
+
+    Patient.objects.bulk_update(patients, ["name", "eav__age"])
+
+Only attributes with a value assigned on the instance are written, and a value
+of ``None`` or ``""`` deletes the stored value.
+
+As with Django's bulk operations, no signals are sent: ``Value`` signal
+handlers and history tracking do not run for values written this way, and
+``save()`` on a single entity is unchanged. Created entities need primary keys
+to link their values to: UUID primary keys always work, and so do integer keys
+on PostgreSQL, SQLite and MariaDB. MySQL does not return auto-increment keys,
+so use UUID keys there. ``ignore_conflicts`` and ``update_conflicts`` cannot be
+combined with EAV values.
+
 Admin Integration
 -----------------
 
