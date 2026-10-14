@@ -1,9 +1,8 @@
-"""Helpers used by :class:`~eav.queryset.EavQuerySet` to order by EAV attributes."""
+"""Helpers used by :class:`~eav.queryset.EavQuerySet` for attribute lookups."""
 
 from __future__ import annotations
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Model, OuterRef, Subquery
 from django.db.utils import NotSupportedError
 
@@ -34,12 +33,19 @@ def eav_order_slug(field: object, eav_attr: str) -> str | None:
     return term[1]
 
 
+def get_attribute(slug: str) -> Attribute:
+    """Return the attribute with *slug*, or raise ``Attribute.DoesNotExist``."""
+    try:
+        attribute: Attribute = Attribute.objects.get(slug=slug)
+    except Attribute.DoesNotExist as err:
+        raise Attribute.DoesNotExist(f'Cannot find EAV attribute "{slug}"') from err
+
+    return attribute
+
+
 def order_subquery(model_cls: type[Model], slug: str) -> Subquery:
     """Build a subquery selecting an entity's value for the attribute *slug*."""
-    try:
-        attribute = Attribute.objects.get(slug=slug)
-    except ObjectDoesNotExist as err:
-        raise ObjectDoesNotExist(f'Cannot find EAV attribute "{slug}"') from err
+    attribute = get_attribute(slug)
 
     if attribute.datatype == Attribute.TYPE_OBJECT:
         raise NotSupportedError("EAV does not support ordering by object attributes")
