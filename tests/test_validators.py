@@ -4,6 +4,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from eav import validators
+from eav.models import EnumValue
 
 
 @pytest.mark.parametrize(
@@ -40,3 +41,9 @@ def test_validators_accept_valid_candidates(validator, candidate) -> None:
 def test_json_validator_rejects_non_objects(candidate) -> None:
     with pytest.raises(ValidationError):
         validators.validate_json(candidate)
+
+
+def test_unsaved_enum_values_are_rejected_whatever_the_key_type() -> None:
+    # A UUID key is assigned on creation, so the key cannot tell if it is saved.
+    with pytest.raises(ValidationError, match="not been saved"):
+        validators.validate_enum(EnumValue(value="unsaved"))
