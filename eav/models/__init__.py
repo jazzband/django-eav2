@@ -1,9 +1,11 @@
-"""
-This module defines the four concrete, non-abstract models:
-    * :class:`Value`
-    * :class:`Attribute`
-    * :class:`EnumValue`
-    * :class:`EnumGroup`.
+"""The four concrete, non-abstract models, and their helpers.
+
+This module defines:
+
+* :class:`Value`
+* :class:`Attribute`
+* :class:`EnumValue`
+* :class:`EnumGroup`.
 
 Along with the :class:`Entity` helper class and :class:`EAVModelMeta`
 optional metaclass for each eav model class.

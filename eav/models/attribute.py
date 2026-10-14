@@ -39,8 +39,8 @@ if TYPE_CHECKING:
 
 
 class Attribute(models.Model):
-    """
-    Putting the **A** in *EAV*. This holds the attributes, or concepts.
+    """Putting the **A** in *EAV*: the attributes, or concepts.
+
     Examples of possible *Attributes*: color, height, weight, number of
     children, number of patients, has fever?, etc...
 
@@ -211,10 +211,7 @@ class Attribute(models.Model):
         return f"{self.name} ({self.get_datatype_display()})"
 
     def save(self, *args, **kwargs):
-        """
-        Saves the Attribute and auto-generates a slug field
-        if one wasn't provided.
-        """
+        """Save the Attribute, generating a slug if one wasn't provided."""
         if not self.slug:
             self.slug = generate_slug(self.name)
 
@@ -228,8 +225,7 @@ class Attribute(models.Model):
         The natural key for an Attribute is defined by its `name` and `slug`. This
         method returns a tuple containing these two attributes of the instance.
 
-        Returns
-        -------
+        Returns:
             tuple: A tuple containing the name and slug of the Attribute instance.
         """
         return (
@@ -239,12 +235,13 @@ class Attribute(models.Model):
 
     @property
     def help_text(self):
+        """The attribute's description, used as help text in forms."""
         return self.description
 
     def get_validators(self):
-        """
-        Returns the appropriate validator function from :mod:`~eav.validators`
-        as a list (of length one) for the datatype.
+        """Return the validators for the datatype, as a list of length one.
+
+        The validator comes from :mod:`~eav.validators`.
 
         .. note::
            The reason it returns it as a list, is eventually we may want this
@@ -266,10 +263,7 @@ class Attribute(models.Model):
         return [datatype_validators[self.datatype]]
 
     def validate_value(self, value):
-        """
-        Check *value* against the validators returned by
-        :meth:`get_validators` for this attribute.
-        """
+        """Check *value* against the validators from :meth:`get_validators`."""
         for validator in self.get_validators():
             validator(value)
 
@@ -314,10 +308,10 @@ class Attribute(models.Model):
         return {choice.value: choice for choice in self.enum_group.values.all()}
 
     def clean(self):
-        """
-        Validates the attribute.  Will raise ``ValidationError`` if the
-        attribute's datatype is *TYPE_ENUM* and enum_group is not set, or if
-        the attribute is not *TYPE_ENUM* and the enum group is set.
+        """Validate the attribute.
+
+        Raises ``ValidationError`` if the datatype is *TYPE_ENUM* and no enum group is
+        set, or if the datatype is not *TYPE_ENUM* and an enum group is set.
         """
         if self.datatype == self.TYPE_ENUM and not self.enum_group:
             raise ValidationError(
@@ -351,8 +345,8 @@ class Attribute(models.Model):
             )
 
     def get_choices(self):
-        """
-        Returns a query set of :class:`EnumValue` objects for this attribute.
+        """Return a query set of the :class:`EnumValue` objects of this attribute.
+
         Returns None if the datatype of this attribute is not *TYPE_ENUM*.
         """
         return (
@@ -362,10 +356,9 @@ class Attribute(models.Model):
         )
 
     def save_value(self, entity, value):
-        """
-        Called with *entity*, any Django object registered with eav, and
-        *value*, the :class:`Value` this attribute for *entity* should
-        be set to.
+        """Set the :class:`Value` of this attribute for *entity* to *value*.
+
+        *entity* is any Django object registered with eav.
 
         If a :class:`Value` object for this *entity* and attribute doesn't
         exist, one will be created.
@@ -383,11 +376,11 @@ class Attribute(models.Model):
         value: object,
         existing: Value | None,
     ) -> Value | None:
-        """
-        Store *value* for *entity*, given the *existing* :class:`Value` object
-        (or ``None``) the caller has already loaded. This is what
-        :meth:`save_value` does once it has looked the object up, and what
-        ``Entity.save`` calls with values it already holds.
+        """Store *value* for *entity*, given its *existing* :class:`Value`, if any.
+
+        The caller has already loaded *existing*. This is what :meth:`save_value` does
+        once it has looked the object up, and what ``Entity.save`` calls with values it
+        already holds.
 
         Returns the stored :class:`Value`, or ``None`` when nothing is stored.
         """

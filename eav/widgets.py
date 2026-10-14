@@ -6,10 +6,12 @@ EMPTY_VALUES = (*validators.EMPTY_VALUES, "[]")
 
 
 class CSVWidget(Textarea):
+    """A text area for a list of values joined by a separator."""
+
     is_hidden = False
 
     def prep_value(self, value):
-        """Prepare value before effectively render widget"""
+        """Prepare value before effectively render widget."""
         if value in EMPTY_VALUES:
             return ""
         if isinstance(value, str):
@@ -19,6 +21,7 @@ class CSVWidget(Textarea):
         raise ValidationError("Invalid format.")
 
     def render(self, name, value, **kwargs):
+        """Render the widget with the list as separated text."""
         value = self.prep_value(value)
         return super().render(name, value, **kwargs)
 

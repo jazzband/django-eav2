@@ -1,7 +1,7 @@
-"""
-This module contains custom :class:`EavQuerySet` class used for overriding
-relational operators and pure functions for rewriting Q-expressions.
-Q-expressions need to be rewritten for two reasons:
+"""A custom :class:`EavQuerySet` that rewrites filters on EAV attributes.
+
+It overrides relational operators and has pure functions for rewriting
+Q-expressions. Q-expressions need to be rewritten for two reasons:
 
 1. In order to hide implementation from the user and provide easy to use
    syntax sugar, i.e.::
@@ -69,9 +69,7 @@ def is_eav_and_leaf(expr, gr_name):
 
 
 def rewrite_q_expr(model_cls, expr):
-    """
-        Rewrites Q-expression to safe form, in order to ensure that
-        generated SQL is valid.
+    """Rewrite a Q-expression to a safe form, so the generated SQL is valid.
 
     IGNORE:
         Suppose we have the following Q-expression:
@@ -90,7 +88,7 @@ def rewrite_q_expr(model_cls, expr):
         generated for the AND-expression (1) will always fail, i.e.
         single row in a eav_values table cannot be both in two disjoint sets at
         the same time (and the whole point of using AND, usually, is two have
-        two different sets). Therefore, we must paritially rewrite the
+        two different sets). Therefore, we must partially rewrite the
         expression so that the generated SQL is valid.
 
     IGNORE:
@@ -105,13 +103,13 @@ def rewrite_q_expr(model_cls, expr):
         explicit ``pk__in`` filter, where pks are taken from evaluated
         Q-expr branch.
 
-        Args:
-            model_cls (TypeVar): model class used to construct :meth:`QuerySet`
-                from leaf attribute-value expression.
-                expr: (Q | tuple): Q-expression (or attr-val leaf) to be rewritten.
+    Args:
+        model_cls: Model class used to construct a :class:`QuerySet` from a leaf
+            attribute-value expression.
+        expr: Q-expression (or attribute-value leaf) to be rewritten.
 
-        Returns:
-            Union[Q, tuple]
+    Returns:
+        The rewritten Q-expression or leaf.
     """
     # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
     # We are only interested in Qs.
@@ -175,10 +173,10 @@ def rewrite_q_expr(model_cls, expr):
 
 
 def eav_filter(func):
-    """
-    Decorator used to wrap filter and exclude methods. Passes args through
-    :func:`expand_q_filters` and kwargs through :func:`expand_eav_filter`. Returns the
-    called function (filter or exclude).
+    """Decorate ``filter`` and ``exclude`` to rewrite EAV filters.
+
+    Passes args through :func:`expand_q_filters` and kwargs through
+    :func:`expand_eav_filter`. Returns the called function (filter or exclude).
     """
 
     @wraps(func)
@@ -213,10 +211,10 @@ def eav_filter(func):
 
 
 def expand_q_filters(q, root_cls):
-    """
-    Takes a Q object and a model class.
-    Recursively passes each filter / value in the Q object tree leaf nodes
-    through :func:`expand_eav_filter`.
+    """Rewrite the EAV filters of a Q object for the model *root_cls*.
+
+    Recursively passes each filter / value in the Q object tree leaf nodes through
+    :func:`expand_eav_filter`.
     """
     new_children = []
 
@@ -235,9 +233,10 @@ def expand_q_filters(q, root_cls):
 
 
 def expand_eav_filter(model_cls, key, value):
-    """
-    Accepts a model class and a key, value.
-    Recursively replaces any eav filter with a subquery.
+    """Replace an EAV filter of *model_cls* with a subquery.
+
+    Accepts a model class and a key, value, and recursively replaces any eav
+    filter with a subquery.
 
     For example::
 
@@ -289,9 +288,7 @@ class EavModelIterable(ModelIterable):
 
 
 class EavQuerySet(QuerySet):
-    """
-    Overrides relational operators for EAV models.
-    """
+    """Overrides relational operators for EAV models."""
 
     def __init__(self, *args, **kwargs):
         """Evaluate into instances that share one attribute lookup."""
@@ -300,25 +297,25 @@ class EavQuerySet(QuerySet):
 
     @eav_filter
     def filter(self, *args, **kwargs):
-        """
-        Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
-        the ``Manager`` filter method.
+        """Filter after passing the arguments through :func:`eav_filter`.
+
+        The result is passed to the ``Manager`` filter method.
         """
         return super().filter(*args, **kwargs)
 
     @eav_filter
     def exclude(self, *args, **kwargs):
-        """
-        Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
-        the ``Manager`` exclude method.
+        """Exclude after passing the arguments through :func:`eav_filter`.
+
+        The result is passed to the ``Manager`` exclude method.
         """
         return super().exclude(*args, **kwargs)
 
     @eav_filter
     def get(self, *args, **kwargs):
-        """
-        Pass *args* and *kwargs* through :func:`eav_filter`, then pass to
-        the ``Manager`` get method.
+        """Get after passing the arguments through :func:`eav_filter`.
+
+        The result is passed to the ``Manager`` get method.
         """
         return super().get(*args, **kwargs)
 
@@ -409,9 +406,9 @@ class EavQuerySet(QuerySet):
         return updated
 
     def order_by(self, *fields):
-        """
-        Order by EAV attributes (``eav__<slug>``, optionally prefixed with ``-``)
-        as well as regular fields.
+        """Order by EAV attributes and regular fields.
+
+        EAV attributes are named ``eav__<slug>``, optionally prefixed with ``-``.
 
         Each EAV attribute is annotated with a correlated subquery that reads
         the entity's value, so this works for integer and UUID primary keys,

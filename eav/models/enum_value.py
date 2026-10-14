@@ -9,10 +9,10 @@ from eav.logic.slug import SLUGFIELD_MAX_LENGTH
 
 
 class EnumValue(models.Model):
-    """
-    *EnumValue* objects are the value 'choices' to multiple choice *TYPE_ENUM*
-    :class:`Attribute` objects. They have only one field, *value*, a
-    ``CharField`` that must be unique.
+    """A choice of a multiple choice (*TYPE_ENUM*) :class:`Attribute`.
+
+    *EnumValue* objects have only one field, *value*, a ``CharField`` that must be
+    unique.
 
     For example::
 
@@ -67,8 +67,7 @@ class EnumValue(models.Model):
         The natural key for an EnumValue is defined by its `value`. This method returns
         the value of the instance as a single-element tuple.
 
-        Returns
-        -------
+        Returns:
             tuple: A tuple containing the value of the EnumValue instance.
         """
         return (self.value,)

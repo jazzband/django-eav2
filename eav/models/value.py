@@ -256,8 +256,7 @@ class Value(models.Model):
         `entity_id`, and `entity_uuid`. This method returns a tuple containing these
         three elements.
 
-        Returns
-        -------
+        Returns:
             tuple: A tuple containing the natural key of the attribute, entity ID,
                 and entity UUID of the Value instance.
         """

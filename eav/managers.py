@@ -1,6 +1,4 @@
-"""
-This module contains the custom manager used by entities registered with eav.
-"""
+"""This module contains the custom manager used by entities registered with eav."""
 
 from django.db import models
 
@@ -8,16 +6,15 @@ from eav.queryset import EavQuerySet
 
 
 class EntityManager(models.Manager):
-    """
-    Our custom manager, overrides ``models.Manager``.
-    """
+    """Our custom manager, overrides ``models.Manager``."""
 
     _queryset_class = EavQuerySet
 
     def create(self, **kwargs):
-        """
-        Parse eav attributes out of *kwargs*, then try to create and save
-        the object, then assign and save it's eav attributes.
+        """Create and save an object, together with its EAV attributes.
+
+        EAV attributes are parsed out of *kwargs* first, then assigned and saved after
+        the object itself.
         """
         config_cls = getattr(self.model, "_eav_config_cls", None)
 
@@ -44,9 +41,7 @@ class EntityManager(models.Manager):
         return obj
 
     def get_or_create(self, defaults=None, **kwargs):
-        """
-        Reproduces the behavior of get_or_create, eav friendly.
-        """
+        """Reproduces the behavior of get_or_create, eav friendly."""
         try:
             return self.get(**kwargs), False
         except self.model.DoesNotExist:
