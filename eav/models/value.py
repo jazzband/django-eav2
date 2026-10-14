@@ -179,6 +179,25 @@ class Value(models.Model):
         verbose_name = _("Value")
         verbose_name_plural = _("Values")
 
+        indexes: ClassVar[list[models.Index]] = [
+            models.Index(
+                fields=["attribute", "value_int"],
+                name="eav_value_attr_int_idx",
+            ),
+            models.Index(
+                fields=["attribute", "value_float"],
+                name="eav_value_attr_float_idx",
+            ),
+            models.Index(
+                fields=["attribute", "value_date"],
+                name="eav_value_attr_date_idx",
+            ),
+            models.Index(
+                fields=["attribute", "value_enum"],
+                name="eav_value_attr_enum_idx",
+            ),
+        ]
+
         constraints: ClassVar[list[models.Constraint]] = [
             models.UniqueConstraint(
                 fields=["entity_ct", "attribute", "entity_uuid"],
