@@ -435,6 +435,19 @@ toml = [
 ]
 
 [[package]]
+name = "dennis"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "click" },
+    { name = "polib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/6c/9170d6388c4edcf84478b62660593cfd16b087f50ff0bce33c238554f731/dennis-1.3.0.tar.gz", hash = "sha256:48be916cb7471c55542470475a9e0a169d91c9b584fa289e85ccd8bccd53e3e9", size = 46829, upload-time = "2026-05-24T11:09:55.565Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/88/d4/8fc1da9a0b70e3a51eb411a5dca9a17aca220fb3c13ab907024875b1d07f/dennis-1.3.0-py3-none-any.whl", hash = "sha256:f6f06ffc44bd95ff4a6f898f3da4e0972fa4faefd4e9eb835513dca76aa20bb6", size = 30026, upload-time = "2026-05-24T11:09:54.161Z" },
+]
+
+[[package]]
 name = "django"
 version = "5.2.18"
 source = { registry = "https://pypi.org/simple" }
@@ -481,6 +494,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "dennis" },
     { name = "django-stubs", version = "6.0.9", source = { registry = "https://pypi.org/simple" }, extra = ["compatible-mypy"], marker = "python_full_version < '3.11'" },
     { name = "django-stubs", version = "6.1.2", source = { registry = "https://pypi.org/simple" }, extra = ["compatible-mypy"], marker = "python_full_version >= '3.11'" },
     { name = "hypothesis", version = "6.168.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -504,6 +518,7 @@ docs = [
     { name = "sphinx-rtd-theme" },
 ]
 lint = [
+    { name = "dennis" },
     { name = "django-stubs", version = "6.0.9", source = { registry = "https://pypi.org/simple" }, extra = ["compatible-mypy"], marker = "python_full_version < '3.11'" },
     { name = "django-stubs", version = "6.1.2", source = { registry = "https://pypi.org/simple" }, extra = ["compatible-mypy"], marker = "python_full_version >= '3.11'" },
     { name = "import-linter" },
@@ -534,6 +549,7 @@ requires-dist = [{ name = "django", specifier = ">=5.2,<6.2" }]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "dennis", specifier = ">=1.1,<2" },
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=6,<7" },
     { name = "hypothesis", specifier = ">=6.87.1,<7" },
     { name = "import-linter", specifier = ">=2.5,<3" },
@@ -553,6 +569,7 @@ docs = [
     { name = "sphinx-rtd-theme", specifier = ">=1.3,<4" },
 ]
 lint = [
+    { name = "dennis", specifier = ">=1.1,<2" },
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = ">=6,<7" },
     { name = "import-linter", specifier = ">=2.5,<3" },
     { name = "mypy", specifier = ">=1.6,<3" },
@@ -1591,6 +1608,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/5c/92/93a4af9511b8c7c647874521d9e6c904266be98067c2ee1eb2e74520d208/poethepoet-0.48.0.tar.gz", hash = "sha256:a06f49d244fadfc2e2e7faa78b54e64a9694727e4ce1d50e08f23cea3ded74f1", size = 148679, upload-time = "2026-07-05T21:48:30.106Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/59/8d/d7c9455b15f8d2d7ce57e7b71a8ef8d02d9992ae4283c9777120620c9022/poethepoet-0.48.0-py3-none-any.whl", hash = "sha256:98da6096d060f49b8d84034770265863fb7dc92a40233b7694b9d216ac68737d", size = 185808, upload-time = "2026-07-05T21:48:28.601Z" },
+]
+
+[[package]]
+name = "polib"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/10/9a/79b1067d27e38ddf84fe7da6ec516f1743f31f752c6122193e7bce38bdbf/polib-1.2.0.tar.gz", hash = "sha256:f3ef94aefed6e183e342a8a269ae1fc4742ba193186ad76f175938621dbfc26b", size = 161658, upload-time = "2023-02-23T17:53:56.873Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6b/99/45bb1f9926efe370c6dbe324741c749658e44cb060124f28dad201202274/polib-1.2.0-py2.py3-none-any.whl", hash = "sha256:1c77ee1b81feb31df9bca258cbc58db1bbb32d10214b173882452c73af06d62d", size = 20634, upload-time = "2023-02-23T17:53:59.919Z" },
 ]
 
 [[package]]
