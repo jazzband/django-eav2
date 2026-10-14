@@ -283,6 +283,37 @@ You can use ``Q`` expressions too:
         Q(eav__sex='male', eav__fever=no) | Q(eav__city='Nice') & Q(eav__age__gt=32)
     )
 
+Performance
+-----------
+
+Reading ``instance.eav.<slug>`` loads the entity's attributes and values once
+and reuses them, so reading several attributes costs two queries in total
+rather than two per attribute. The values are kept on the instance in the same
+cache ``prefetch_related`` uses, so ``refresh_from_db()`` clears them, and so
+does saving (the next read after a save loads them again). If values may have
+changed elsewhere (another process, a raw query), call
+``instance.eav.clear_cache()`` before reading them again.
+
+Saving only writes the values that were assigned, and loads the attributes and
+values it needs a single time.
+
+When listing entities, prefetch their values so reading an attribute does not
+query per row::
+
+    patients = Patient.objects.prefetch_related("eav_values__attribute")
+
+    for patient in patients:
+        print(patient.eav.age)  # no extra queries
+
+Prefetching is explicit on purpose: it loads every value of every row, which
+is wasted work when a list never reads EAV attributes. Without it, a list of
+``N`` entities costs ``N + 2`` queries when you read an attribute on each: the
+list, one attribute lookup shared by all of them, and one query per entity for
+its values. With the prefetch it is 3 queries, however long the list is.
+
+The shared attribute lookup is only used when the model uses the default
+``EavConfig.get_attributes``.
+
 Admin Integration
 -----------------
 

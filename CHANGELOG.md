@@ -4,6 +4,13 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ## Unreleased
 
+### Performance
+
+- `instance.eav.<slug>` loads an entity's attributes and values once and reuses them, so reading three attributes takes 2 queries instead of 6. The values are held in the instance's `prefetch_related` cache, so `refresh_from_db()` and `save()` clear them; use `instance.eav.clear_cache()` after changing values elsewhere.
+- Saving an entity loads its attributes and values once and writes only assigned values: creating an entity with three attributes takes 6 queries instead of 39, and saving one changed attribute takes 4 instead of 11.
+- `prefetch_related("eav_values__attribute")` is now used when reading attributes, and entities from one queryset (including `.iterator()`) share a single attribute lookup. Reading one attribute across 10 prefetched entities takes 3 queries instead of 23.
+- New `Attribute.store_value`, `Value.save_checked`, `Entity.clear_cache` and `EavConfig.shares_attributes`; `Attribute.save_value` keeps its behaviour.
+
 ### Bug Fixes
 
 - `order_by("eav__<slug>")` no longer fails on UUID-keyed entities or empty querysets, no longer mixes in values of other models that share a primary key, and now accepts `-eav__<slug>` for descending order. Ordering by an `object` attribute raises `NotSupportedError` (it was a `FieldError`). Ordering by a related field such as `order_by("example__name")` now sorts by that field; it used to sort by the foreign key column only.
