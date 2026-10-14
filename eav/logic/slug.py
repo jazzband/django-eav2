@@ -27,6 +27,9 @@ def non_identifier_chars() -> dict[str, str]:
     return {char: f"u{ord(char):04x}" for char in special_chars}
 
 
+_NON_IDENTIFIER_CHARS: Final = non_identifier_chars()
+
+
 def generate_slug(value: str) -> str:
     """Generate a valid slug based on the given value.
 
@@ -41,7 +44,7 @@ def generate_slug(value: str) -> str:
         str: A valid Python identifier slug, with a maximum
             length of SLUGFIELD_MAX_LENGTH.
     """
-    for char, replacement in non_identifier_chars().items():
+    for char, replacement in _NON_IDENTIFIER_CHARS.items():
         value = value.replace(char, replacement)
 
     # Use slugify to create a URL-friendly base slug.
