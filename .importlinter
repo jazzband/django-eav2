@@ -1,0 +1,26 @@
+# See https://github.com/seddonym/import-linter
+[importlinter]
+root_package = eav
+include_external_packages = False
+exclude_type_checking_imports = True
+
+[importlinter:contract:layers]
+name = Layered architecture of eav
+type = layers
+layers =
+  eav.admin
+  eav.decorators
+  eav.registry
+  eav.managers
+  eav.queryset
+  eav.logic.bulk | eav.logic.ordering
+  eav.models
+  eav.fields
+  eav.forms
+  eav.widgets
+  eav.validators | eav.logic.managers | eav.logic.slug | eav.logic.entity_pk | eav.logic.object_pk | eav.logic.dates | eav.logic.schema
+
+ignore_imports =
+  # The EAVModelMeta metaclass registers each model with eav, which is
+  # implemented above the models. It is part of the public API of eav.models.
+  eav.models.entity -> eav
