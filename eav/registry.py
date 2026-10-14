@@ -23,12 +23,16 @@ class EavConfig:
        model instance. "eav" by default. See attach_eav_attr.
     4. generic_relation_attr - Name of the GenericRelation to Value
        objects. "eav_values" by default.
-    5. generic_relation_related_name - Name of the related name for
+    5. bulk_batch_size - How many entities ``bulk_create`` and ``bulk_update``
+       write at a time, and the most rows in one ``INSERT`` statement. 1000 by
+       default; the ``batch_size`` argument of those methods overrides it.
+    6. generic_relation_related_name - Name of the related name for
        GenericRelation from Entity to Value. None by default. Therefore,
        if not overridden, it is not possible to query Values by Entities.
     """
 
     manager_attr = "objects"
+    bulk_batch_size = 1000
     manager_only = False
     eav_attr = "eav"
     generic_relation_attr = "eav_values"

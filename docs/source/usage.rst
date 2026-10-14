@@ -335,8 +335,22 @@ save::
 ``bulk_create()`` validates every instance first (required attributes, value
 types, enum choices, unknown attributes), and raises before anything is
 written. The instances, then their values, are written inside one transaction,
-in chunks of ``batch_size`` instances (1000 by default), so memory stays
-bounded for large inputs.
+in chunks of ``batch_size`` instances, so memory stays bounded for large
+inputs. ``batch_size`` is also the most rows sent in one ``INSERT``. It is 1000
+by default; set ``bulk_batch_size`` on your ``EavConfig`` to change it for a
+model, or pass ``batch_size`` to override it for one call::
+
+    class PatientConfig(EavConfig):
+        bulk_batch_size = 2000
+
+    eav.register(Patient, PatientConfig)
+
+Larger batches mean fewer queries but bigger statements. On PostgreSQL and
+MySQL anything from 500 to a few thousand performs about the same on a local
+database, and the main gain over 1000 is fewer round trips on a networked one.
+Keep ``batch_size`` times the number of columns under PostgreSQL's limit of
+65535 bind parameters if you use server-side binding, and under MySQL's
+``max_allowed_packet``. SQLite lowers it automatically to its variable limit.
 
 To update, list EAV attributes as ``eav__<slug>`` next to ordinary fields::
 

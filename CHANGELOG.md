@@ -14,6 +14,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 ### Features
 
 - `bulk_create()` and `bulk_update()` on EAV managers store EAV values in about one query per 1000 rows instead of one or more per entity: `Patient.objects.bulk_create(patients)` writes the values assigned with `patient.eav.<slug> = ...`, and `bulk_update(patients, ["name", "eav__age"])` updates them. Instances are validated first, written in chunks inside one transaction, and no signals are sent. Creating entities needs primary keys, so integer keys are not supported on MySQL.
+- `EavConfig.bulk_batch_size` (1000 by default) sets how many entities `bulk_create()` and `bulk_update()` write at a time; the `batch_size` argument overrides it.
 - `Attribute.enum_choices`, `Attribute.validate_assignment`, `Entity.assigned_values` and `Value.clean_own_fields`. Saving an enum attribute no longer queries the choices more than once.
 
 ### Bug Fixes
