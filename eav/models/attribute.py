@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from eav import validators
 from eav.fields import EavDatatypeField
 from eav.logic.dates import as_datetime
+from eav.logic.deprecations import warn_if_deprecated_datatype
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.managers import AttributeManager
 from eav.logic.object_pk import get_pk_format
@@ -45,17 +46,21 @@ class Attribute(models.Model):
        to save or create any entity object for which this attribute applies,
        without first setting this EAV attribute.
 
-    There are 7 possible values for datatype:
+    There are 9 possible values for datatype:
 
         * int (TYPE_INT)
         * float (TYPE_FLOAT)
         * text (TYPE_TEXT)
         * date (TYPE_DATE)
         * bool (TYPE_BOOLEAN)
-        * object (TYPE_OBJECT)
         * enum (TYPE_ENUM)
-        * json (TYPE_JSON)
-        * csv (TYPE_CSV)
+        * object (TYPE_OBJECT), deprecated
+        * json (TYPE_JSON), deprecated
+        * csv (TYPE_CSV), deprecated
+
+    .. deprecated:: 2.0.0
+       The *object*, *json*, and *csv* datatypes are removed in 3.0.0. Use a
+       ``ForeignKey`` or a ``JSONField`` on your model, or a related model.
 
 
     Examples::
@@ -205,6 +210,7 @@ class Attribute(models.Model):
         if not self.slug:
             self.slug = generate_slug(self.name)
 
+        warn_if_deprecated_datatype(self.datatype, self.slug)
         self.full_clean()
         super().save(*args, **kwargs)
 
@@ -393,6 +399,7 @@ class Attribute(models.Model):
                 existing.delete()
             return None
 
+        warn_if_deprecated_datatype(self.datatype, self.slug)
         stored = (
             as_datetime(raw_value) if self.datatype == self.TYPE_DATE else raw_value
         )

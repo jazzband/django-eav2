@@ -12,7 +12,10 @@ from eav.models import Attribute, Value
 from eav.widgets import CSVWidget
 from test_project.models import Patient
 
-pytestmark = pytest.mark.django_db
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning"),
+]
 
 
 @pytest.mark.parametrize("raw", [None, "", []])

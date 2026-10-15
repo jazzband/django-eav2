@@ -47,6 +47,12 @@ Other useful fields are ``description`` (shown as help text in forms),
 Datatypes
 ---------
 
+.. warning::
+
+    The ``json``, ``csv``, and ``object`` datatypes are deprecated and
+    django-eav2 3.0 removes them. Do not use them in new code. See
+    `Deprecated datatypes`_.
+
 .. list-table::
     :header-rows: 1
     :widths: 15 30 55
@@ -76,13 +82,14 @@ Datatypes
       - One choice from a group of options. See `Enum attributes`_.
     * - ``json``
       - ``Attribute.TYPE_JSON``
-      - A JSON object (a ``dict``)
+      - **Deprecated.** A JSON object (a ``dict``)
     * - ``csv``
       - ``Attribute.TYPE_CSV``
-      - A list of strings. See `CSV attributes`_.
+      - **Deprecated.** A list of strings
     * - ``object``
       - ``Attribute.TYPE_OBJECT``
-      - A reference to a saved model instance that has an integer primary key
+      - **Deprecated.** A reference to a saved model instance that has an
+        integer primary key
 
 Enum attributes
 ~~~~~~~~~~~~~~~
@@ -113,8 +120,65 @@ Assign either an ``EnumValue`` or its text:
     patient.eav.fever = yes
     patient.eav.fever = "No"
 
-JSON attributes
-~~~~~~~~~~~~~~~
+Deprecated datatypes
+--------------------
+
+.. deprecated:: 2.0.0
+    The ``json``, ``csv``, and ``object`` datatypes are removed in 3.0.0.
+
+django-eav2 deprecates these three datatypes and removes them in 3.0. Saving
+an attribute of one of these types, or writing a value to one, emits
+``eav.exceptions.RemovedInEav3Warning``. That includes ``bulk_create()`` and
+``bulk_update()``, and it includes saves that leave a value unchanged. The
+warning is a ``FutureWarning``, so Python shows it by default, and it points at
+your own code. Fixtures loaded with ``loaddata`` and migrations do not emit it.
+
+To silence it while you migrate, or to turn it into an error in your tests:
+
+.. code-block:: python
+
+    import warnings
+
+    from eav.exceptions import RemovedInEav3Warning
+
+    warnings.filterwarnings("ignore", category=RemovedInEav3Warning)
+    # or: warnings.filterwarnings("error", category=RemovedInEav3Warning)
+
+An attribute is worth its overhead when people define it at runtime, without
+a deployment. These types rarely meet that bar, because the data has a shape
+that you, the developer, know in advance, and a model can express it better:
+
+.. list-table::
+    :header-rows: 1
+    :widths: 15 45 40
+
+    * - Datatype
+      - Why it is deprecated
+      - Use instead
+    * - ``json``
+      - Structured data usually belongs in a column. EAV cannot validate or
+        constrain it per attribute beyond checking that it is a JSON object.
+      - A ``JSONField`` on your model
+    * - ``csv``
+      - The ``;`` separator breaks on values that contain it, and the datatype
+        does not validate the items. It works as a simple multi-select, but a
+        typed list is more reliable.
+      - A ``JSONField`` that holds a list, or a related model
+    * - ``object``
+      - It has no referential integrity and no cascade on delete, cannot be
+        ordered, cannot link to a model with a UUID primary key, and breaks
+        the admin change form.
+      - A ``ForeignKey`` or a ``ManyToManyField`` on your own model
+
+If you have a case that these alternatives do not cover, please
+`open an issue <https://github.com/jazzband/django-eav2/issues>`_ before 3.0
+so we can find a better answer.
+
+Before 3.0, migrate the data out of EAV and delete the attributes. The
+sections below describe how the deprecated datatypes behave until then.
+
+JSON attributes (deprecated)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A JSON attribute stores a ``dict``. Assign a ``dict``, not a JSON string, which
 is stored as a string. You can filter on a key:
@@ -132,8 +196,8 @@ is stored as a string. You can filter on a key:
     Product.objects.filter(eav__name_intl__has_key="es")
     Product.objects.filter(eav__name_intl__en="Green Broom")
 
-CSV attributes
-~~~~~~~~~~~~~~
+CSV attributes (deprecated)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A CSV attribute stores a list of strings. You can assign a list or a string
 that uses ``;`` as the separator. Reload the instance before you read the value:
@@ -159,8 +223,8 @@ find entities without a value, exclude those that have one:
 
     Product.objects.exclude(eav__colors__isnull=False)
 
-Object attributes
-~~~~~~~~~~~~~~~~~
+Object attributes (deprecated)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An object attribute links an entity to any saved model instance through a
 generic foreign key:

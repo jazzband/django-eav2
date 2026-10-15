@@ -11,6 +11,7 @@ from django.db import connections
 from django.db.utils import NotSupportedError
 
 from eav.logic.dates import as_datetime
+from eav.logic.deprecations import warn_if_deprecated_datatype
 from eav.logic.entities import entity_of
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.schema import SharedSchema
@@ -244,11 +245,13 @@ class BulkValueWriter:
         Only the attributes in *slugs* are written when it is given. Values set
         to ``None`` or an empty string are deleted.
         """
+        attributes = self._schema.load()
+        self._warn_if_deprecated(instances, attributes, slugs)
+
         if any(instance.pk is None for instance in instances):
             raise NotSupportedError(_NO_PRIMARY_KEYS)
 
         plan = WritePlan()
-        attributes = self._schema.load()
 
         for instance in instances:
             pairs = assigned_pairs(instance, attributes, slugs)
@@ -258,3 +261,19 @@ class BulkValueWriter:
 
         for instance in instances:
             entity_of(instance).clear_cache()
+
+    def _warn_if_deprecated(
+        self,
+        instances: Sequence[Model],
+        attributes: Mapping[str, Attribute],
+        slugs: list[str] | None,
+    ) -> None:
+        """Warn once for each deprecated attribute that *instances* assign."""
+        used = {
+            attribute.slug: attribute
+            for instance in instances
+            for attribute, _raw in assigned_pairs(instance, attributes, slugs)
+        }
+
+        for attribute in used.values():
+            warn_if_deprecated_datatype(attribute.datatype, attribute.slug)
