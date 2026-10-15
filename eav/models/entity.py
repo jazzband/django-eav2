@@ -71,7 +71,9 @@ class Entity:
         into the instance's ``prefetch_related`` cache, and reuses them. That
         cache is cleared when the instance is saved or refreshed with
         ``refresh_from_db()``; call this after changing values elsewhere
-        (another process, a raw query) if you need to read them again.
+        (another process, a raw query, ``Value.objects.bulk_create``) if you need
+        to read them again, or set ``cache_values = False`` on the model's
+        :class:`~eav.registry.EavConfig` to read them from the database every time.
         """
         self._evict_values()
         self._schema = OwnSchema(self)
@@ -93,8 +95,12 @@ class Entity:
         """
         Values already on the instance, from ``prefetch_related`` or from us.
 
-        ``None`` means they have not been loaded.
+        ``None`` means they have not been loaded, which is always the case for
+        models whose config sets ``cache_values = False``.
         """
+        if not config_of(self.instance).cache_values:
+            return None
+
         prefetched = getattr(self.instance, "_prefetched_objects_cache", {})
         queryset = prefetched.get(self._relation)
         return None if queryset is None else list(queryset)
@@ -111,7 +117,11 @@ class Entity:
         if self.instance._state.adding:  # noqa: SLF001
             return {}
 
-        if self._cached_values() is None:
+        cached = self._cached_values()
+
+        if cached is None and not config_of(self.instance).cache_values:
+            cached = list(self.get_values())
+        elif cached is None:
             models.prefetch_related_objects(
                 [self.instance],
                 models.Prefetch(
@@ -119,8 +129,8 @@ class Entity:
                     queryset=Value.objects.select_related("attribute", "value_enum"),
                 ),
             )
+            cached = self._cached_values() or []
 
-        cached = self._cached_values() or ()
         return {eav_value.attribute.pk: eav_value for eav_value in cached}
 
     def _loaded_value(self, slug: str) -> Value | None:

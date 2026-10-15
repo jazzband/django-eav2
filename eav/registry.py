@@ -35,13 +35,18 @@ class EavConfig:
     5. bulk_batch_size - How many entities ``bulk_create`` and ``bulk_update``
        write at a time, and the most rows in one ``INSERT`` statement. 1000 by
        default; the ``batch_size`` argument of those methods overrides it.
-    6. generic_relation_related_name - Name of the related name for
+    6. cache_values - Whether ``instance.eav.<slug>`` loads the values once
+       and reuses them, which is the default. Set to ``False`` for models whose
+       values are written outside ``instance.eav`` and ``save()``; every read
+       then queries the database.
+    7. generic_relation_related_name - Name of the related name for
        GenericRelation from Entity to Value. None by default. Therefore,
        if not overridden, it is not possible to query Values by Entities.
     """
 
     manager_attr: str = "objects"
     bulk_batch_size: int = 1000
+    cache_values: bool = True
     manager_only: bool = False
     eav_attr: str = "eav"
     generic_relation_attr: str = "eav_values"
