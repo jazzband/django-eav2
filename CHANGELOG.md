@@ -32,6 +32,11 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+- `~Q()` on an attribute inside a larger `Q` removes whole entities, as `exclude()` does. It used to negate single value rows, so `filter(Q(eav__age__gt=30) & ~Q(eav__city="Nice"))` could return entities that live in Nice. Every condition on an attribute, in a `Q` or as a keyword argument, is now an independent `EXISTS` subquery, which also stops OR conditions from returning an entity more than once.
+- `eav__<slug>__isnull=True` finds the entities that have no value for the attribute. It used to find nothing.
+- Lookups chained after an attribute slug, such as `eav__born__year__gt=2000` or `eav__extras__chills__iexact="yes"`, are applied. They used to be dropped, which returned no rows.
+- `filter()` no longer changes the `Q` objects you pass to it, so you can reuse them, and a `Q` that contains an expression such as `Exists(...)` no longer fails.
+- A lookup other than equality on an `object` attribute raises `FieldError`. It used to be ignored, which returned wrong rows.
 - Filtering on several EAV attributes in one `filter()` call works on UUID-keyed entities.
 - The Indonesian translation is compiled and ships with the package; its `.mo` file was missing. A test now fails if any compiled catalog differs from its `.po` source.
 

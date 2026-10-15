@@ -23,12 +23,15 @@ Mix attribute lookups with regular fields in one call:
 
 The lookups you can use depend on the attribute's datatype. They are the
 lookups Django offers for the matching field: comparisons such as ``gt`` and
-``lte`` for numbers and dates, ``contains`` and ``startswith`` for text, and
-``isnull`` for all of them.
+``lte`` for numbers and dates, and ``contains`` and ``startswith`` for text.
+Object attributes support only equality.
 
-You can add one lookup after the slug. Chaining a second one, such as
-``eav__created__year__gt``, is not supported, and it currently returns no rows
-instead of raising an error.
+``isnull=True`` finds the entities that have no value for the attribute, and
+``isnull=False`` finds the ones that have a value.
+
+You can chain lookups after the slug, as you would across a Django field. For
+example, ``eav__born__year__gt=2000`` compares the year of a date attribute.
+A lookup that does not exist raises ``FieldError``.
 
 Enum attributes accept either an ``EnumValue`` or its text:
 
@@ -58,16 +61,13 @@ Combine conditions with ``Q``
         Q(eav__sex="male", eav__fever=no) | (Q(eav__city="Nice") & Q(eav__age__gt=32))
     )
 
-.. warning::
+``~Q()`` on an attribute removes whole entities, so these two queries return
+the same entities:
 
-    Do not put ``~Q()`` on an attribute in the same ``Q`` as other conditions.
-    The negation applies to single stored values, so an entity that matches
-    your other conditions can slip through. Chain ``filter()`` and
-    ``exclude()`` instead:
+.. code-block:: python
 
-    .. code-block:: python
-
-        Patient.objects.filter(eav__age__gt=30).exclude(eav__city="Nice")
+    Patient.objects.filter(Q(eav__age__gt=30) & ~Q(eav__city="Nice"))
+    Patient.objects.filter(eav__age__gt=30).exclude(eav__city="Nice")
 
 Exclude
 -------
