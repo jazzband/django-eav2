@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Final
 
+from django.apps import apps
 from django.contrib.contenttypes import fields as generic
 from django.db.models.signals import post_init, post_save, pre_save
 
@@ -214,12 +215,20 @@ class Registry:
     def _detach_generic_relation(self) -> None:
         """Remove the generic relation from the entity."""
         relation_name = self.config_cls.generic_relation_attr.lower()
-        for field in self.model_cls._meta.local_many_to_many:
-            if field.name == relation_name:
-                self.model_cls._meta.local_many_to_many.remove(field)
-                break
+        model_meta = self.model_cls._meta
+
+        # Django keeps a ``GenericRelation`` among the private fields.
+        relations = [
+            field for field in model_meta.private_fields if field.name == relation_name
+        ]
+        for relation in relations:
+            model_meta.private_fields.remove(relation)
 
         delattr(self.model_cls, relation_name)
+
+        # The reverse side, on ``Value``, is found through the app registry.
+        model_meta._expire_cache()
+        apps.clear_cache()
 
     def _register_self(self) -> None:
         """Call the necessary registration methods."""
