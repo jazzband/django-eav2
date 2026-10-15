@@ -97,7 +97,7 @@ default-groups = [ "dev" ]
 add-bounds = "major"
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py310"
 line-length = 88
 [tool.ruff.lint]
 select = [ "ALL" ]
@@ -172,74 +172,17 @@ strict_equality_for_none = true
 strict = true
 # mypy config: https://mypy.readthedocs.io/en/stable/config_file.html
 plugins = [ "mypy_django_plugin.main" ]
-# BASELINE: each module below disables the error codes it currently trips.
-# Remove codes as the module gets typed; new modules get no entries.
-[[tool.mypy.overrides]]
-module = [ "eav", "eav.decorators", "eav.models.entity", "eav.registry" ]
-disable_error_code = [ "no-untyped-call", "no-untyped-def" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.admin" ]
-disable_error_code = [ "arg-type", "attr-defined", "no-untyped-def", "type-arg" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.fields" ]
-disable_error_code = [ "arg-type", "no-untyped-call", "no-untyped-def", "type-arg" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.forms" ]
-disable_error_code = [
-  "attr-defined",
-  "dict-item",
-  "no-untyped-call",
-  "no-untyped-def",
-  "operator",
-  "override",
-  "type-arg",
-]
 
-[[tool.mypy.overrides]]
-module = [ "eav.logic.entity_pk", "eav.validators" ]
-disable_error_code = [ "no-untyped-def" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.logic.managers" ]
-disable_error_code = [ "no-untyped-def", "type-arg" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.logic.object_pk" ]
-disable_error_code = [ "no-any-return", "operator", "type-arg" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.managers" ]
-disable_error_code = [ "no-untyped-call", "no-untyped-def", "type-arg" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.models.attribute" ]
-disable_error_code = [ "no-untyped-call", "no-untyped-def", "union-attr" ]
 
-[[tool.mypy.overrides]]
-module = [ "eav.models.value" ]
-disable_error_code = [
-  "name-defined",
-  "no-untyped-call",
-  "no-untyped-def",
-  "return-value"
-]
 
-[[tool.mypy.overrides]]
-module = [ "eav.queryset" ]
-disable_error_code = [
-  "no-untyped-call",
-  "no-untyped-def",
-  "type-arg",
-  "union-attr",
-  "var-annotated"
-]
 
-[[tool.mypy.overrides]]
-module = [ "eav.widgets" ]
-disable_error_code = [ "no-untyped-call", "no-untyped-def", "override" ]
 
 [tool.pyright]
 venv = ".venv"
@@ -248,18 +191,6 @@ typeCheckingMode = "standard"
 # pyright config: https://microsoft.github.io/pyright/#/configuration
 include = [ "eav" ]
 exclude = [ "**/migrations" ]
-# BASELINE: pyright skips these files until they are cleaned. Remove entries as
-# files pass; new files must pass without being listed here.
-ignore = [
-  "eav/admin.py",
-  "eav/fields.py",
-  "eav/forms.py",
-  "eav/models/attribute.py",
-  "eav/models/value.py",
-  "eav/queryset.py",
-  "eav/registry.py",
-  "eav/widgets.py",
-]
 
 [tool.django-stubs]
 django_settings_module = "test_project.settings"
