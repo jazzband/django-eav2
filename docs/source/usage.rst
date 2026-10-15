@@ -291,8 +291,20 @@ and reuses them, so reading several attributes costs two queries in total
 rather than two per attribute. The values are kept on the instance in the same
 cache ``prefetch_related`` uses, so ``refresh_from_db()`` clears them, and so
 does saving (the next read after a save loads them again). If values may have
-changed elsewhere (another process, a raw query), call
-``instance.eav.clear_cache()`` before reading them again.
+changed elsewhere (another process, a raw query, ``Value.objects.bulk_create``),
+call ``instance.eav.clear_cache()`` before reading them again.
+
+A model whose values are written outside ``instance.eav`` and ``save()`` can
+turn the cache off in its config, so every read queries the database:
+
+.. code-block:: python
+
+    class PatientConfig(EavConfig):
+        cache_values = False
+
+    eav.register(Patient, PatientConfig)
+
+``prefetch_related`` of the values is ignored for such a model.
 
 Saving only writes the values that were assigned, and loads the attributes and
 values it needs a single time.

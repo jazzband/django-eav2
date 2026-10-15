@@ -271,3 +271,56 @@ def test_entities_of_a_custom_config_do_not_share_attributes() -> None:
 
     assert first.eav.age == second.eav.age == 1
     assert first.eav._schema is not second.eav._schema
+
+
+def test_values_written_outside_the_entity_are_stale_until_the_cache_is_cleared(
+    patient: Patient,
+) -> None:
+    assert patient.eav.age == 3
+    Value.objects.filter(attribute__slug="age").update(value_int=9)
+
+    assert patient.eav.age == 3
+
+
+def test_cache_values_false_reads_the_database_every_time(
+    django_assert_num_queries,
+) -> None:
+    class Uncached(EavConfig):
+        cache_values = False
+
+    eav.unregister(Patient)
+    eav.register(Patient, Uncached)
+    patient = Patient.objects.create(name="Joe", eav__age=3)
+    patient = Patient.objects.get(pk=patient.pk)
+
+    assert patient.eav.age == 3
+    Value.objects.filter(attribute__slug="age").update(value_int=9)
+    assert patient.eav.age == 9
+
+    Value.objects.create(
+        entity_ct=ContentType.objects.get_for_model(Patient),
+        entity_id=patient.pk,
+        attribute=Attribute.objects.get(slug="city"),
+        value_text="Rome",
+    )
+    assert patient.eav.city == "Rome"
+
+    with django_assert_num_queries(1):
+        assert patient.eav.age == 9
+
+
+def test_cache_values_false_saves_against_fresh_values() -> None:
+    class Uncached(EavConfig):
+        cache_values = False
+
+    eav.unregister(Patient)
+    eav.register(Patient, Uncached)
+    patient = Patient.objects.create(name="Joe", eav__age=3)
+    assert patient.eav.age == 3
+
+    Value.objects.filter(attribute__slug="age").update(value_int=9)
+    patient.eav.age = 10
+    patient.save()
+
+    assert Value.objects.filter(attribute__slug="age").count() == 1
+    assert patient.eav.age == 10
