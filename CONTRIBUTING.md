@@ -64,7 +64,7 @@ We use GitHub issues to track public bugs. Report a bug by opening a new issue. 
 
 We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting, [wemake-python-styleguide](https://github.com/wemake-services/wemake-python-styleguide) (WPS) for stricter structural rules, and [Google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) reStructuredText for doc-strings.
 
-WPS is being adopted gradually. `setup.cfg` has a baseline of per-file ignores for existing code: new code must pass without adding entries, and when you touch a file, remove the ignores you have fixed.
+`setup.cfg` lists the few WPS exceptions that are permanent, each with its reason. New code must pass without adding entries; if a rule is wrong for your case, propose changing the rule rather than adding contortions to the code.
 
 Name variables for what they hold instead of the bare word `value`: an `eav.models.Value` row is `eav_value`, what a caller assigns is `raw_value`, and what a validator receives is `candidate`. The public API (`Value`, `Value.value`, `entity.eav.<slug>`) does not change.
 

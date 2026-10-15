@@ -27,6 +27,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Bug Fixes
 
+- Filtering on several EAV attributes in one `filter()` call works on UUID-keyed entities.
 - The Indonesian translation is compiled and ships with the package; its `.mo` file was missing. A test now fails if any compiled catalog differs from its `.po` source.
 
 - `validate_enum` and `validate_object` use Django's `_state.adding` to detect unsaved instances, because a model with a UUID default key always has a primary key, so an unsaved `EnumValue` was accepted and then failed with an integrity error.
@@ -44,9 +45,10 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Internal
 
+- `eav/` is fully typed and passes mypy strict, pyright and wemake-python-styleguide with no baseline of ignores; the few permanent WPS exceptions in `setup.cfg` each give a reason. Parameters named `value` on internal helpers are now `candidate` or `raw_value` (`Attribute.validate_value`, `validate_assignment`, `store_value`, `save_value` and the validators); the public API is unchanged.
 - Moved from Poetry to uv, hatchling and poethepoet.
 - Docstrings are required in `eav/`, module layers are enforced with `import-linter`, and the docs are linted with `sphinx-lint`.
-- Added `py.typed`, wemake-python-styleguide, mypy and pyright with baselines, Postgres and MySQL CI jobs, and Python 3.14 and Django 6.1 to the test matrix.
+- Added `py.typed`, wemake-python-styleguide, mypy and pyright, Postgres and MySQL CI jobs, and Python 3.14 and Django 6.1 to the test matrix.
 
 ## 1.8.2 (2026-05-22)
 
