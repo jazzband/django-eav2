@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tomllib
 from pathlib import Path
 
 import django
@@ -43,10 +44,10 @@ project = "Django EAV 2"
 copyright = "2018, Iwo Herka and team at MAKIMO"  # noqa: A001
 author = "-"
 
-# The short X.Y version
-version = ""
-# The full version, including alpha/beta/rc tags
-release = "0.10.0"
+# The version comes from the package metadata, so it cannot go stale.
+_pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+release = tomllib.loads(_pyproject.read_text())["project"]["version"]
+version = release
 
 
 def setup(app):
@@ -69,10 +70,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
-    "sphinx_rtd_theme",
+    "sphinx_copybutton",
 ]
-
-templates_path = ["_templates"]
 
 source_suffix = ".rst"
 
@@ -82,25 +81,25 @@ language = "en"
 
 exclude_patterns = ["build"]
 
-# The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
-
 
 # -- Options for HTML output -------------------------------------------------
 
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "shibuya"
 
 html_static_path = ["_static"]
 
-html_sidebars = {
-    "index": ["sidebarintro.html", "localtoc.html"],
-    "**": [
-        "sidebarintro.html",
-        "localtoc.html",
-        "relations.html",
-        "searchbox.html",
-    ],
+html_theme_options = {
+    "github_url": "https://github.com/jazzband/django-eav2",
+    "readthedocs_url": "https://django-eav2.readthedocs.io",
+}
+
+html_context = {
+    "source_type": "github",
+    "source_user": "jazzband",
+    "source_repo": "django-eav2",
+    "source_version": "master",
+    "source_docs_path": "/docs/source/",
 }
 
 htmlhelp_basename = "DjangoEAV2doc"
