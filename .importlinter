@@ -13,6 +13,7 @@ layers =
   eav.registry
   eav.managers
   eav.queryset
+  eav.logic.filtering
   eav.logic.bulk | eav.logic.ordering
   eav.models
   eav.fields

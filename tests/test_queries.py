@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import pytest
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
-from django.db.models import Q
+from django.core.exceptions import (
+    FieldError,
+    MultipleObjectsReturned,
+    ObjectDoesNotExist,
+)
+from django.db.models import Exists, OuterRef, Q
 from django.db.utils import NotSupportedError
 from django.test import TestCase
 
 import eav
+from eav.exceptions import RemovedInEav3Warning
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 from eav.registry import EavConfig
-from test_project.models import Encounter, ExampleModel, Patient
+from test_project.models import Doctor, Encounter, ExampleModel, Patient
 
 pytestmark = pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning")
 
@@ -483,68 +488,48 @@ class Queries(TestCase):
         assert set(p.values_list("name", flat=True)) == {"Bob", "Cyrill", "Eugene"}
 
     def test_filter_or_eav_and_non_eav_no_duplicates(self) -> None:
-        """
-        OR between an EAV Q and a non-EAV Q must not return duplicate rows.
-
-        When an EAV condition is used in OR with a non-EAV condition, the EAV
-        side remains as a JOIN condition (it cannot be merged via rewrite_q_expr
-        because there is only one EAV leaf). This JOIN can produce multiple rows
-        per entity. Results should be distinct.
-
-        This is a known limitation: callers should use .distinct() when mixing
-        EAV and non-EAV conditions in OR.
-        """
+        """OR between an EAV Q and a non-EAV Q returns each entity once."""
         self.init_data()
         # fever=yes → Cyrill, Eugene; name='Bob' → Bob
         p = Patient.objects.filter(Q(eav__fever=self.yes) | Q(name="Bob"))
-        # Correct distinct count is 3; without distinct() duplicates may appear
-        assert p.distinct().count() == 3
-        assert set(p.distinct().values_list("name", flat=True)) == {
-            "Bob",
-            "Cyrill",
-            "Eugene",
-        }
+
+        assert p.count() == 3
+        assert set(p.values_list("name", flat=True)) == {"Bob", "Cyrill", "Eugene"}
 
     def test_q_object_not_mutated_by_filter(self) -> None:
-        """
-        Q objects passed to filter() must not be mutated.
-
-        expand_q_filters() rewrites Q children in-place. If the original Q
-        object is mutated, reusing it in a second query will operate on the
-        already-expanded (internal) form and may produce incorrect results or
-        errors.
-
-        This test documents the current behaviour (mutation occurs) so that
-        any future fix is captured as a regression guard.
-        """
+        """A Q object passed to filter() is unchanged and can be reused."""
         self.init_data()
         q = Q(eav__fever=self.yes)
         original_children = list(q.children)  # [('eav__fever', <EnumValue>)]
 
-        Patient.objects.filter(q)
+        first = Patient.objects.filter(q)
+        second = Patient.objects.filter(q)
 
-        # Document current (broken) behaviour: children are mutated.
-        # When this is fixed, change the assertion to assertEqual.
-        assert q.children != original_children, (
-            "Q mutation is fixed - update this test to assert no mutation"
-        )
+        assert q.children == original_children
+        assert set(first.values_list("name", flat=True)) == {"Cyrill", "Eugene"}
+        assert set(second.values_list("name", flat=True)) == {"Cyrill", "Eugene"}
+
+    def test_negated_eav_field_in_one_q_acts_on_entities(self) -> None:
+        """``~Q()`` on an attribute excludes whole entities, as ``exclude()`` does."""
+        self.init_data()
+        # age > 2 → Anne, Bob, Cyrill, Daniel; not Nice removes Daniel
+        in_one_q = Patient.objects.filter(Q(eav__age__gt=2) & ~Q(eav__city="Nice"))
+        chained = Patient.objects.filter(eav__age__gt=2).exclude(eav__city="Nice")
+
+        expected = {"Anne", "Bob", "Cyrill"}
+        assert set(in_one_q.values_list("name", flat=True)) == expected
+        assert set(chained.values_list("name", flat=True)) == expected
+
+    def test_negated_eav_field_combined_with_or(self) -> None:
+        """Negation and OR combine per entity."""
+        self.init_data()
+        # city Nice → Daniel; not age > 2 → Eugene
+        found = Patient.objects.filter(Q(eav__city="Nice") | ~Q(eav__age__gt=2))
+
+        assert set(found.values_list("name", flat=True)) == {"Daniel", "Eugene"}
 
     def test_negated_eav_field_workaround_chained_exclude(self) -> None:
-        """
-        Documents the correct way to express "EAV attr A = x AND EAV attr B != y".
-
-        Because EAV values are stored one-per-row, using ~Q() inside filter()
-        negates at the *row* level, not the *entity* level.  The correct
-        approach is to chain .exclude() which operates at the entity level::
-
-            # WRONG - may return entities that should be excluded
-            Patient.objects.filter(Q(eav__fever=no) & ~Q(eav__city="Nice"))
-
-            # CORRECT - exclude() works at entity level
-            Patient.objects.filter(eav__fever=no).exclude(eav__city="Nice")
-            # or equivalently:
-            Patient.objects.filter(Q(eav__fever=no)).exclude(Q(eav__city="Nice"))
-        """
+        """Chained ``filter()`` and ``exclude()`` give the same entities."""
         self.init_data()
         # fever=no → Anne, Bob, Daniel; chained exclude removes Daniel
         p_chained = Patient.objects.filter(eav__fever=self.no).exclude(
@@ -559,3 +544,141 @@ class Queries(TestCase):
         )
         assert p_q.count() == 2
         assert set(p_q.values_list("name", flat=True)) == {"Anne", "Bob"}
+
+    def test_filtering_with_a_chained_lookup(self) -> None:
+        """A lookup after a JSON key, such as ``iexact``, is applied."""
+        self.init_data()
+
+        for filters in (
+            {"eav__extras__chills__iexact": "YES"},
+            {"eav__extras__headache__icontains": "ye"},
+        ):
+            assert Patient.objects.filter(**filters).exists()
+
+        found = Patient.objects.filter(eav__extras__chills__iexact="YES")
+        assert set(found.values_list("name", flat=True)) == {"Anne", "Cyrill"}
+
+        in_q = Patient.objects.filter(Q(eav__extras__chills__iexact="YES"))
+        assert set(in_q.values_list("name", flat=True)) == {"Anne", "Cyrill"}
+
+    def test_unknown_lookup_after_a_slug_raises(self) -> None:
+        """A lookup that does not exist is an error, not an empty result."""
+        self.init_data()
+
+        with pytest.raises(FieldError, match="nope"):
+            Patient.objects.filter(eav__age__nope=1)
+
+    def test_several_attributes_in_one_q(self) -> None:
+        """Keys in one ``Q(...)`` must all match the same entity."""
+        self.init_data()
+
+        found = Patient.objects.filter(Q(eav__age=3, eav__city="Nice"))
+
+        assert set(found.values_list("name", flat=True)) == {"Daniel"}
+
+    def test_q_and_keyword_conditions_in_one_call(self) -> None:
+        """A Q and keyword arguments combine."""
+        self.init_data()
+
+        found = Patient.objects.filter(
+            Q(eav__fever=self.no) | Q(eav__city="Kisumu"),
+            eav__age__gt=2,
+        )
+
+        assert set(found.values_list("name", flat=True)) == {
+            "Anne",
+            "Bob",
+            "Cyrill",
+            "Daniel",
+        }
+
+    def test_q_with_an_expression_child(self) -> None:
+        """Expressions such as ``Exists`` pass through untouched."""
+        self.init_data()
+        anne = Exists(Patient.objects.filter(pk=OuterRef("pk"), name="Anne"))
+
+        found = Patient.objects.filter(Q(eav__age=3) & Q(anne))
+
+        assert set(found.values_list("name", flat=True)) == {"Anne"}
+
+    def test_enum_with_a_chained_lookup(self) -> None:
+        """A lookup after an enum slug applies to the text of the choice."""
+        self.init_data()
+
+        found = Patient.objects.filter(Q(eav__fever__startswith="ye"))
+
+        assert set(found.values_list("name", flat=True)) == {"Cyrill", "Eugene"}
+
+    def test_object_attribute_rejects_extra_lookups(self) -> None:
+        """Object attributes compare by equality only, so more is an error."""
+        with pytest.warns(RemovedInEav3Warning):
+            Attribute.objects.create(name="owner", datatype=Attribute.TYPE_OBJECT)
+
+        with pytest.raises(FieldError, match="equality"):
+            Patient.objects.filter(eav__owner__gt=0)
+
+    def test_negation_on_an_entity_with_a_uuid_key(self) -> None:
+        """Entities with UUID keys get the same entity-level negation."""
+        for name, age, city in (("a", 5, "Nice"), ("b", 5, "Rome"), ("c", 1, "Nice")):
+            Doctor.objects.create(name=name, eav__age=age, eav__city=city)
+
+        found = Doctor.objects.filter(Q(eav__age__gt=2) & ~Q(eav__city="Nice"))
+
+        assert set(found.values_list("name", flat=True)) == {"b"}
+
+    def test_isnull_true_finds_entities_without_the_attribute(self) -> None:
+        """``isnull=True`` means no stored value, and ``False`` means one exists."""
+        self.init_data()
+        # Bob's illness is an empty string, so nothing is stored for it.
+        with_value = {"Anne", "Cyrill", "Daniel", "Eugene"}
+
+        for found, expected in (
+            (Patient.objects.filter(eav__illness__isnull=True), {"Bob"}),
+            (Patient.objects.filter(Q(eav__illness__isnull=True)), {"Bob"}),
+            (Patient.objects.filter(~Q(eav__illness__isnull=False)), {"Bob"}),
+            (Patient.objects.exclude(eav__illness__isnull=False), {"Bob"}),
+            (Patient.objects.filter(eav__illness__isnull=False), with_value),
+            (Patient.objects.exclude(eav__illness__isnull=True), with_value),
+        ):
+            assert set(found.values_list("name", flat=True)) == expected
+
+    def test_isnull_needs_a_boolean_and_a_known_attribute(self) -> None:
+        """A wrong ``isnull`` value or an unknown slug is an error."""
+        self.init_data()
+
+        with pytest.raises(ValueError, match="True or False"):
+            Patient.objects.filter(eav__illness__isnull="yes")
+
+        with pytest.raises(Attribute.DoesNotExist):
+            Patient.objects.filter(eav__nope__isnull=True)
+
+    def test_keywords_act_on_one_entity(self) -> None:
+        """Keywords combine with AND for each entity, and ``exclude()`` negates that."""
+        self.init_data()
+
+        both = Patient.objects.filter(eav__age=3, eav__city="Nice")
+        not_both = Patient.objects.exclude(eav__age=3, eav__city="Nice")
+
+        assert set(both.values_list("name", flat=True)) == {"Daniel"}
+        assert set(not_both.values_list("name", flat=True)) == {
+            "Anne",
+            "Bob",
+            "Cyrill",
+            "Eugene",
+        }
+
+    def test_object_attribute_equality_uses_the_primary_key(self) -> None:
+        """An object attribute is compared by the primary key of its target."""
+        with pytest.warns(RemovedInEav3Warning):
+            Attribute.objects.create(name="clinic", datatype=Attribute.TYPE_OBJECT)
+        clinic = ExampleModel.objects.create(name="North")
+        other = ExampleModel.objects.create(name="South")
+        Patient.objects.create(name="Anne", eav__clinic=clinic)
+        Patient.objects.create(name="Bob", eav__clinic=other)
+
+        for found, expected in (
+            (Patient.objects.filter(eav__clinic=clinic.pk), {"Anne"}),
+            (Patient.objects.filter(Q(eav__clinic=other.pk)), {"Bob"}),
+            (Patient.objects.exclude(eav__clinic=clinic.pk), {"Bob"}),
+        ):
+            assert set(found.values_list("name", flat=True)) == expected
