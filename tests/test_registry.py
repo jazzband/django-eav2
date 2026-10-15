@@ -3,6 +3,7 @@ from django.test import TestCase
 
 import eav
 from eav.managers import EntityManager
+from eav.models import Value
 from eav.registry import EavConfig
 from test_project.models import (
     Doctor,
@@ -11,6 +12,16 @@ from test_project.models import (
     ExampleModel,
     Patient,
 )
+
+
+def count_relations(model) -> int:
+    """Count the ``eav_values`` relations on *model*."""
+    return [field.name for field in model._meta.get_fields()].count("eav_values")
+
+
+def reverse_relation_names() -> list[str]:
+    """Name the reverse relations of the model that holds EAV values."""
+    return [relation.name for relation in Value._meta.related_objects]
 
 
 class RegistryTests(TestCase):
@@ -89,6 +100,20 @@ class RegistryTests(TestCase):
         self.assertFalse(
             ExampleMetaclassModel.objects.__class__.__name__ == "EntityManager",
         )
+
+    def test_unregistering_removes_the_generic_relation(self):
+        eav.unregister(Patient)
+        for _ in range(3):
+            eav.register(Patient)
+            eav.unregister(Patient)
+        self.assertEqual(count_relations(Patient), 0)
+        self.assertNotIn("Patient", reverse_relation_names())
+        self.assertFalse(hasattr(Patient, "eav_values"))
+
+        eav.register(Patient)
+        self.assertEqual(count_relations(Patient), 1)
+        self.assertIn("Patient", reverse_relation_names())
+        eav.unregister(Patient)
 
     def test_unregistering_unregistered_model_proceeds_silently(self):
         eav.unregister(Patient)
