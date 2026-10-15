@@ -173,17 +173,6 @@ strict = true
 # mypy config: https://mypy.readthedocs.io/en/stable/config_file.html
 plugins = [ "mypy_django_plugin.main" ]
 
-
-
-
-
-
-
-
-
-
-
-
 [tool.pyright]
 venv = ".venv"
 venvPath = "."
