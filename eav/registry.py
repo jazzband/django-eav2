@@ -28,8 +28,8 @@ class EavConfig:
        manager from Entity class, "objects" by default.
     2. manager_only - Specifies whether signals and generic relation should
        be setup for the registered model.
-    3. eav_attr - Named of the Entity toolkit instance on the registered
-       model instance. "eav" by default. See attach_eav_attr.
+    3. eav_attr - Name of the Entity helper on the registered model instance,
+       and the prefix of its lookups. "eav" by default. See attach_eav_attr.
     4. generic_relation_attr - Name of the GenericRelation to Value
        objects. "eav_values" by default.
     5. bulk_batch_size - How many entities ``bulk_create`` and ``bulk_update``
@@ -39,9 +39,9 @@ class EavConfig:
        and reuses them, which is the default. Set to ``False`` for models whose
        values are written outside ``instance.eav`` and ``save()``; every read
        then queries the database.
-    7. generic_relation_related_name - Name of the related name for
-       GenericRelation from Entity to Value. None by default. Therefore,
-       if not overridden, it is not possible to query Values by Entities.
+    7. generic_relation_related_name - Name used to query Value objects from an
+       entity, for example ``Value.objects.filter(Patient__name="Ada")``. None by
+       default, which uses the model class name.
     """
 
     manager_attr: str = "objects"
@@ -127,7 +127,7 @@ class Registry:
 
     @staticmethod
     def attach_eav_attr(sender: type[Model], *args: Any, **kwargs: Any) -> None:
-        """Attach EAV Entity toolkit to an instance after init."""
+        """Attach the EAV Entity helper to an instance after init."""
         instance: Any = kwargs["instance"]
         setattr(instance, instance._eav_config_cls.eav_attr, Entity(instance))
 

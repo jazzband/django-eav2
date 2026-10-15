@@ -36,7 +36,8 @@ decorator takes it as the ``config_cls`` argument:
         ...
 
 Registering the same model twice is harmless, because the second call does
-nothing. To undo a registration, call :func:`~eav.unregister`.
+nothing. That includes a second call with a different config class, which is
+ignored too. To change the config, call :func:`~eav.unregister` first.
 
 What registration changes
 -------------------------
@@ -45,10 +46,10 @@ Registration makes five changes to your model class:
 
 1. It attaches an :class:`~eav.managers.EntityManager`, which replaces the
    default ``objects`` manager. The manager adds the ``eav__`` lookups and the
-   bulk methods. You can pick another attribute name with ``manager_attr``.
+   bulk methods. See `Configure a model`_ to attach it under another name.
 2. It connects the model's ``post_init`` signal to
    :meth:`~eav.registry.Registry.attach_eav_attr`, which gives every
-   instance an :class:`~eav.models.Entity` helper. The helper reads, stores
+   instance an :class:`~eav.models.Entity` helper. The helper reads, stores,
    and validates attribute values, and is available as ``instance.eav``.
 3. It connects the ``pre_save`` and ``post_save`` signals to
    :meth:`~eav.models.Entity.pre_save_handler` and
@@ -66,14 +67,14 @@ For example, the relation gives you every stored value of one entity:
 .. code-block:: python
 
     patient.eav_values.all()
-    # <QuerySet [fever: "True" (1), temperature: "37.7" (1)]>
+    # <QuerySet [Fever: "True" (Ada), Temperature: "37.7" (Ada)]>
 
 Configure a model
 -----------------
 
 Subclass :class:`~eav.registry.EavConfig`, override the options you want to
-change, and pass the class when you register. For example, to rename the
-manager:
+change, and pass the class when you register. For example, to attach the EAV
+manager as ``eav_objects`` instead of replacing ``objects``:
 
 .. code-block:: python
 
@@ -83,6 +84,12 @@ manager:
         manager_attr = "eav_objects"
 
     eav.register(Supplier, SupplierEavConfig)
+
+    Supplier.eav_objects.filter(eav__city="London")
+
+The manager that was already called ``objects`` keeps its name, and only
+``eav_objects`` understands ``eav__`` lookups. Every other example in this
+guide uses ``objects``, so use ``eav_objects`` in its place.
 
 :doc:`configuration` lists every option.
 

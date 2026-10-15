@@ -2,8 +2,8 @@ Bulk operations
 ===============
 
 ``bulk_create()`` and ``bulk_update()`` on a registered model's manager store
-attribute values as well as fields. They use about one query per 1000 rows,
-where saving entities one by one takes one or more queries each.
+attribute values as well as fields. Each batch costs one query for the entities,
+plus one for each datatype you set, instead of one or more queries per entity.
 
 Create many entities
 --------------------
@@ -25,8 +25,8 @@ pass the list to ``bulk_create()``:
 ``bulk_create()`` first validates every instance: required attributes, value
 types, enum choices, and unknown attributes. If any instance is invalid, it
 raises before it writes anything. It then writes the instances and their
-values in one transaction, in chunks, so memory stays bounded for large
-inputs.
+values in one transaction, in batches, so no single statement grows without
+limit.
 
 Update many entities
 --------------------
@@ -76,7 +76,7 @@ mind:
       - 65,535 bind parameters per statement, when the driver binds on the
         server
     * - MySQL
-      - ``max_allowed_packet``
+      - Limited by ``max_allowed_packet``
     * - SQLite
       - The variable limit. The batch size is lowered automatically.
 

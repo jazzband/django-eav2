@@ -18,7 +18,7 @@ def register_eav(**kwargs: Any) -> Callable[[_ModelT], _ModelT]:
 
     Example::
 
-        @register_eav
+        @register_eav()
         class Author(models.Model):
             pass
     """

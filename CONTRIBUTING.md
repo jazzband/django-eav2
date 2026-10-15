@@ -77,6 +77,7 @@ The docs are reStructuredText in `docs/source`, built with Sphinx. When you add 
 - Use short sentences, the active voice, and plain words. Refer to a reader or a user as "they", never "he" or "she".
 - Use a table when list items have several parallel parts, such as a name, a default, and a purpose.
 - Link to a page instead of repeating it, and say what the link leads to.
+- Skip filler words such as "simply" and "just", and write wording that includes every reader.
 - Make code samples complete enough to run, with names that explain themselves.
 - Build with `uv run poe docs`, which fails on any warning.
 

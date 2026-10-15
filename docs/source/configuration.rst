@@ -1,7 +1,7 @@
 Configuration
 =============
 
-Django EAV 2 has one Django setting, and one config class for each registered
+Django EAV 2 has one Django setting and one config class for each registered
 model.
 
 .. _primary-key-setting:
@@ -56,14 +56,17 @@ options for one model:
     * - ``eav_attr``
       - ``"eav"``
       - The name of the :class:`~eav.models.Entity` helper on each instance.
+        It is also the prefix in lookups and bulk field names, so ``eav_attr =
+        "extra"`` gives ``extra__city``.
     * - ``generic_relation_attr``
       - ``"eav_values"``
       - The name of the generic relation from an entity to its
         :class:`~eav.models.Value` objects.
     * - ``generic_relation_related_name``
-      - Model class name
+      - ``None``, which uses the model class name
       - The name used to query values from an entity, for example
-        ``Value.objects.filter(Patient__name="Ada")``.
+        ``Value.objects.filter(Patient__name="Ada")``. The case of the model
+        name is kept.
     * - ``bulk_batch_size``
       - ``1000``
       - How many entities ``bulk_create`` and ``bulk_update`` write at a time.

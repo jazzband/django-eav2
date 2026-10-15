@@ -4,7 +4,6 @@ API reference
 This page documents the public classes and functions. For explanations and
 examples, use the guide pages.
 
-
 Registration
 ------------
 
@@ -61,7 +60,7 @@ Models
     :members:
     :member-order: bysource
 
-Queryset
+QuerySet
 --------
 
 .. automodule:: eav.queryset
