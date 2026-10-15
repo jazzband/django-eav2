@@ -12,6 +12,7 @@ These validators are called by the
 
 import datetime as dt
 import json
+from typing import Any
 
 from django.apps import apps
 from django.core.exceptions import ValidationError
@@ -19,13 +20,13 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-def validate_text(candidate):
+def validate_text(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* type is ``str`` or ``unicode``."""
     if not isinstance(candidate, str):
         raise ValidationError(_("Must be str or unicode"))
 
 
-def validate_float(candidate):
+def validate_float(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* can be cast as a ``float``."""
     try:
         float(candidate)
@@ -33,7 +34,7 @@ def validate_float(candidate):
         raise ValidationError(_("Must be a float")) from err
 
 
-def validate_int(candidate):
+def validate_int(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* can be cast as an ``int``."""
     try:
         int(candidate)
@@ -41,7 +42,7 @@ def validate_int(candidate):
         raise ValidationError(_("Must be an integer")) from err
 
 
-def validate_date(candidate):
+def validate_date(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* is a ``datetime`` or ``date``."""
     if not isinstance(candidate, dt.datetime) and not isinstance(
         candidate,
@@ -50,13 +51,13 @@ def validate_date(candidate):
         raise ValidationError(_("Must be a date or datetime"))
 
 
-def validate_bool(candidate):
+def validate_bool(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* type is ``bool``."""
     if not isinstance(candidate, bool):
         raise ValidationError(_("Must be a boolean"))
 
 
-def validate_object(candidate):
+def validate_object(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* is a saved Django model instance."""
     if not isinstance(candidate, models.Model):
         raise ValidationError(_("Must be a django model object instance"))
@@ -65,7 +66,7 @@ def validate_object(candidate):
         raise ValidationError(_("Model has not been saved yet"))
 
 
-def validate_enum(candidate):
+def validate_enum(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* is a saved ``EnumValue``."""
     enum_value_model = apps.get_model("eav", "EnumValue")
 
@@ -73,7 +74,7 @@ def validate_enum(candidate):
         raise ValidationError(_("EnumValue has not been saved yet"))
 
 
-def validate_json(candidate):
+def validate_json(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* is a dict or JSON text for one."""
     try:
         parsed = json.loads(candidate) if isinstance(candidate, str) else candidate
@@ -84,7 +85,7 @@ def validate_json(candidate):
         raise ValidationError(_("Must be a JSON Serializable object"))
 
 
-def validate_csv(candidate):
+def validate_csv(candidate: Any) -> None:
     """Raise ``ValidationError`` unless *candidate* is a c-s-v value."""
     if isinstance(candidate, str):
         candidate = candidate.split(";")

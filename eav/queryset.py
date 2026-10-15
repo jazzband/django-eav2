@@ -21,7 +21,7 @@ Q-expressions. Q-expressions need to be rewritten for two reasons:
 .. note:: EAV negation limitation
 
    Because EAV values are stored as individual rows in a shared table,
-   using ``~Q(eav__attr=value)`` inside ``.filter()`` negates at the
+   using ``~models.Q(eav__attr=value)`` inside ``.filter()`` negates at the
    **row** level rather than the **entity** level.  This can produce
    unexpected results: an entity that has *other* EAV rows not matching
    the negation will still appear in the result set.
@@ -30,26 +30,40 @@ Q-expressions. Q-expressions need to be rewritten for two reasons:
    is to chain ``.exclude()`` instead::
 
        # Wrong - row-level negation, may return unexpected results
-       MyModel.objects.filter(Q(eav__a=x) & ~Q(eav__b=y))
+       MyModel.objects.filter(models.Q(eav__a=x) & ~models.Q(eav__b=y))
 
        # Correct - entity-level negation
        MyModel.objects.filter(eav__a=x).exclude(eav__b=y)
 """
 
-from functools import wraps
+from __future__ import annotations
 
-from django.db import transaction
-from django.db.models import Q
+import operator
+from functools import reduce, wraps
+from typing import TYPE_CHECKING, Any, TypeVar, cast
+
+from django.db import models, transaction
 from django.db.models.query import ModelIterable, QuerySet
 from django.db.utils import NotSupportedError
 
-from eav.logic.bulk import BulkValueWriter, chunked
+from eav.logic.bulk import BulkValueWriter, chunked, split_eav_fields
+from eav.logic.entities import config_of
+from eav.logic.entity_pk import get_entity_pk_type
+from eav.logic.lookups import leaf_queryset, value_lookup
 from eav.logic.ordering import eav_order_slug, get_attribute, order_subquery
 from eav.logic.schema import shared_schema_for
-from eav.models import Attribute, EnumValue, Value
+from eav.models import Value
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Collection, Iterable, Iterator
+
+    from typing_extensions import Self
+
+_ModelT = TypeVar("_ModelT", bound=models.Model)
+_FuncT = TypeVar("_FuncT", bound="Callable[..., Any]")
 
 
-def is_eav_and_leaf(expr, gr_name):
+def is_eav_and_leaf(expr: Any, gr_name: str) -> bool:
     """
     Check whether Q-expression is an EAV AND leaf.
 
@@ -68,7 +82,10 @@ def is_eav_and_leaf(expr, gr_name):
     )
 
 
-def rewrite_q_expr(model_cls, expr):
+def rewrite_q_expr(
+    model_cls: Any,
+    expr: models.Q | tuple[str, Any],
+) -> models.Q | tuple[str, Any]:
     """Rewrite a Q-expression to a safe form, so the generated SQL is valid.
 
     IGNORE:
@@ -113,66 +130,37 @@ def rewrite_q_expr(model_cls, expr):
     """
     # Node in a Q-expr can be a Q or an attribute-value tuple (leaf).
     # We are only interested in Qs.
+    if not isinstance(expr, models.Q):
+        return expr
 
-    if isinstance(expr, Q):
-        config_cls = getattr(model_cls, "_eav_config_cls", None)
-        gr_name = config_cls.generic_relation_attr
+    gr_name = model_cls._eav_config_cls.generic_relation_attr  # noqa: SLF001
 
-        # Recursively check child nodes.
-        expr.children = [rewrite_q_expr(model_cls, c) for c in expr.children]
-        # Check which ones need a rewrite.
-        rewritable = [c for c in expr.children if is_eav_and_leaf(c, gr_name)]
+    # Recursively check child nodes.
+    children: list[Any] = [
+        rewrite_q_expr(model_cls, cast("models.Q", child)) for child in expr.children
+    ]
+    leaves = [child for child in children if is_eav_and_leaf(child, gr_name)]
 
-        # Conflict occurs only with two or more AND-expressions.
-        # If there is only one we can ignore it.
+    # Conflict occurs only with two or more AND-expressions.
+    # If there is only one we can ignore it.
+    if len(leaves) > 1:
+        # Each leaf is a terminal Q node, i.e. an AND expression with a single
+        # attribute-value tuple child.
+        in_name = f"{gr_name}__in"
+        querysets = [
+            leaf_queryset(model_cls, leaf.children[0], in_name) for leaf in leaves
+        ]
+        merge = operator.and_ if expr.connector == "AND" else operator.or_
 
-        if len(rewritable) > 1:
-            q = None
-            # Save nodes which shouldn't be merged (non-EAV).
-            other = [c for c in expr.children if c not in rewritable]
+        # Keep the nodes that shouldn't be merged (non-EAV).
+        others = [child for child in children if child not in leaves]
+        children = [*others, ("pk__in", reduce(merge, querysets))]
 
-            for child in rewritable:
-                if not (child.children and len(child.children) == 1):
-                    raise AssertionError("Child must have exactly one descendant")
-                # Child to be merged is always a terminal Q node,
-                # i.e. it's an AND expression with attribute-value tuple child.
-                attrval = child.children[0]
-                if not isinstance(attrval, tuple):
-                    raise TypeError("Attribute-value must be a tuple")
-
-                fname = f"{gr_name}__in"
-
-                # Child can be either a 'eav_values__in' or 'pk__in' query.
-                # If it's the former then transform it into the latter.
-                # Otherwise, check if the value is valid for the '__in' query.
-                # If so, reverse it back to QuerySet so that set operators
-                # can be applied.
-
-                if attrval[0] == fname or hasattr(attrval[1], "__contains__"):
-                    # Create model queryset.
-                    leaf_qs = model_cls.objects.filter(**{fname: attrval[1]})
-                else:
-                    # Second val in tuple is a queryset.
-                    leaf_qs = attrval[1]
-
-                # Explicitly check for None. 'or' doesn't work here
-                # as empty QuerySet, which is valid, is falsy.
-                q = leaf_qs if q is None else q
-
-                if expr.connector == "AND":
-                    q &= leaf_qs
-                else:
-                    q |= leaf_qs
-
-            # If any two children were merged,
-            # update parent expression.
-            if q is not None:
-                expr.children = [*other, ("pk__in", q)]
-
+    expr.children = children
     return expr
 
 
-def eav_filter(func):
+def eav_filter(func: _FuncT) -> _FuncT:
     """Decorate ``filter`` and ``exclude`` to rewrite EAV filters.
 
     Passes args through :func:`expand_q_filters` and kwargs through
@@ -180,59 +168,60 @@ def eav_filter(func):
     """
 
     @wraps(func)
-    def wrapper(self, *args, **kwargs):
-        nargs = []
-        nkwargs = {}
+    def wrapper(self: EavQuerySet[Any], *args: Any, **kwargs: Any) -> Any:
+        # Modify Q objects (warning: recursion ahead) and rewrite them to a safe form.
+        rewritten = [
+            rewrite_q_expr(self.model, expand_q_filters(arg, self.model))
+            if isinstance(arg, models.Q)
+            else arg
+            for arg in args
+        ]
+        filters: dict[str, Any] = {}
+        pk_field = get_entity_pk_type(self.model)
 
-        for arg in args:
-            if isinstance(arg, Q):
-                # Modify Q objects (warning: recursion ahead).
-                arg = expand_q_filters(arg, self.model)  # noqa: PLW2901
-                # Rewrite Q-expression to safeform.
-                arg = rewrite_q_expr(self.model, arg)  # noqa: PLW2901
-            nargs.append(arg)
-
-        for key, value in kwargs.items():
+        for key, raw_value in kwargs.items():
             # Modify kwargs (warning: recursion ahead).
-            nkey, nval = expand_eav_filter(self.model, key, value)
+            name, operand = expand_eav_filter(self.model, key, raw_value)
+            previous = filters.get(name)
 
-            if nkey in nkwargs:
-                # Add filter to check if matching entity_id is
-                # in the previous queryset with same nkey
-                nkwargs[nkey] = nval.filter(
-                    entity_id__in=nkwargs[nkey].values_list("entity_id", flat=True),
+            # Add filter to check if the matching entity is in the previous
+            # queryset with same name.
+            filters[name] = (
+                operand
+                if previous is None
+                else operand.filter(
+                    **{f"{pk_field}__in": previous.values_list(pk_field, flat=True)},
                 ).distinct()
-            else:
-                nkwargs.update({nkey: nval})
+            )
 
-        return func(self, *nargs, **nkwargs)
+        return func(self, *rewritten, **filters)
 
-    return wrapper
+    return cast("_FuncT", wrapper)
 
 
-def expand_q_filters(q, root_cls):
+def expand_q_filters(query: models.Q, root_cls: Any) -> models.Q:
     """Rewrite the EAV filters of a Q object for the model *root_cls*.
 
     Recursively passes each filter / value in the Q object tree leaf nodes through
     :func:`expand_eav_filter`.
     """
-    new_children = []
+    new_children: list[Any] = []
 
-    for qi in q.children:
-        if isinstance(qi, tuple):
+    for child in query.children:
+        if isinstance(child, tuple):
             # This child is a leaf node: in Q this is a 2-tuple of:
             # (filter parameter, value).
-            key, value = expand_eav_filter(root_cls, *qi)
-            new_children.append(Q(**{key: value}))
+            key, operand = expand_eav_filter(root_cls, *child)
+            new_children.append(models.Q(**{key: operand}))
         else:
             # This child is another Q node: recursify!
-            new_children.append(expand_q_filters(qi, root_cls))
+            new_children.append(expand_q_filters(cast("models.Q", child), root_cls))
 
-    q.children = new_children
-    return q
+    query.children = new_children
+    return query
 
 
-def expand_eav_filter(model_cls, key, value):
+def expand_eav_filter(model_cls: Any, key: str, raw_value: Any) -> tuple[str, Any]:
     """Replace an EAV filter of *model_cls* with a subquery.
 
     Accepts a model class and a key, value, and recursively replaces any eav
@@ -253,31 +242,21 @@ def expand_eav_filter(model_cls, key, value):
 
     if len(fields) > 1 and config_cls and fields[0] == config_cls.eav_attr:
         slug = fields[1]
-        gr_name = config_cls.generic_relation_attr
         datatype = get_attribute(slug).datatype
+        extra = fields[2] if len(fields) > 2 else None  # noqa: PLR2004
+        lookup = value_lookup(datatype, raw_value, extra)
+        subquery = Value.objects.filter(**{lookup: raw_value, "attribute__slug": slug})
 
-        value_key = ""
-        if datatype == Attribute.TYPE_ENUM and not isinstance(value, EnumValue):
-            lookup = f"__value__{fields[2]}" if len(fields) > 2 else "__value"  # noqa: PLR2004
-            value_key = f"value_{datatype}{lookup}"
-        elif datatype == Attribute.TYPE_OBJECT:
-            value_key = "generic_value_id"
-        else:
-            lookup = f"__{fields[2]}" if len(fields) > 2 else ""  # noqa: PLR2004
-            value_key = f"value_{datatype}{lookup}"
-        kwargs = {value_key: value, "attribute__slug": slug}
-        value = Value.objects.filter(**kwargs)
-
-        return f"{gr_name}__in", value
+        return f"{config_cls.generic_relation_attr}__in", subquery
 
     # Not an eav field, so keep as is
-    return key, value
+    return key, raw_value
 
 
-class EavModelIterable(ModelIterable):
+class EavModelIterable(ModelIterable):  # type: ignore[type-arg]
     """An iterable of model instances that share one lookup of their attributes."""
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         """Yield the instances, pointing each entity at the shared schema."""
         schema = shared_schema_for(self.queryset.model)
 
@@ -287,16 +266,16 @@ class EavModelIterable(ModelIterable):
             yield instance
 
 
-class EavQuerySet(QuerySet):
+class EavQuerySet(QuerySet[_ModelT]):
     """A queryset of EAV models that understands ``eav__<slug>`` lookups."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Evaluate into instances that share one attribute lookup."""
         super().__init__(*args, **kwargs)
         self._iterable_class = EavModelIterable
 
     @eav_filter
-    def filter(self, *args, **kwargs):
+    def filter(self, *args: Any, **kwargs: Any) -> EavQuerySet[_ModelT]:
         """Filter after passing the arguments through :func:`eav_filter`.
 
         The result is passed to the ``Manager`` filter method.
@@ -304,7 +283,7 @@ class EavQuerySet(QuerySet):
         return super().filter(*args, **kwargs)
 
     @eav_filter
-    def exclude(self, *args, **kwargs):
+    def exclude(self, *args: Any, **kwargs: Any) -> EavQuerySet[_ModelT]:
         """Exclude after passing the arguments through :func:`eav_filter`.
 
         The result is passed to the ``Manager`` exclude method.
@@ -312,7 +291,7 @@ class EavQuerySet(QuerySet):
         return super().exclude(*args, **kwargs)
 
     @eav_filter
-    def get(self, *args, **kwargs):
+    def get(self, *args: Any, **kwargs: Any) -> _ModelT:
         """Get after passing the arguments through :func:`eav_filter`.
 
         The result is passed to the ``Manager`` get method.
@@ -321,13 +300,13 @@ class EavQuerySet(QuerySet):
 
     def bulk_create(  # noqa: PLR0913, PLR0917
         self,
-        objs,
-        batch_size=None,
-        ignore_conflicts=False,  # noqa: FBT002
-        update_conflicts=False,  # noqa: FBT002
-        update_fields=None,
-        unique_fields=None,
-    ):
+        objs: Iterable[_ModelT],
+        batch_size: int | None = None,
+        ignore_conflicts: bool = False,  # noqa: FBT001, FBT002
+        update_conflicts: bool = False,  # noqa: FBT001, FBT002
+        update_fields: Collection[str] | None = None,
+        unique_fields: Collection[str] | None = None,
+    ) -> list[_ModelT]:
         """
         Create *objs* and store the EAV values assigned to them.
 
@@ -341,22 +320,23 @@ class EavQuerySet(QuerySet):
         """
         objs = list(objs)
         writer = BulkValueWriter.for_objects(self.model, objs, batch_size)
-        options = {
-            "ignore_conflicts": ignore_conflicts,
-            "update_conflicts": update_conflicts,
-            "update_fields": update_fields,
-            "unique_fields": unique_fields,
-        }
 
         if writer is None:
-            return super().bulk_create(objs, batch_size=batch_size, **options)
+            return super().bulk_create(
+                objs,
+                batch_size=batch_size,
+                ignore_conflicts=ignore_conflicts,
+                update_conflicts=update_conflicts,
+                update_fields=update_fields,
+                unique_fields=unique_fields,
+            )
 
         if ignore_conflicts or update_conflicts:
             raise NotSupportedError(
                 "bulk_create() cannot store EAV values together with conflict handling",
             )
 
-        created = []
+        created: list[_ModelT] = []
         with transaction.atomic(using=self.db):
             writer.validate_new(objs)
 
@@ -367,7 +347,12 @@ class EavQuerySet(QuerySet):
 
         return created
 
-    def bulk_update(self, objs, fields, batch_size=None):
+    def bulk_update(
+        self,
+        objs: Iterable[_ModelT],
+        fields: Iterable[str],
+        batch_size: int | None = None,
+    ) -> int:
         """
         Update *objs*, including EAV attributes named like ``eav__<slug>``.
 
@@ -377,27 +362,24 @@ class EavQuerySet(QuerySet):
         Like Django's ``bulk_update`` this sends no signals.
         """
         objs = list(objs)
-        eav_attr = self.model._eav_config_cls.eav_attr  # noqa: SLF001
-        prefix = f"{eav_attr}__"
-        eav_slugs = [
-            name.removeprefix(prefix) for name in fields if name.startswith(prefix)
-        ]
-        model_fields = [name for name in fields if not name.startswith(prefix)]
+        field_names = list(fields)
+        eav_slugs, model_fields = split_eav_fields(
+            config_of(self.model).eav_attr,
+            field_names,
+        )
 
         if not eav_slugs:
-            return super().bulk_update(objs, fields, batch_size)
+            return super().bulk_update(objs, field_names, batch_size)
 
-        if any(obj.pk is None for obj in objs):
+        if any(candidate.pk is None for candidate in objs):
             raise ValueError("All bulk_update() objects must have a primary key set.")
 
         writer = BulkValueWriter(self.model, batch_size)
 
         with transaction.atomic(using=self.db):
-            updated = (
-                super().bulk_update(objs, model_fields, batch_size)
-                if model_fields
-                else 0
-            )
+            updated = 0
+            if model_fields:
+                updated = super().bulk_update(objs, model_fields, batch_size)
             writer.validate_assigned(objs, eav_slugs)
 
             for chunk in chunked(objs, writer.chunk_size):
@@ -405,7 +387,7 @@ class EavQuerySet(QuerySet):
 
         return updated
 
-    def order_by(self, *fields):
+    def order_by(self, *fields: Any) -> Self:
         """Order by EAV attributes and regular fields.
 
         EAV attributes are named ``eav__<slug>``, optionally prefixed with ``-``.
@@ -414,12 +396,12 @@ class EavQuerySet(QuerySet):
         the entity's value, so this works for integer and UUID primary keys,
         for empty querysets, and for any value type the database can sort.
         """
-        config_cls = self.model._eav_config_cls  # noqa: SLF001
-        queryset = self
-        ordering = []
+        eav_attr = config_of(self.model).eav_attr
+        queryset: QuerySet[_ModelT] = self
+        ordering: list[Any] = []
 
         for field in fields:
-            slug = eav_order_slug(field, config_cls.eav_attr)
+            slug = eav_order_slug(field, eav_attr)
 
             if slug is None:
                 ordering.append(field)
@@ -432,4 +414,4 @@ class EavQuerySet(QuerySet):
                 )
             ordering.append(f"-{alias}" if field.startswith("-") else alias)
 
-        return QuerySet.order_by(queryset, *ordering)
+        return cast("Self", QuerySet.order_by(queryset, *ordering))

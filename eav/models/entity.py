@@ -1,21 +1,23 @@
 from __future__ import annotations
 
-from copy import copy
 from functools import cached_property
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Prefetch, QuerySet, prefetch_related_objects
+from django.db import models
 from django.db.models.base import ModelBase
 from django.utils.translation import gettext_lazy as _
 
 from eav import register
 from eav.exceptions import IllegalAssignmentException
+from eav.logic.entities import config_of, entity_of
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.schema import OwnSchema, SchemaSource
 from eav.models.attribute import Attribute
-from eav.models.enum_value import EnumValue
 from eav.models.value import Value
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
 
 #: Names Entity keeps in ``__dict__`` that are not EAV attribute assignments.
 _INTERNAL_NAMES = frozenset(("instance", "ct", "_schema"))
@@ -25,28 +27,33 @@ class Entity:
     """Helper class that will be attached to entities registered with eav."""
 
     @staticmethod
-    def pre_save_handler(sender, *args, **kwargs):
+    def pre_save_handler(
+        sender: type[models.Model],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Validate the entity's attributes before the model instance is saved.
 
         Attached to the instance as a ``pre_save`` handler; it calls
         :meth:`validate_attributes`.
         """
-        instance = kwargs["instance"]
-        entity = getattr(kwargs["instance"], instance._eav_config_cls.eav_attr)  # noqa: SLF001
+        entity = entity_of(kwargs["instance"])
         entity.clear_cache()
         entity.validate_attributes()
 
     @staticmethod
-    def post_save_handler(sender, *args, **kwargs):
+    def post_save_handler(
+        sender: type[models.Model],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Save the entity's EAV values after the model instance is saved.
 
         Attached to the instance as a ``post_save`` handler; it calls :meth:`save`.
         """
-        instance = kwargs["instance"]
-        entity = getattr(instance, instance._eav_config_cls.eav_attr)  # noqa: SLF001
-        entity.save(created=kwargs.get("created", False))
+        entity_of(kwargs["instance"]).save(created=kwargs.get("created", False))
 
-    def __init__(self, instance) -> None:
+    def __init__(self, instance: models.Model) -> None:
         """Attach the helper to *instance*, the model instance it belongs to."""
         self.instance = instance
         self._schema: SchemaSource = OwnSchema(self)
@@ -73,15 +80,14 @@ class Entity:
         """Read the attributes from *source*, for example one shared by a queryset."""
         self._schema = source
 
-    def _attributes(self):
+    def _attributes(self) -> Mapping[str, Attribute]:
         """Attributes that apply to this entity, by slug, in display order."""
         return self._schema.load()
 
     @property
     def _relation(self) -> str:
         """Name of the relation from the instance to its :class:`Value` objects."""
-        config_cls = self.instance._eav_config_cls  # noqa: SLF001
-        return str(config_cls.generic_relation_attr).lower()
+        return config_of(self.instance).generic_relation_attr.lower()
 
     def _cached_values(self) -> list[Value] | None:
         """
@@ -100,15 +106,15 @@ class Entity:
             None,
         )
 
-    def _values(self) -> dict[Any, Value]:
+    def _values_by_attribute(self) -> dict[Any, Value]:
         """Return the entity's :class:`Value` objects by attribute primary key."""
         if self.instance._state.adding:  # noqa: SLF001
             return {}
 
         if self._cached_values() is None:
-            prefetch_related_objects(
+            models.prefetch_related_objects(
                 [self.instance],
-                Prefetch(
+                models.Prefetch(
                     self._relation,
                     queryset=Value.objects.select_related("attribute", "value_enum"),
                 ),
@@ -130,7 +136,7 @@ class Entity:
 
         return None
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         """Return the value of the EAV attribute called *name*.
 
         This is called whenever the user invokes::
@@ -159,18 +165,15 @@ class Entity:
                 % {"obj": self.instance, "attr": name},
             ) from err
 
-        eav_value = self._values().get(attribute.pk)
+        eav_value = self._values_by_attribute().get(attribute.pk)
         return None if eav_value is None else eav_value.value
 
-    def get_all_attributes(self) -> QuerySet[Attribute]:
+    def get_all_attributes(self) -> models.QuerySet[Attribute]:
         """Return a query set of the :class:`Attribute` objects this entity can set."""
-        config_cls = self.instance._eav_config_cls  # noqa: SLF001
-        attributes: QuerySet[Attribute] = config_cls.get_attributes(
-            instance=self.instance,
-        )
+        attributes = config_of(self.instance).get_attributes(instance=self.instance)
         return attributes.order_by("display_order").select_related("enum_group")
 
-    def _hasattr(self, attribute_slug):
+    def _hasattr(self, attribute_slug: str) -> bool:
         """Check whether a user has set a real attribute on this helper.
 
         Since we override ``__getattr__`` with a fallback to the database, this checks
@@ -178,7 +181,7 @@ class Entity:
         """
         return attribute_slug in self.__dict__
 
-    def _getattr(self, attribute_slug):
+    def _getattr(self, attribute_slug: str) -> Any:
         """Get the value a user set for one of our attributes.
 
         Since we override ``__getattr__`` with a fallback to the database, this reads
@@ -193,55 +196,39 @@ class Entity:
         Pass ``created=True`` for an entity that was just inserted, which has no
         values to look up.
         """
-        values = {} if created else self._values()
+        stored = {} if created else self._values_by_attribute()
+        attributes = self._attributes()
 
-        for attribute in self._attributes().values():
-            if self._hasattr(attribute.slug):
-                attribute_value = self._getattr(attribute.slug)
-                if (
-                    attribute.datatype == Attribute.TYPE_ENUM
-                    and not isinstance(
-                        attribute_value,
-                        EnumValue,
-                    )
-                    and attribute_value is not None
-                ):
-                    attribute_value = attribute.enum_choices.get(
-                        attribute_value,
-                    ) or EnumValue.objects.get(value=attribute_value)
+        for slug, raw_value in self.assigned_values().items():
+            attribute = attributes.get(slug)
 
+            if attribute is not None:
                 attribute.store_value(
                     self.instance,
-                    attribute_value,
-                    values.get(attribute.pk),
+                    attribute.as_choice(raw_value),
+                    stored.get(attribute.pk),
                 )
 
         # The stored values changed, so they are loaded again on the next read.
         self._evict_values()
 
-    def validate_attributes(self):
+    def validate_attributes(self) -> None:
         """Validate all the entity's values so they can be saved cleanly.
 
         Called before :meth:`save`. Raises ``ValidationError`` if they can't be.
         """
-        values_dict = self.get_values_dict()
+        stored = self.get_values_dict()
+        assigned = self.assigned_values()
+        attributes = self._attributes()
 
-        for attribute in self._attributes().values():
-            value = None
+        for slug, attribute in attributes.items():
+            # A value assigned to this instance wins over the stored one.
+            attribute.validate_assignment(
+                assigned[slug] if slug in assigned else stored.get(slug),
+            )
 
-            # Value was assigned to this instance.
-            if self._hasattr(attribute.slug):
-                value = self._getattr(attribute.slug)
-                values_dict.pop(attribute.slug, None)
-            # Otherwise try pre-loaded from DB.
-            else:
-                value = values_dict.pop(attribute.slug, None)
-
-            attribute.validate_assignment(value)
-
-        illegal = values_dict or (
-            self.get_object_attributes() - self.get_all_attribute_slugs()
-        )
+        known = set(attributes)
+        illegal = (set(stored) - known) or (set(assigned) - known)
 
         if illegal:
             message = (
@@ -252,18 +239,18 @@ class Entity:
             )
             raise IllegalAssignmentException(message)
 
-    def get_values_dict(self):
+    def get_values_dict(self) -> dict[str, Any]:
         """Return the entity's values by attribute slug."""
         return {
             eav_value.attribute.slug: eav_value.value
-            for eav_value in self._values().values()
+            for eav_value in self._values_by_attribute().values()
         }
 
-    def get_values(self):
+    def get_values(self) -> models.QuerySet[Value]:
         """Get all set :class:`Value` objects for self.instance."""
         entity_filter = {
             "entity_ct": self.ct,
-            f"{get_entity_pk_type(self.instance)}": self.instance.pk,
+            get_entity_pk_type(type(self.instance)): self.instance.pk,
         }
 
         return Value.objects.filter(**entity_filter).select_related(
@@ -271,11 +258,11 @@ class Entity:
             "value_enum",
         )
 
-    def get_all_attribute_slugs(self):
+    def get_all_attribute_slugs(self) -> set[str]:
         """Return the slugs of all attributes available to this entity."""
         return set(self._attributes())
 
-    def get_attribute_by_slug(self, slug):
+    def get_attribute_by_slug(self, slug: str) -> Attribute:
         """Return the :class:`Attribute` with *slug*."""
         if slug not in self._attributes():
             # The attributes may have changed since they were loaded.
@@ -286,10 +273,10 @@ class Entity:
         except KeyError as err:
             raise Attribute.DoesNotExist(slug) from err
 
-    def get_value_by_attribute(self, attribute):
+    def get_value_by_attribute(self, attribute: Attribute) -> Value:
         """Return the :class:`Value` for *attribute*."""
         try:
-            return self._values()[attribute.pk]
+            return self._values_by_attribute()[attribute.pk]
         except KeyError as err:
             raise Value.DoesNotExist(attribute.slug) from err
 
@@ -302,28 +289,34 @@ class Entity:
         """
         return {name: self.__dict__[name] for name in self.get_object_attributes()}
 
-    def get_object_attributes(self):
+    def get_object_attributes(self) -> set[str]:
         """Return the names of the attributes assigned to this entity instance.
 
         Names used internally are excluded.
         """
-        return set(copy(self.__dict__).keys()) - _INTERNAL_NAMES
+        return set(self.__dict__) - _INTERNAL_NAMES
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Value]:
         """Iterate over set EAV values.
 
         This would allow you to do::
 
             for i in m.eav: print(i)
         """
-        return iter(self._values().values())
+        return iter(self._values_by_attribute().values())
 
 
 class EAVModelMeta(ModelBase):
     """Metaclass that registers each model class with eav when it is created."""
 
-    def __new__(cls, name, bases, namespace, **kwds):
+    def __new__(
+        cls,
+        name: str,
+        bases: tuple[type, ...],
+        namespace: dict[str, Any],
+        **kwds: Any,
+    ) -> Any:
         """Create the model class and register it with eav."""
-        result = super().__new__(cls, name, bases, dict(namespace))
-        register(result)
-        return result
+        model_class = super().__new__(cls, name, bases, dict(namespace))
+        register(cast("type[models.Model]", model_class))
+        return model_class

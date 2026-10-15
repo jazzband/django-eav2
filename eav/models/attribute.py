@@ -2,15 +2,15 @@ from __future__ import annotations
 
 import warnings
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import ForeignKey
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from eav import validators
 from eav.fields import EavDatatypeField
 from eav.logic.dates import as_datetime
 from eav.logic.entity_pk import get_entity_pk_type
@@ -19,21 +19,10 @@ from eav.logic.object_pk import get_pk_format
 from eav.logic.slug import SLUGFIELD_MAX_LENGTH, generate_slug
 from eav.models.enum_value import EnumValue
 from eav.models.value import Value
-from eav.settings import CHARFIELD_LENGTH
-from eav.validators import (
-    validate_bool,
-    validate_csv,
-    validate_date,
-    validate_enum,
-    validate_float,
-    validate_int,
-    validate_json,
-    validate_object,
-    validate_text,
-)
+from eav.settings import CHARFIELD_LENGTH, DESCRIPTION_LENGTH
 
 if TYPE_CHECKING:
-    from django.db.models import Model
+    from collections.abc import Callable, Collection
 
     from eav.models.enum_group import EnumGroup
 
@@ -166,7 +155,7 @@ class Attribute(models.Model):
     :meth:`~eav.registry.EavConfig.get_attributes` method of that entity's config.
     """
 
-    enum_group: ForeignKey[EnumGroup | None] = ForeignKey(
+    enum_group: models.ForeignKey[EnumGroup | None] = models.ForeignKey(
         "eav.EnumGroup",
         on_delete=models.PROTECT,
         blank=True,
@@ -175,7 +164,7 @@ class Attribute(models.Model):
     )
 
     description = models.CharField(
-        max_length=256,
+        max_length=DESCRIPTION_LENGTH,
         blank=True,
         default="",
         help_text=_("Short description"),
@@ -208,9 +197,10 @@ class Attribute(models.Model):
         verbose_name_plural = _("Attributes")
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.get_datatype_display()})"
+        display = self.get_datatype_display()  # pyright: ignore[reportAttributeAccessIssue]
+        return f"{self.name} ({display})"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Save the Attribute, generating a slug if one wasn't provided."""
         if not self.slug:
             self.slug = generate_slug(self.name)
@@ -234,11 +224,11 @@ class Attribute(models.Model):
         )
 
     @property
-    def help_text(self):
+    def help_text(self) -> str:
         """The attribute's description, used as help text in forms."""
         return self.description
 
-    def get_validators(self):
+    def get_validators(self) -> list[Callable[[Any], None]]:
         """Return the validators for the datatype, as a list of length one.
 
         The validator comes from :mod:`~eav.validators`.
@@ -249,47 +239,46 @@ class Attribute(models.Model):
            validators to return as well as the default, built-in one.
         """
         datatype_validators = {
-            "text": validate_text,
-            "float": validate_float,
-            "int": validate_int,
-            "date": validate_date,
-            "bool": validate_bool,
-            "object": validate_object,
-            "enum": validate_enum,
-            "json": validate_json,
-            "csv": validate_csv,
+            "text": validators.validate_text,
+            "float": validators.validate_float,
+            "int": validators.validate_int,
+            "date": validators.validate_date,
+            "bool": validators.validate_bool,
+            "object": validators.validate_object,
+            "enum": validators.validate_enum,
+            "json": validators.validate_json,
+            "csv": validators.validate_csv,
         }
 
         return [datatype_validators[self.datatype]]
 
-    def validate_value(self, value):
-        """Check *value* against the validators from :meth:`get_validators`."""
+    def validate_value(self, candidate: Any) -> None:
+        """Check *candidate* against the validators from :meth:`get_validators`."""
         for validator in self.get_validators():
-            validator(value)
+            validator(candidate)
 
         if self.datatype == self.TYPE_ENUM:
-            if isinstance(value, EnumValue):
-                value = value.value
-            if value not in self.enum_choices:
+            choice = candidate.value if isinstance(candidate, EnumValue) else candidate
+            if choice not in self.enum_choices:
                 raise ValidationError(
                     _("%(val)s is not a valid choice for %(attr)s")
-                    % {"val": value, "attr": self},
+                    % {"val": choice, "attr": self},
                 )
 
-    def validate_assignment(self, value: object) -> None:
+    def validate_assignment(self, candidate: object) -> None:
         """
         Check a value assigned to this attribute of an entity.
 
-        Raises ``ValidationError`` if the attribute is required and the value is
-        ``None``, or if the value is not valid for the attribute.
+        Raises ``ValidationError`` if the attribute is required and *candidate* is
+        ``None``, or if *candidate* is not valid for the attribute.
         """
-        if value is None:
+        if candidate is None:
             if self.required:
                 raise ValidationError(_("%s EAV field cannot be blank") % self.slug)
             return
 
         try:
-            self.validate_value(value)
+            self.validate_value(candidate)
         except ValidationError as err:
             raise ValidationError(
                 _("%(attr)s EAV field %(err)s") % {"attr": self.slug, "err": err},
@@ -307,7 +296,7 @@ class Attribute(models.Model):
 
         return {choice.value: choice for choice in self.enum_group.values.all()}
 
-    def clean(self):
+    def clean(self) -> None:
         """Validate the attribute.
 
         Raises ``ValidationError`` if the datatype is *TYPE_ENUM* and no enum group is
@@ -323,7 +312,7 @@ class Attribute(models.Model):
                 _("You can only assign a choice group to multiple choice attributes"),
             )
 
-    def clean_fields(self, exclude=None):
+    def clean_fields(self, exclude: Collection[str] | None = None) -> None:
         """Perform field-specific validation on the model's fields.
 
         This method extends the default field cleaning process to include
@@ -344,19 +333,34 @@ class Attribute(models.Model):
                 stacklevel=3,
             )
 
-    def get_choices(self):
+    def get_choices(self) -> models.QuerySet[EnumValue] | None:
         """Return a query set of the :class:`EnumValue` objects of this attribute.
 
         Returns None if the datatype of this attribute is not *TYPE_ENUM*.
         """
-        return (
-            self.enum_group.values.all()
-            if self.datatype == Attribute.TYPE_ENUM
-            else None
+        if self.datatype != Attribute.TYPE_ENUM or self.enum_group is None:
+            return None
+
+        return self.enum_group.values.all()
+
+    def as_choice(self, raw_value: object) -> object:
+        """Return the :class:`EnumValue` for text assigned to an enum attribute.
+
+        Anything that is not text for an enum attribute is returned unchanged.
+        """
+        if (
+            self.datatype != self.TYPE_ENUM
+            or raw_value is None
+            or isinstance(raw_value, EnumValue)
+        ):
+            return raw_value
+
+        return self.enum_choices.get(str(raw_value)) or EnumValue.objects.get(
+            value=raw_value,
         )
 
-    def save_value(self, entity, value):
-        """Set the :class:`Value` of this attribute for *entity* to *value*.
+    def save_value(self, entity: models.Model, raw_value: object) -> Value | None:
+        """Set the :class:`Value` of this attribute for *entity* to *raw_value*.
 
         *entity* is any Django object registered with eav.
 
@@ -364,19 +368,19 @@ class Attribute(models.Model):
         exist, one will be created.
 
         .. note::
-           If *value* is None and a :class:`Value` object exists for this
+           If *raw_value* is None and a :class:`Value` object exists for this
            Attribute and *entity*, it will delete that :class:`Value` object.
         """
-        existing = self.value_set.filter(**self._entity_filter(entity)).first()
-        return self.store_value(entity, value, existing)
+        values = self.value_set.filter(**self._entity_filter(entity))  # pyright: ignore[reportAttributeAccessIssue]
+        return self.store_value(entity, raw_value, values.first())
 
     def store_value(
         self,
-        entity: Model,
-        value: object,
+        entity: models.Model,
+        raw_value: object,
         existing: Value | None,
     ) -> Value | None:
-        """Store *value* for *entity*, given its *existing* :class:`Value`, if any.
+        """Store *raw_value* for *entity*, given its *existing* :class:`Value`.
 
         The caller has already loaded *existing*. This is what :meth:`save_value` does
         once it has looked the object up, and what ``Entity.save`` calls with values it
@@ -384,25 +388,26 @@ class Attribute(models.Model):
 
         Returns the stored :class:`Value`, or ``None`` when nothing is stored.
         """
-        if value is None or value == "":
+        if raw_value is None or raw_value == "":
             if existing is not None:
                 existing.delete()
             return None
 
-        if self.datatype == self.TYPE_DATE:
-            value = as_datetime(value)
+        stored = (
+            as_datetime(raw_value) if self.datatype == self.TYPE_DATE else raw_value
+        )
 
         if existing is None:
             existing = Value(attribute=self, **self._entity_filter(entity))
-        elif value == existing.value:
+        elif stored == existing.value:
             return existing
 
-        existing.value = value
+        existing.value = stored
         existing.save_checked()
         return existing
 
-    def _entity_filter(self, entity: Model) -> dict[str, object]:
+    def _entity_filter(self, entity: models.Model) -> dict[str, object]:
         return {
             "entity_ct": ContentType.objects.get_for_model(entity),
-            f"{get_entity_pk_type(entity)}": entity.pk,
+            get_entity_pk_type(type(entity)): entity.pk,
         }

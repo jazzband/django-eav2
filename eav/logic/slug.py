@@ -7,6 +7,7 @@ from typing import Final
 from django.utils.text import slugify
 
 SLUGFIELD_MAX_LENGTH: Final = 50
+_FALLBACK_CHARS: Final = string.ascii_lowercase + string.digits
 
 
 def non_identifier_chars() -> dict[str, str]:
@@ -30,32 +31,31 @@ def non_identifier_chars() -> dict[str, str]:
 _NON_IDENTIFIER_CHARS: Final = non_identifier_chars()
 
 
-def generate_slug(value: str) -> str:
-    """Generate a valid slug based on the given value.
+def generate_slug(text: str) -> str:
+    """Generate a valid slug based on the given text.
 
-    This function converts the input value into a Python-identifier-friendly slug.
+    This function converts the input text into a Python-identifier-friendly slug.
     It handles special characters, ensures a valid Python identifier, and truncates
     the result to fit within the maximum allowed length.
 
     Args:
-        value (str): The input string to generate a slug from.
+        text (str): The input string to generate a slug from.
 
     Returns:
         str: A valid Python identifier slug, with a maximum
             length of SLUGFIELD_MAX_LENGTH.
     """
     for char, replacement in _NON_IDENTIFIER_CHARS.items():
-        value = value.replace(char, replacement)
+        text = text.replace(char, replacement)
 
     # Use slugify to create a URL-friendly base slug.
-    slug = slugify(value, allow_unicode=False).replace("-", "_")
+    slug = slugify(text, allow_unicode=False).replace("-", "_")
 
     # If slugify returns an empty string, generate a fallback
     # slug to ensure it's never empty.
     if not slug:
-        chars = string.ascii_lowercase + string.digits
-        randstr = "".join(secrets.choice(chars) for _ in range(8))
-        slug = f"rand_{randstr}"
+        suffix = "".join(secrets.choice(_FALLBACK_CHARS) for _ in range(8))
+        slug = f"rand_{suffix}"
 
     # Ensure the slug doesn't start with a digit to make it a valid Python identifier.
     if slug[0].isdigit():

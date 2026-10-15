@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from django.db import models
-from django.db.models import ManyToManyField
 from django.utils.translation import gettext_lazy as _
 
 from eav.logic.managers import EnumGroupManager
@@ -31,7 +30,7 @@ class EnumGroup(models.Model):
         max_length=CHARFIELD_LENGTH,
         verbose_name=_("Name"),
     )
-    values: ManyToManyField[EnumValue, Any] = ManyToManyField(
+    values: models.ManyToManyField[EnumValue, Any] = models.ManyToManyField(
         "eav.EnumValue",
         verbose_name=_("Enum group"),
     )
