@@ -11,6 +11,8 @@ from eav.models import Attribute, EnumGroup, EnumValue, Value
 from eav.registry import EavConfig
 from test_project.models import Encounter, ExampleModel, Patient
 
+pytestmark = pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning")
+
 
 class Queries(TestCase):
     def setUp(self):

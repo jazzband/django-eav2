@@ -7,7 +7,10 @@ import eav
 from eav.models import Attribute
 from test_project.models import Doctor, ExampleModel, Patient
 
-pytestmark = pytest.mark.django_db
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning"),
+]
 
 
 @pytest.fixture(autouse=True)

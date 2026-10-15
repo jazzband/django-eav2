@@ -50,12 +50,13 @@ Each attribute becomes a form field that matches its datatype:
       - ``BooleanField``
     * - ``enum``
       - ``ChoiceField``
-    * - ``json``
+    * - ``json`` (deprecated)
       - ``JSONField``
-    * - ``csv``
+    * - ``csv`` (deprecated)
       - ``CSVFormField``
 
-Attributes of type ``object`` do not get a form field. See `Known limitations`_.
+Attributes of the deprecated ``object`` type do not get a form field. See
+`Known limitations`_.
 
 Customize the fieldset
 ----------------------
@@ -75,14 +76,16 @@ Known limitations
 
 .. warning::
 
-    Both of these are known problems, which we plan to fix separately.
+    These are known problems.
 
-* **Attributes of type object** break the change form. The admin lists the
-  attribute as a field, but the form does not build one for it, so rendering
-  the form raises ``KeyError``. Until this is fixed, do not use ``object``
-  attributes on a model that you edit in the admin, or hide them with
+* **Attributes of the deprecated object type** break the change form. The admin
+  lists the attribute as a field, but the form does not build one for it, so
+  rendering the form raises ``KeyError``. We do not plan to fix this, because
+  3.0 removes the type. Do not use ``object`` attributes on a model that you
+  edit in the admin, or hide them with
   :meth:`~eav.registry.EavConfig.get_attributes`.
-* **Inlines** need work. :class:`~eav.admin.BaseEntityInline` expects a
-  ``form`` that is based on :class:`~eav.forms.BaseDynamicEntityForm`. Without
-  one, rendering the inline raises ``AttributeError``. ``TabularInline`` is not
+* **Inlines** need work, and we plan to fix them separately.
+  :class:`~eav.admin.BaseEntityInline` expects a ``form`` that is based on
+  :class:`~eav.forms.BaseDynamicEntityForm`. Without one, rendering the inline
+  raises ``AttributeError``. ``TabularInline`` is not
   supported either, so use ``StackedInline``.

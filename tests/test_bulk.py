@@ -16,7 +16,10 @@ from eav.models import Attribute, EnumGroup, EnumValue, Value
 from eav.registry import EavConfig
 from test_project.models import Doctor, ExampleModel, Patient
 
-pytestmark = pytest.mark.django_db
+pytestmark = [
+    pytest.mark.django_db,
+    pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning"),
+]
 
 
 @pytest.fixture(autouse=True)

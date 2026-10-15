@@ -10,6 +10,8 @@ import eav
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 from test_project.models import Patient
 
+pytestmark = pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning")
+
 
 class DataValidation(TestCase):
     def setUp(self):

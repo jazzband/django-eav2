@@ -18,7 +18,7 @@ layers =
   eav.fields
   eav.forms
   eav.widgets
-  eav.validators | eav.logic.managers | eav.logic.slug | eav.logic.entity_pk | eav.logic.object_pk | eav.logic.dates | eav.logic.schema
+  eav.validators | eav.logic.managers | eav.logic.slug | eav.logic.entity_pk | eav.logic.object_pk | eav.logic.dates | eav.logic.schema | eav.logic.deprecations
 
 ignore_imports =
   # The EAVModelMeta metaclass registers each model with eav, which is

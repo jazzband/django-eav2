@@ -11,6 +11,8 @@ from eav.forms import BaseDynamicEntityForm
 from eav.models import Attribute, EnumGroup, EnumValue
 from test_project.models import ExampleModel, M2MModel, Patient
 
+pytestmark = pytest.mark.filterwarnings("ignore::eav.exceptions.RemovedInEav3Warning")
+
 
 class MockRequest(RequestFactory):
     def request(self, **request):

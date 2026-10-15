@@ -10,6 +10,10 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - Migrations `0001` and `0010` use the configured key type, so a new project with `UUIDField` gets UUID keys from its first `migrate`; this fixes `cannot cast type bigint to uuid` on PostgreSQL (#455). Existing databases are unaffected. The README's two-step conversion, which generated migration files inside the installed package, is gone: converting the keys of existing tables is not supported.
 - `order_by("eav__<enum attribute>")` now sorts by the text of the choice, so it does not depend on how the database orders keys. It used to sort by the choice's id.
 
+### Deprecations
+
+- The `json`, `csv`, and `object` attribute datatypes are deprecated and django-eav2 3.0 removes them, along with their value columns. Saving an attribute of one of these types, or writing a value to one (including `bulk_create()` and `bulk_update()`), emits `eav.exceptions.RemovedInEav3Warning`, a `FutureWarning` that points at your own code. Use a `JSONField`, a `ForeignKey`, a `ManyToManyField`, or a related model on your own model instead, and move existing data out of EAV before 3.0. If you have a use case that those do not cover, open an issue.
+
 ### Performance
 
 - `instance.eav.<slug>` loads an entity's attributes and values once and reuses them, so reading three attributes takes 2 queries instead of 6. The values are held in the instance's `prefetch_related` cache, so `refresh_from_db()` and `save()` clear them; use `instance.eav.clear_cache()` after changing values elsewhere.
