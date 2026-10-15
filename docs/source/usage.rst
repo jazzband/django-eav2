@@ -81,7 +81,14 @@ it as a second argument. Available options are as follows:
    model instance. "eav" by default. See attach_eav_attr.
 4. ``generic_relation_attr`` - Name of the GenericRelation to Value
    objects. "eav_values" by default.
-5. ``generic_relation_related_name`` - Name of the related name for
+5. ``bulk_batch_size`` - How many entities ``bulk_create`` and ``bulk_update``
+   write at a time, and the most rows in one ``INSERT`` statement. 1000 by
+   default; the ``batch_size`` argument of those methods overrides it.
+6. ``cache_values`` - Whether ``instance.eav.<slug>`` loads the values once and
+   reuses them. ``True`` by default; set it to ``False`` for models whose
+   values are written outside ``instance.eav`` and ``save()`` (see
+   :ref:`below <usage-performance>`).
+7. ``generic_relation_related_name`` - Name of the related name for
    GenericRelation from Entity to Value. None by default. Therefore,
    if not overridden, it is not possible to query Values by Entities.
 
@@ -110,7 +117,7 @@ a set of attributes available to a given model. By default, it returns
 
     class SomeModelEavConfig(EavConfig):
         @classmethod
-        def get_attributes(cls):
+        def get_attributes(cls, instance=None):
             return Attribute.objects.filter(slug__startswith='a')
 
 Attribute validation includes checks against illegal attribute value
@@ -282,6 +289,8 @@ You can use ``Q`` expressions too:
     Patient.objects.filter(
         Q(eav__sex='male', eav__fever=no) | Q(eav__city='Nice') & Q(eav__age__gt=32)
     )
+
+.. _usage-performance:
 
 Performance
 -----------
