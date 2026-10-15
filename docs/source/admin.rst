@@ -84,7 +84,6 @@ For an inline whose model is also an entity, mix
 
     class EncounterInline(BaseEntityInline, StackedInline):
         model = Encounter
-        form = EncounterAdminForm
 
 .. warning::
 

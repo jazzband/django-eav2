@@ -9,8 +9,8 @@ How reads are cached
 
 The first time you read ``instance.eav.<slug>``, the library loads the
 entity's attributes and all of its values, and keeps them on the instance.
-Later reads cost nothing. Reading several attributes therefore takes two
-queries in total, where a query per attribute would take two for each one.
+Later reads need no queries. Reading three attributes, for example, takes two
+queries in total, not two per attribute.
 
 The values live in the same cache that ``prefetch_related`` uses on the
 instance. Calling ``refresh_from_db()`` clears that cache. So does ``save()``:
