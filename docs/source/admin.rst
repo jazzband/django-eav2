@@ -55,7 +55,7 @@ Each attribute becomes a form field that matches its datatype:
     * - ``csv``
       - ``CSVFormField``
 
-Attributes of type ``object`` are not shown in forms.
+Attributes of type ``object`` do not get a form field. See `Known limitations`_.
 
 Customize the fieldset
 ----------------------
@@ -70,21 +70,19 @@ class to change how the fieldset is labeled:
         eav_fieldset_title = "Clinical measurements"
         eav_fieldset_description = "Values recorded at each visit."
 
-Use it in inlines
+Known limitations
 -----------------
-
-For an inline whose model is also an entity, mix
-:class:`~eav.admin.BaseEntityInline` into ``StackedInline``:
-
-.. code-block:: python
-
-    from django.contrib.admin import StackedInline
-
-    from eav.admin import BaseEntityInline
-
-    class EncounterInline(BaseEntityInline, StackedInline):
-        model = Encounter
 
 .. warning::
 
-    ``TabularInline`` is not supported. Use ``StackedInline``.
+    Both of these are known problems, which we plan to fix separately.
+
+* **Attributes of type object** break the change form. The admin lists the
+  attribute as a field, but the form does not build one for it, so rendering
+  the form raises ``KeyError``. Until this is fixed, do not use ``object``
+  attributes on a model that you edit in the admin, or hide them with
+  :meth:`~eav.registry.EavConfig.get_attributes`.
+* **Inlines** need work. :class:`~eav.admin.BaseEntityInline` expects a
+  ``form`` that is based on :class:`~eav.forms.BaseDynamicEntityForm`. Without
+  one, rendering the inline raises ``AttributeError``. ``TabularInline`` is not
+  supported either, so use ``StackedInline``.

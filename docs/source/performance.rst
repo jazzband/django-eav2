@@ -44,7 +44,10 @@ cache off.
 Listing many entities
 ---------------------
 
-Prefetch the values when you read attributes across a list:
+Prefetch the values when you read attributes across a list. Prefetch
+``eav_values__attribute``, because ``eav_values`` alone still queries once per
+row. If you changed ``generic_relation_attr``, use that name in place of
+``eav_values``:
 
 .. code-block:: python
 
@@ -67,7 +70,8 @@ attribute on each of ``N`` entities is:
       - ``N + 2``: the list, one attribute lookup shared by all entities, and
         one query per entity for its values
     * - With ``prefetch_related``
-      - 3, however long the list is
+      - 3, or 4 when some entity has no value for the attribute you read,
+        however long the list is
 
 The shared attribute lookup applies only to models that keep the default
 :meth:`~eav.registry.EavConfig.get_attributes`.

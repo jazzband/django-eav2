@@ -41,7 +41,13 @@ Register a model, create an attribute, then store and query values:
 
 ```python
 import eav
+from django.db import models
 from eav.models import Attribute
+
+
+class Supplier(models.Model):
+    name = models.CharField(max_length=100)
+
 
 eav.register(Supplier)
 
@@ -56,7 +62,7 @@ Supplier.objects.filter(eav__city="London")
 ## Is EAV right for you?
 
 EAV trades query speed and simplicity for flexibility. It suits open-ended,
-sparse or user-defined properties, and is a poor fit for stable, known columns
+sparse, or user-defined properties, and is a poor fit for stable, known columns
 or performance-critical reporting. The
 [concepts page](https://django-eav2.readthedocs.io/en/latest/concepts.html)
 explains the model, when to use it, when to avoid it, and the alternatives.

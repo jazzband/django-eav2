@@ -24,15 +24,16 @@ An entity-attribute-value (EAV) model splits a record into three parts:
         attribute
       - ``Value(value_float=1.8, attribute=height)``
 
-Because attributes are rows, not columns, you can add, rename, and remove them
-while the application runs. Each value is stored in a column that matches the
+Because attributes are rows, not columns, you can add and change them while
+the application runs. An attribute that has stored values cannot be deleted
+until its values are, and its datatype cannot change. Each value is stored in a column that matches the
 attribute's datatype, so values are typed and can be filtered. Numbers, dates, and enum choices
 are also indexed.
 
 When to use it
 --------------
 
-EAV fits when the set of properties is open-ended, and each record uses only a
+EAV fits when the set of properties is open-ended and each record uses only a
 few of them. Typical cases are:
 
 * Attributes that administrators or end users define, such as custom fields
@@ -44,7 +45,7 @@ few of them. Typical cases are:
 When to avoid it
 ----------------
 
-EAV trades query speed and simplicity for flexibility. Think twice when:
+EAV trades query speed and simplicity for flexibility. Avoid it when:
 
 * Reads must be fast. Each attribute you filter on adds a lookup on the values
   table, which is slower than filtering on a plain column.
@@ -61,8 +62,8 @@ Alternatives
 
 On PostgreSQL, MySQL, and SQLite, a ``JSONField`` can hold flexible data with
 less machinery. It gives up a shared attribute catalog, per-attribute
-validation and the admin integration, and queries depend on the database
-backend. Consider it first when you do not need those.
+validation, and the admin integration, and some JSON lookups depend on the
+database backend. Consider it first when you do not need those.
 
 Further reading
 ---------------

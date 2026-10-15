@@ -18,9 +18,10 @@ Two fields matter most:
     * - ``datatype``
       - What the attribute stores. See `Datatypes`_.
     * - ``slug``
-      - A unique identifier that is also a valid Python name, because you use
-        it to read the value: ``entity.eav.<slug>``. If you omit it, the slug
-        is generated from ``name``.
+      - A unique identifier. It should be a valid Python name, because you use
+        it to read the value: ``entity.eav.<slug>``, and Django EAV 2 warns if
+        it is not. If you omit it, the slug is generated from ``name``, with
+        spaces and other punctuation replaced.
 
 .. code-block:: python
 
@@ -55,7 +56,7 @@ Datatypes
       - Stores
     * - ``int``
       - ``Attribute.TYPE_INT``
-      - Whole numbers
+      - Whole numbers. A float is truncated.
     * - ``float``
       - ``Attribute.TYPE_FLOAT``
       - Floating-point numbers
@@ -65,10 +66,11 @@ Datatypes
     * - ``date``
       - ``Attribute.TYPE_DATE``
       - Dates and datetimes. A plain date is stored as midnight in the
-        default timezone.
+        default timezone, and reading the value returns an aware
+        ``datetime``.
     * - ``bool``
       - ``Attribute.TYPE_BOOLEAN``
-      - ``True`` or ``False``
+      - ``True`` or ``False`` only
     * - ``enum``
       - ``Attribute.TYPE_ENUM``
       - One choice from a group of options. See `Enum attributes`_.
@@ -80,7 +82,7 @@ Datatypes
       - A list of strings. See `CSV attributes`_.
     * - ``object``
       - ``Attribute.TYPE_OBJECT``
-      - A reference to any saved Django model instance
+      - A reference to a saved model instance that has an integer primary key
 
 Enum attributes
 ~~~~~~~~~~~~~~~
@@ -114,7 +116,8 @@ Assign either an ``EnumValue`` or its text:
 JSON attributes
 ~~~~~~~~~~~~~~~
 
-A JSON attribute stores a ``dict`` and supports Django's JSON lookups:
+A JSON attribute stores a ``dict``. Assign a ``dict``, not a JSON string, which
+is stored as a string. You can filter on a key:
 
 .. code-block:: python
 
@@ -127,12 +130,14 @@ A JSON attribute stores a ``dict`` and supports Django's JSON lookups:
     broom.eav.name_intl  # {"es": "Escoba Verde", "en": "Green Broom"}
 
     Product.objects.filter(eav__name_intl__has_key="es")
+    Product.objects.filter(eav__name_intl__en="Green Broom")
 
 CSV attributes
 ~~~~~~~~~~~~~~
 
 A CSV attribute stores a list of strings. You can assign a list or a string
-that uses ``;`` as the separator. Reading the value from a saved entity returns
+that uses ``;`` as the separator. Reload the instance before you read the value:
+until then, the attribute returns what you assigned. After a reload, it returns
 a list:
 
 .. code-block:: python
@@ -147,14 +152,12 @@ a list:
 
     Product.objects.filter(eav__colors__contains="green")
 
-An empty string stores an empty list. To find entities without a value, negate
-the ``isnull`` lookup:
+An empty string stores nothing, so reading the attribute returns ``None``. To
+find entities without a value, exclude those that have one:
 
 .. code-block:: python
 
-    from django.db.models import Q
-
-    Product.objects.filter(~Q(eav__colors__isnull=False))
+    Product.objects.exclude(eav__colors__isnull=False)
 
 Object attributes
 ~~~~~~~~~~~~~~~~~
@@ -171,4 +174,10 @@ generic foreign key:
 
     cog.eav.supplier  # <Supplier: Steve>
 
-The linked object must already be saved.
+The linked object must already be saved, and its primary key must be an
+integer. To filter on an object attribute, pass the primary key, not the
+instance:
+
+.. code-block:: python
+
+    Part.objects.filter(eav__supplier=steve.pk)

@@ -8,7 +8,11 @@ it on any registered model as if it were a field.
 .. code-block:: python
 
     import eav
+    from django.db import models
     from eav.models import Attribute
+
+    class Supplier(models.Model):
+        name = models.CharField(max_length=100)
 
     eav.register(Supplier)
     Attribute.objects.create(name="City", datatype=Attribute.TYPE_TEXT)

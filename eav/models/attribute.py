@@ -79,7 +79,7 @@ class Attribute(models.Model):
         # = <Attribute: has fever? (Multiple Choice)>
 
     .. warning:: Once an Attribute has been used by an entity, you can not
-                 change it's datatype.
+                 change its datatype.
     """
 
     TYPE_TEXT = "text"

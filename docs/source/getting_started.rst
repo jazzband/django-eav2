@@ -2,12 +2,13 @@ Getting started
 ===============
 
 This page takes you from installation to your first stored and queried
-attribute. It takes about five minutes.
+attribute.
 
 Requirements
 ------------
 
-Django EAV 2 supports Python 3.10 and later, and Django 5.2, 6.0, and 6.1.
+Django EAV 2 supports Django 5.2 on Python 3.10 to 3.14, and Django 6.0 and
+6.1 on Python 3.12 to 3.14.
 
 Install the package
 -------------------
