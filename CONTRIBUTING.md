@@ -68,6 +68,18 @@ We use [ruff](https://docs.astral.sh/ruff/) for linting and formatting, [wemake-
 
 Name variables for what they hold instead of the bare word `value`: an `eav.models.Value` row is `eav_value`, what a caller assigns is `raw_value`, and what a validator receives is `candidate`. The public API (`Value`, `Value.value`, `entity.eav.<slug>`) does not change.
 
+### Write clear documentation
+
+The docs are reStructuredText in `docs/source`, built with Sphinx. When you add or change a page:
+
+- Organize pages around what a reader wants to do, and keep one topic per page.
+- Write headings in sentence case, with no punctuation at the end. Stay within three levels.
+- Use short sentences, the active voice, and plain words. Refer to a reader or a user as "they", never "he" or "she".
+- Use a table when list items have several parallel parts, such as a name, a default, and a purpose.
+- Link to a page instead of repeating it, and say what the link leads to.
+- Make code samples complete enough to run, with names that explain themselves.
+- Build with `uv run poe docs`, which fails on any warning.
+
 <hr>
 
 <br>

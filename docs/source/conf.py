@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import os
 import sys
-import tomllib
+from importlib.metadata import version as package_version
 from pathlib import Path
 
 import django
@@ -44,9 +44,8 @@ project = "Django EAV 2"
 copyright = "2018, Iwo Herka and team at MAKIMO"  # noqa: A001
 author = "-"
 
-# The version comes from the package metadata, so it cannot go stale.
-_pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
-release = tomllib.loads(_pyproject.read_text())["project"]["version"]
+# The version comes from the installed package, so it cannot go stale.
+release = package_version("django-eav2")
 version = release
 
 

@@ -46,6 +46,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ### Internal
 
+- The documentation is reorganized into topic pages, uses the Shibuya theme, and fixes examples that did not run: `@register_eav` needs parentheses, the decorator accepts `config_cls`, and CSV attributes filter with `__contains`.
 - `eav/` is fully typed and passes mypy strict, pyright and wemake-python-styleguide with no baseline of ignores; the few permanent WPS exceptions in `setup.cfg` each give a reason. Parameters named `value` on internal helpers are now `candidate` or `raw_value` (`Attribute.validate_value`, `validate_assignment`, `store_value`, `save_value` and the validators); the public API is unchanged.
 - Moved from Poetry to uv, hatchling and poethepoet.
 - Docstrings are required in `eav/`, module layers are enforced with `import-linter`, and the docs are linted with `sphinx-lint`.
