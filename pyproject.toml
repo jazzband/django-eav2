@@ -140,6 +140,8 @@ per-file-ignores."tests/*" = [
   "S101",    # "Use of assert detected"
   "SLF001"  # "Private member accessed"
 ]
+# Rules that flake8 (wemake-python-styleguide) checks, so `# noqa: WPSnnn` is valid.
+external = [ "WPS" ]
 flake8-implicit-str-concat.allow-multiline = false
 # Use Google-style docstrings.
 pydocstyle.convention = "google"

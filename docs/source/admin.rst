@@ -71,12 +71,43 @@ class to change how the fieldset is labeled:
         eav_fieldset_title = "Clinical measurements"
         eav_fieldset_description = "Values recorded at each visit."
 
+Use it in inlines
+-----------------
+
+For an inline whose model is also an entity, mix
+:class:`~eav.admin.BaseEntityInline` into ``StackedInline``. The inline shows
+the attributes of its own model next to the parent's:
+
+.. code-block:: python
+
+    from django.contrib.admin import StackedInline
+
+    from eav.admin import BaseEntityInline
+
+    class EncounterInline(BaseEntityInline, StackedInline):
+        model = Encounter
+
+    class PatientAdmin(BaseEntityAdmin):
+        form = PatientAdminForm
+        inlines = [EncounterInline]
+
+The inline uses :class:`~eav.forms.BaseDynamicEntityForm` unless you set
+``form`` to a subclass of it. To choose what the inline shows, declare
+``fields`` or ``fieldsets`` and include an attribute's slug to show that
+attribute. Attributes apply to every registered model by
+default, so use a dynamic form for the parent as well, as shown above. To
+limit an attribute to one model, see :ref:`limit-attributes`.
+
+.. warning::
+
+    ``TabularInline`` is not supported. Use ``StackedInline``.
+
 Known limitations
 -----------------
 
 .. warning::
 
-    These are known problems.
+    This is a known problem.
 
 * **Attributes of the deprecated object type** break the change form. The admin
   lists the attribute as a field, but the form does not build one for it, so
@@ -84,8 +115,3 @@ Known limitations
   3.0 removes the type. Do not use ``object`` attributes on a model that you
   edit in the admin, or hide them with
   :meth:`~eav.registry.EavConfig.get_attributes`.
-* **Inlines** need work, and we plan to fix them separately.
-  :class:`~eav.admin.BaseEntityInline` expects a ``form`` that is based on
-  :class:`~eav.forms.BaseDynamicEntityForm`. Without one, rendering the inline
-  raises ``AttributeError``. ``TabularInline`` is not
-  supported either, so use ``StackedInline``.

@@ -6,9 +6,11 @@ from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from django.contrib.admin import helpers, site
 from django.contrib.admin.options import InlineModelAdmin, ModelAdmin
+from django.contrib.admin.utils import flatten_fieldsets
 from django.forms.models import BaseInlineFormSet
 from django.utils.safestring import mark_safe
 
+from eav.forms import BaseDynamicEntityForm
 from eav.logic.entities import entity_of
 from eav.models import Attribute, EnumGroup, EnumValue, Value
 
@@ -18,8 +20,6 @@ if TYPE_CHECKING:
     from django.db.models import Model
     from django.forms import ModelForm
     from django.http import HttpRequest, HttpResponse
-
-    from eav.forms import BaseDynamicEntityForm
 
 _FieldsetSpec = tuple[str | None, dict[str, Any]]
 _Prepopulated = dict[str, "Sequence[str]"]
@@ -139,7 +139,8 @@ class BaseEntityAdmin(ModelAdmin):  # type: ignore[type-arg]
         """
         return (
             self.eav_fieldset_title,
-            {"fields": eav_fields, "description": self.eav_fieldset_description},
+            # ``fields`` is Django's fieldset key, used by every inline too.
+            {"fields": eav_fields, "description": self.eav_fieldset_description},  # noqa: WPS226
         )
 
 
@@ -158,8 +159,10 @@ class BaseEntityInlineFormSet(BaseInlineFormSet):  # type: ignore[type-arg]
 class BaseEntityInline(InlineModelAdmin):  # type: ignore[type-arg]
     """Inline model admin that works correctly with EAV attributes.
 
-    Mix in the standard ``StackedInline`` or ``TabularInline`` classes to define the
-    formset representation, e.g.::
+    Mix in the standard ``StackedInline`` class to define the formset
+    representation. The form defaults to
+    :class:`~eav.forms.BaseDynamicEntityForm`; set ``form`` to a subclass of it
+    to customize the form, e.g.::
 
         class ItemInline(BaseEntityInline, StackedInline):
             model = Item
@@ -170,22 +173,51 @@ class BaseEntityInline(InlineModelAdmin):  # type: ignore[type-arg]
         ``StackedInline``.
     """
 
+    form = BaseDynamicEntityForm
     formset = BaseEntityInlineFormSet
+
+    # Django's ModelAdmin API names this method, so it cannot be renamed.
+    def get_formset(  # noqa: WPS615
+        self,
+        request: HttpRequest,
+        obj: Model | None = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Build the formset from the model's fields, not from the attributes.
+
+        The fieldsets name the attributes too, but the form class can only have
+        the model's fields and the ones it declares. The form adds a field for
+        each attribute when it is created.
+        """
+        if "fields" not in kwargs:
+            # Reverse relations and other attributes are not form fields.
+            model_meta = self.model._meta  # noqa: SLF001
+            known = {field.name for field in model_meta.fields if field.editable}
+            known.update(field.name for field in model_meta.many_to_many)
+            known.update(self.form.declared_fields)
+            known.update(self.get_readonly_fields(request, obj))
+            names = flatten_fieldsets(self.get_fieldsets(request, obj))
+            kwargs["fields"] = [name for name in names if name in known]
+
+        return super().get_formset(request, obj, **kwargs)
 
     def get_fieldsets(
         self,
         request: HttpRequest,
         obj: Model | None = None,
     ) -> list[Any]:
-        """Return the declared fieldsets, or build them from the form's fields."""
+        """Return the declared fieldsets or fields, or build them from the form."""
         if self.fieldsets:
             return list(self.fieldsets)
 
+        if self.fields:
+            return [(None, {"fields": list(self.fields)})]
+
         # Passing ``fields`` stops Django from calling ``get_fieldsets`` again.
         formset = self.get_formset(request, obj, fields=None)
-        fk_name = self.fk_name or formset.fk.name  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]
+        fk_name = self.fk_name or formset.fk.name
         instance = self.model(**({fk_name: obj} if obj else {}))
-        form = formset.form(request.POST, instance=instance)  # pyright: ignore[reportGeneralTypeIssues]
+        form = formset.form(request.POST, instance=instance)
 
         return [(None, {"fields": list(form.fields)})]
 
