@@ -1,72 +1,53 @@
-.. .. image:: _static/logo.png
-..     :align: center
-
-.. rst-class:: doc-title
-
 Django EAV 2
 ============
 
-Django EAV 2 is an entity-attribute-value storage for modern Django.
-Getting started is very easy.
-
-**Step 1.** Register a model:
+Django EAV 2 stores extra, typed attributes for your Django models without
+changing their tables. Define an attribute once, then read, write, and filter
+it on any registered model as if it were a field.
 
 .. code-block:: python
 
     import eav
+    from eav.models import Attribute
+
     eav.register(Supplier)
+    Attribute.objects.create(name="City", datatype=Attribute.TYPE_TEXT)
 
-or with decorators:
+    supplier = Supplier.objects.create(name="Acme", eav__city="London")
+    supplier.eav.city  # "London"
 
-.. code-block:: python
+    Supplier.objects.filter(eav__city="London")
 
-    from eav.decorators import register_eav
+The attributes live in their own tables, so an administrator can add or
+change them at runtime, in the Django admin or in code, without a migration.
 
-    @register_eav
-    class Supplier(models.Model):
-        ...
-
-**Step 2.** Create an attribute:
-
-.. code-block:: python
-
-    Attribute.objects.create(name='City', datatype=Attribute.TYPE_TEXT)
-
-**Step 3.** That's it! You're ready to go:
-
-.. code-block:: python
-
-    supplier.eav.city = 'London'
-    supplier.save()
-
-    Supplier.objects.filter(eav__city='London')
-    # = <EavQuerySet [<Supplier: Supplier object (1)>]>
-
-
-Documentation
--------------
+New to the library? Start with :doc:`getting_started`. To decide whether the
+entity-attribute-value pattern fits your problem, read :doc:`concepts`.
 
 .. toctree::
-    :maxdepth: 2
+    :caption: Guide
+    :maxdepth: 1
 
     getting_started
-    usage
-
-
-API Reference
--------------
-
-If you are looking for information on a specific function, class, or
-method, this part of the documentation is for you.
+    concepts
+    registering
+    attributes
+    querying
+    bulk
+    performance
+    admin
 
 .. toctree::
-   :maxdepth: 2
+    :caption: Reference
+    :maxdepth: 1
 
-   api
+    configuration
+    api
 
-Indices and tables
-------------------
+.. toctree::
+    :caption: Project
+    :maxdepth: 1
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    GitHub <https://github.com/jazzband/django-eav2>
+    Changelog <https://github.com/jazzband/django-eav2/blob/master/CHANGELOG.md>
+    Issues <https://github.com/jazzband/django-eav2/issues>

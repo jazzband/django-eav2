@@ -1,13 +1,22 @@
-.. rst-class:: doc-api
-
-API Reference
+API reference
 =============
 
-If you are looking for information on a specific function, class, or method,
-this part of the documentation is for you.
+This page documents the public classes and functions. For explanations and
+examples, use the guide pages.
 
-.. toctree::
 
+Registration
+------------
+
+.. autofunction:: eav.register
+
+.. autofunction:: eav.unregister
+
+Exceptions
+----------
+
+.. automodule:: eav.exceptions
+    :members:
 
 Admin
 -----
