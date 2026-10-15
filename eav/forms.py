@@ -3,27 +3,28 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
+from django import forms
 from django.contrib.admin.widgets import AdminSplitDateTime
 from django.core.exceptions import ValidationError
-from django.forms import (
-    BooleanField,
-    CharField,
-    ChoiceField,
-    Field,
-    FloatField,
-    IntegerField,
-    JSONField,
-    ModelForm,
-    SplitDateTimeField,
-)
 from django.utils.translation import gettext_lazy as _
 
 from eav.widgets import CSVWidget
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
-class CSVFormField(Field):
+    from eav.models import Attribute, Entity, EnumGroup
+
+
+_FieldClasses = dict[str, type[forms.Field]]
+
+#: Choices that come before the real ones of an enum attribute.
+_BLANK_CHOICES = (("", ""), ("-----", "-----"))
+
+
+class CSVFormField(forms.Field):
     """A form field for a list of values joined by a separator."""
 
     message = _("Enter comma-separated-values. eg: one;two;three.")
@@ -31,26 +32,27 @@ class CSVFormField(Field):
     widget = CSVWidget
     default_separator = ";"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Create the field, splitting its text on the ``separator`` argument."""
         kwargs.pop("max_length", None)
         self.separator = kwargs.pop("separator", self.default_separator)
         super().__init__(*args, **kwargs)
 
-    def to_python(self, value):
+    def to_python(self, value: str | None) -> list[str]:
         """Split the text into a list of stripped values."""
         if not value:
             return []
-        return [v.strip() for v in value.split(self.separator) if v]
+        return [part.strip() for part in value.split(self.separator) if part]
 
-    def validate(self, field_value):
+    def validate(self, value: Any) -> None:
         """Require the cleaned value to be a list."""
-        super().validate(field_value)
+        super().validate(value)
 
-        if not isinstance(field_value, list):
+        if not isinstance(value, list):
             raise ValidationError(self.message, code=self.code)
 
 
-class BaseDynamicEntityForm(ModelForm):
+class BaseDynamicEntityForm(forms.ModelForm):  # type: ignore[type-arg]
     """``ModelForm`` for an entity with support for EAV attributes.
 
     Form fields are created on the fly depending on the schema defined for the
@@ -76,60 +78,32 @@ class BaseDynamicEntityForm(ModelForm):
     =====  =============
     """
 
-    FIELD_CLASSES: ClassVar[dict[str, Field]] = {
-        "text": CharField,
-        "float": FloatField,
-        "int": IntegerField,
-        "date": SplitDateTimeField,
-        "bool": BooleanField,
-        "enum": ChoiceField,
-        "json": JSONField,
+    FIELD_CLASSES: ClassVar[_FieldClasses] = {
+        "text": forms.CharField,
+        "float": forms.FloatField,
+        "int": forms.IntegerField,
+        "date": forms.SplitDateTimeField,
+        "bool": forms.BooleanField,
+        "enum": forms.ChoiceField,
+        "json": forms.JSONField,
         "csv": CSVFormField,
     }
 
-    def __init__(self, data=None, *args, **kwargs):
+    entity: Entity
+
+    def __init__(
+        self,
+        data: Mapping[str, Any] | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        """Create the form and add a field for each attribute of the entity."""
         super().__init__(data, *args, **kwargs)
         config_cls = self.instance._eav_config_cls  # noqa: SLF001
         self.entity = getattr(self.instance, config_cls.eav_attr)
         self._build_dynamic_fields()
 
-    def _build_dynamic_fields(self):
-        # Reset form fields.
-        self.fields = deepcopy(self.base_fields)
-
-        for attribute in self.entity.get_all_attributes():
-            value = getattr(self.entity, attribute.slug)
-
-            defaults = {
-                "label": attribute.name.capitalize(),
-                "required": attribute.required,
-                "help_text": attribute.help_text,
-                "validators": attribute.get_validators(),
-            }
-
-            datatype = attribute.datatype
-
-            if datatype == attribute.TYPE_ENUM:
-                values = attribute.get_choices().values_list("id", "value")
-                choices = [("", ""), ("-----", "-----"), *list(values)]
-                defaults.update({"choices": choices})
-
-                if value:
-                    defaults.update({"initial": value.pk})
-
-            elif datatype == attribute.TYPE_DATE:
-                defaults.update({"widget": AdminSplitDateTime})
-            elif datatype == attribute.TYPE_OBJECT:
-                continue
-
-            MappedField = self.FIELD_CLASSES[datatype]  # noqa: N806
-            self.fields[attribute.slug] = MappedField(**defaults)
-
-            # Fill initial data (if attribute was already defined).
-            if value and datatype != attribute.TYPE_ENUM:
-                self.initial[attribute.slug] = value
-
-    def save(self, *, commit=True):
+    def save(self, commit: bool = True) -> Any:  # noqa: FBT001, FBT002
         """Save the cleaned data into the instance and its EAV attributes.
 
         Returns ``instance``.
@@ -147,16 +121,59 @@ class BaseDynamicEntityForm(ModelForm):
 
         # Assign attributes.
         for attribute in self.entity.get_all_attributes():
-            value = self.cleaned_data.get(attribute.slug)
+            submitted = self.cleaned_data.get(attribute.slug)
 
             if attribute.datatype == attribute.TYPE_ENUM:
-                value = attribute.enum_group.values.get(pk=value) if value else None
+                group = cast("EnumGroup", attribute.enum_group)
+                submitted = group.values.get(pk=submitted) if submitted else None
 
-            setattr(self.entity, attribute.slug, value)
+            setattr(self.entity, attribute.slug, submitted)
 
         # Save entity and its attributes.
         if commit:
             instance.save()
-            self._save_m2m()
+            self._save_m2m()  # type: ignore[attr-defined]  # pyright: ignore[reportAttributeAccessIssue]
 
         return instance
+
+    def _build_dynamic_fields(self) -> None:
+        """Replace the form's fields with the static ones plus one per attribute."""
+        self.fields = deepcopy(self.base_fields)
+
+        for attribute in self.entity.get_all_attributes():
+            current = getattr(self.entity, attribute.slug)
+            field = self._build_field(attribute, current)
+
+            if field is None:
+                continue
+
+            self.fields[attribute.slug] = field
+
+            # Fill initial data (if attribute was already defined).
+            if current and attribute.datatype != attribute.TYPE_ENUM:
+                self.initial[attribute.slug] = current
+
+    def _build_field(self, attribute: Attribute, current: Any) -> forms.Field | None:
+        """Build the form field for *attribute*, or ``None`` if it has none."""
+        if attribute.datatype == attribute.TYPE_OBJECT:
+            return None
+
+        defaults: dict[str, Any] = {
+            "label": attribute.name.capitalize(),
+            "required": attribute.required,
+            "help_text": attribute.help_text,
+            "validators": attribute.get_validators(),
+        }
+
+        if attribute.datatype == attribute.TYPE_ENUM:
+            choices = [
+                (item.pk, item.value) for item in attribute.enum_choices.values()
+            ]
+            defaults["choices"] = [*_BLANK_CHOICES, *choices]
+
+            if current:
+                defaults["initial"] = current.pk
+        elif attribute.datatype == attribute.TYPE_DATE:
+            defaults["widget"] = AdminSplitDateTime
+
+        return self.FIELD_CLASSES[attribute.datatype](**defaults)

@@ -1,6 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms.widgets import Textarea
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from django.forms.renderers import BaseRenderer
+    from django.utils.safestring import SafeString
 
 EMPTY_VALUES = (*validators.EMPTY_VALUES, "[]")
 
@@ -8,9 +18,12 @@ EMPTY_VALUES = (*validators.EMPTY_VALUES, "[]")
 class CSVWidget(Textarea):
     """A text area for a list of values joined by a separator."""
 
-    is_hidden = False
+    @property
+    def is_hidden(self) -> bool:
+        """Whether the widget is hidden, which it never is."""
+        return False
 
-    def prep_value(self, value):
+    def prep_value(self, value: object) -> str:
         """Prepare value before effectively render widget."""
         if value in EMPTY_VALUES:
             return ""
@@ -20,12 +33,22 @@ class CSVWidget(Textarea):
             return ";".join(value)
         raise ValidationError("Invalid format.")
 
-    def render(self, name, value, **kwargs):
+    def render(
+        self,
+        name: str,
+        value: Any,
+        attrs: dict[str, Any] | None = None,
+        renderer: BaseRenderer | None = None,
+    ) -> SafeString:
         """Render the widget with the list as separated text."""
-        value = self.prep_value(value)
-        return super().render(name, value, **kwargs)
+        return super().render(name, self.prep_value(value), attrs, renderer)
 
-    def value_from_datadict(self, data, files, name):
+    def value_from_datadict(
+        self,
+        data: Mapping[str, Any],
+        files: Mapping[str, Any],
+        name: str,
+    ) -> Any:
         """
         Return the value of this widget or None.
 
