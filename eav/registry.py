@@ -169,8 +169,8 @@ class Registry:
 
     def _detach_manager(self) -> None:
         """Detach the manager and restore the previous one (if there was one)."""
-        mgr = getattr(self.model_cls, self.config_cls.manager_attr)
-        self.model_cls._meta.local_managers.remove(mgr)
+        entity_manager = getattr(self.model_cls, self.config_cls.manager_attr)
+        self.model_cls._meta.local_managers.remove(entity_manager)
         self.model_cls._meta._expire_cache()
         delattr(self.model_cls, self.config_cls.manager_attr)
 
@@ -198,28 +198,28 @@ class Registry:
 
     def _attach_generic_relation(self) -> None:
         """Set up the generic relation for the entity."""
-        rel_name = (
+        related_query_name = (
             self.config_cls.generic_relation_related_name or self.model_cls.__name__
         )
 
-        gr_name = self.config_cls.generic_relation_attr.lower()
+        relation_name = self.config_cls.generic_relation_attr.lower()
         generic_relation = generic.GenericRelation(
             Value,
             object_id_field=get_entity_pk_type(self.model_cls),
             content_type_field="entity_ct",
-            related_query_name=rel_name,
+            related_query_name=related_query_name,
         )
-        generic_relation.contribute_to_class(self.model_cls, gr_name)
+        generic_relation.contribute_to_class(self.model_cls, relation_name)
 
     def _detach_generic_relation(self) -> None:
         """Remove the generic relation from the entity."""
-        gen_rel_field = self.config_cls.generic_relation_attr.lower()
+        relation_name = self.config_cls.generic_relation_attr.lower()
         for field in self.model_cls._meta.local_many_to_many:
-            if field.name == gen_rel_field:
+            if field.name == relation_name:
                 self.model_cls._meta.local_many_to_many.remove(field)
                 break
 
-        delattr(self.model_cls, gen_rel_field)
+        delattr(self.model_cls, relation_name)
 
     def _register_self(self) -> None:
         """Call the necessary registration methods."""
