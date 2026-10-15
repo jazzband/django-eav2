@@ -26,7 +26,8 @@ An entity-attribute-value (EAV) model splits a record into three parts:
 
 Because attributes are rows, not columns, you can add, rename, and remove them
 while the application runs. Each value is stored in a column that matches the
-attribute's datatype, so values are typed and can be filtered and indexed.
+attribute's datatype, so values are typed and can be filtered. Numbers, dates, and enum choices
+are also indexed.
 
 When to use it
 --------------

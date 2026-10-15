@@ -35,8 +35,8 @@ decorator takes it as the ``config_cls`` argument:
     class Supplier(models.Model):
         ...
 
-Registering the same model twice is harmless: the second call is ignored. To
-undo a registration, call :func:`~eav.unregister`.
+Registering the same model twice is harmless, because the second call does
+nothing. To undo a registration, call :func:`~eav.unregister`.
 
 What registration changes
 -------------------------
@@ -57,6 +57,9 @@ Registration makes five changes to your model class:
 4. It adds a generic relation from the model to its
    :class:`~eav.models.Value` objects, named ``eav_values`` by default.
 5. It stores the config class on the model as ``_eav_config_cls``.
+
+With ``manager_only = True`` in the config, only changes 1 and 5 happen: the
+model gets the manager, but no helper, signals, or generic relation.
 
 For example, the relation gives you every stored value of one entity:
 
