@@ -1,30 +1,39 @@
+from __future__ import annotations
+
 import uuid
+from collections.abc import Callable, Mapping
 from functools import partial
+from types import MappingProxyType
+from typing import Any, Final
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 
-_BIG_AUTO_FIELD = "django.db.models.BigAutoField"
+_BIG_AUTO_FIELD: Final = "django.db.models.BigAutoField"
 
-_FIELD_MAPPING = {
-    _BIG_AUTO_FIELD: partial(
-        models.BigAutoField,
-        primary_key=True,
-        editable=False,
-        serialize=False,
-    ),
-    "django.db.models.UUIDField": partial(
-        models.UUIDField,
-        primary_key=True,
-        editable=False,
-        serialize=False,
-        default=uuid.uuid4,
-    ),
-}
+_FieldFactory = Callable[[], "models.Field[Any, Any]"]
+
+_FIELD_MAPPING: Final[Mapping[str, _FieldFactory]] = MappingProxyType(
+    {
+        _BIG_AUTO_FIELD: partial(
+            models.BigAutoField,
+            primary_key=True,
+            editable=False,
+            serialize=False,
+        ),
+        "django.db.models.UUIDField": partial(
+            models.UUIDField,
+            primary_key=True,
+            editable=False,
+            serialize=False,
+            default=uuid.uuid4,
+        ),
+    },
+)
 
 
-def get_pk_format() -> models.Field:
+def get_pk_format() -> models.Field[Any, Any]:
     """
     Get the primary key field of the EAV models, from ``EAV2_PRIMARY_KEY_FIELD``.
 

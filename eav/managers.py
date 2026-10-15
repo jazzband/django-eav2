@@ -1,16 +1,26 @@
 """This module contains the custom manager used by entities registered with eav."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, TypeVar
+
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from eav.queryset import EavQuerySet
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
-class EntityManager(models.Manager):
+_ModelT = TypeVar("_ModelT", bound=models.Model)
+
+
+class EntityManager(models.Manager[_ModelT]):
     """A manager for EAV models that creates entities together with their attributes."""
 
     _queryset_class = EavQuerySet
 
-    def create(self, **kwargs):
+    def create(self, **kwargs: Any) -> _ModelT:
         """Create and save an object, together with its EAV attributes.
 
         EAV attributes are parsed out of *kwargs* first, then assigned and saved after
@@ -22,29 +32,35 @@ class EntityManager(models.Manager):
             return super().create(**kwargs)
 
         prefix = f"{config_cls.eav_attr}__"
-        new_kwargs = {}
-        eav_kwargs = {}
+        eav_kwargs = {
+            key.removeprefix(prefix): assigned
+            for key, assigned in kwargs.items()
+            if key.startswith(prefix)
+        }
+        model_kwargs = {
+            key: assigned
+            for key, assigned in kwargs.items()
+            if not key.startswith(prefix)
+        }
 
-        for key, value in kwargs.items():
-            if key.startswith(prefix):
-                eav_kwargs.update({key[len(prefix) :]: value})
-            else:
-                new_kwargs.update({key: value})
+        instance = self.model(**model_kwargs)
+        entity = getattr(instance, config_cls.eav_attr)
 
-        obj = self.model(**new_kwargs)
-        obj_eav = getattr(obj, config_cls.eav_attr)
+        for key, assigned in eav_kwargs.items():
+            setattr(entity, key, assigned)
 
-        for key, value in eav_kwargs.items():
-            setattr(obj_eav, key, value)
+        instance.save()
+        return instance
 
-        obj.save()
-        return obj
-
-    def get_or_create(self, defaults=None, **kwargs):
+    def get_or_create(
+        self,
+        defaults: Mapping[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> tuple[_ModelT, bool]:
         """Reproduces the behavior of get_or_create, eav friendly."""
         try:
             return self.get(**kwargs), False
-        except self.model.DoesNotExist:
+        except ObjectDoesNotExist:
             if defaults:
                 kwargs = {**kwargs, **defaults}
             return self.create(**kwargs), True

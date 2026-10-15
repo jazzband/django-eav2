@@ -1,7 +1,8 @@
+from django.db.models import Model
 from django.db.models.fields import UUIDField
 
 
-def get_entity_pk_type(entity_cls) -> str:
+def get_entity_pk_type(entity_cls: type[Model]) -> str:
     """Return the entity PK type to use.
 
     These values map to `models.Value` as potential fields to use to relate

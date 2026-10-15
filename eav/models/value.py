@@ -6,7 +6,6 @@ from django.contrib.contenttypes import fields as generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
-from django.db.models import ForeignKey
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -16,9 +15,13 @@ from eav.logic.managers import ValueManager
 from eav.logic.object_pk import get_pk_format
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
     from eav.models.attribute import Attribute
     from eav.models.enum_value import EnumValue
 
+
+_NaturalKey = tuple[tuple[str, str], int | None, "UUID | None"]
 
 #: Related fields whose existence checks cost a query each.
 _RELATION_FIELDS = frozenset(
@@ -53,7 +56,7 @@ class Value(models.Model):
     id = get_pk_format()
 
     # Direct foreign keys
-    attribute: ForeignKey[Attribute] = ForeignKey(
+    attribute: models.ForeignKey[Attribute] = models.ForeignKey(
         "eav.Attribute",
         db_index=True,
         on_delete=models.PROTECT,
@@ -75,7 +78,7 @@ class Value(models.Model):
         verbose_name=_("Entity uuid"),
     )
 
-    entity_ct = ForeignKey(
+    entity_ct = models.ForeignKey(
         ContentType,
         on_delete=models.PROTECT,
         related_name="value_entities",
@@ -143,7 +146,7 @@ class Value(models.Model):
         verbose_name=_("Value JSON"),
     )
 
-    value_enum: ForeignKey[EnumValue | None] = ForeignKey(
+    value_enum: models.ForeignKey[EnumValue | None] = models.ForeignKey(
         "eav.EnumValue",
         blank=True,
         null=True,
@@ -159,7 +162,7 @@ class Value(models.Model):
         verbose_name=_("Generic value id"),
     )
 
-    generic_value_ct = ForeignKey(
+    generic_value_ct = models.ForeignKey(
         ContentType,
         blank=True,
         null=True,
@@ -198,7 +201,7 @@ class Value(models.Model):
             ),
         ]
 
-        constraints: ClassVar[list[models.Constraint]] = [
+        constraints: ClassVar[list[models.BaseConstraint]] = [
             models.UniqueConstraint(
                 fields=["entity_ct", "attribute", "entity_uuid"],
                 name="unique_entity_uuid_per_attribute",
@@ -219,11 +222,12 @@ class Value(models.Model):
     def __str__(self) -> str:
         """Return the string representation of a Value."""
         entity = self.entity_pk_uuid if self.entity_uuid else self.entity_pk_int
-        return f'{self.attribute.name}: "{self.value}" ({entity})'
+        name = self.attribute.name
+        return f'{name}: "{self.value}" ({entity})'
 
     __repr__ = __str__
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Validate and save this value."""
         self.full_clean()
         super().save(*args, **kwargs)
@@ -248,7 +252,7 @@ class Value(models.Model):
         """
         self.clean_fields(exclude=_RELATION_FIELDS)
 
-    def natural_key(self) -> tuple[tuple[str, str], int, str]:
+    def natural_key(self) -> _NaturalKey:
         """
         Retrieve the natural key for the Value instance.
 
@@ -260,17 +264,21 @@ class Value(models.Model):
             tuple: A tuple containing the natural key of the attribute, entity ID,
                 and entity UUID of the Value instance.
         """
-        return (self.attribute.natural_key(), self.entity_id, self.entity_uuid)
+        attribute_key = self.attribute.natural_key()
+        return (attribute_key, self.entity_id, self.entity_uuid)
 
-    def _get_value(self):
+    def _get_value(self) -> Any:
         """Return the python object this value is holding."""
-        return getattr(self, f"value_{self.attribute.datatype}")
+        datatype = self.attribute.datatype
+        return getattr(self, f"value_{datatype}")
 
-    def _set_value(self, new_value):
+    def _set_value(self, new_value: Any) -> None:
         """Set the object this value is holding."""
-        if self.attribute.datatype == "date":
+        datatype = self.attribute.datatype
+
+        if datatype == "date":
             new_value = as_datetime(new_value)
 
-        setattr(self, f"value_{self.attribute.datatype}", new_value)
+        setattr(self, f"value_{datatype}", new_value)
 
     value = property(_get_value, _set_value)

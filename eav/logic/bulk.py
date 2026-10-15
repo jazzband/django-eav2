@@ -11,6 +11,7 @@ from django.db import connections
 from django.db.utils import NotSupportedError
 
 from eav.logic.dates import as_datetime
+from eav.logic.entities import entity_of
 from eav.logic.entity_pk import get_entity_pk_type
 from eav.logic.schema import SharedSchema
 from eav.models import Attribute, EnumValue, Value
@@ -44,10 +45,22 @@ def chunked(sequence: Sequence[Any], size: int) -> Iterator[Sequence[Any]]:
         yield sequence[start : start + size]
 
 
-def entity_of(instance: Model) -> Any:
-    """Return the EAV helper attached to *instance*."""
-    config_cls = getattr(type(instance), "_eav_config_cls")  # noqa: B009
-    return getattr(instance, config_cls.eav_attr)
+def split_eav_fields(
+    eav_attr: str,
+    names: Iterable[str],
+) -> tuple[list[str], list[str]]:
+    """
+    Split field names into EAV attribute slugs and names of model fields.
+
+    EAV attributes are named like ``eav__<slug>`` after the *eav_attr* of the
+    model.
+    """
+    prefix = f"{eav_attr}__"
+    names = list(names)
+    eav_names = [name for name in names if name.startswith(prefix)]
+    slugs = [name.removeprefix(prefix) for name in eav_names]
+
+    return slugs, [name for name in names if name not in eav_names]
 
 
 def assigned_pairs(
