@@ -39,6 +39,28 @@ Registering the same model twice is harmless, because the second call does
 nothing. That includes a second call with a different config class, which is
 ignored too. To change the config, call :func:`~eav.unregister` first.
 
+Register with a metaclass
+-------------------------
+
+:class:`~eav.models.EAVModelMeta` registers a model when Python creates the
+class:
+
+.. code-block:: python
+
+    from eav.models import EAVModelMeta
+
+    class Supplier(models.Model, metaclass=EAVModelMeta):
+        ...
+
+This registers the model with the default config. It takes no config class,
+and a later call to :func:`~eav.register` is ignored, so use the decorator if
+you need one.
+
+A class can have only one metaclass. If your model, or a base class or mixin
+it inherits from, already sets a different metaclass, Python raises a
+``TypeError`` about conflicting metaclasses. The decorator and the function
+have no such limit, so prefer the decorator in new code.
+
 What registration changes
 -------------------------
 
