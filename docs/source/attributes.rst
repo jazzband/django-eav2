@@ -120,6 +120,46 @@ Assign either an ``EnumValue`` or its text:
     patient.eav.fever = yes
     patient.eav.fever = "No"
 
+Changing or removing attributes
+-------------------------------
+
+An :class:`~eav.models.Attribute` is an ordinary Django model, so you change
+and delete it with the usual ORM calls, or in the admin.
+
+Changing ``name``, ``description``, ``required``, or ``display_order`` is safe.
+Stored values keep pointing at the attribute.
+
+Changing the ``slug`` renames the attribute on every entity. Code that reads
+``entity.eav.<slug>`` or filters on ``eav__<slug>`` must use the new slug.
+
+Changing the ``datatype`` does **not** migrate stored values. Each value sits
+in a column for its original datatype. Once any entity has a value, saving the
+attribute with a new datatype raises ``ValidationError``. Bypassing that check,
+for example with ``QuerySet.update()``, leaves the stored values in the old
+column, so they read as empty. To change a type, create a new attribute, copy
+the values over, and delete the old attribute:
+
+.. code-block:: python
+
+    old = Attribute.objects.get(slug="height")
+    new = Attribute.objects.create(name="Height cm", datatype=Attribute.TYPE_FLOAT)
+
+    for flower in Flower.objects.filter(eav__height__isnull=False):
+        setattr(flower.eav, new.slug, float(flower.eav.height))
+        flower.save()
+
+Deleting an attribute that has values raises ``ProtectedError``, because values
+protect their attribute. Delete the values first:
+
+.. code-block:: python
+
+    from eav.models import Value
+
+    Value.objects.filter(attribute=attribute).delete()
+    attribute.delete()
+
+Deleting an attribute that no entity uses needs no extra step.
+
 Deprecated datatypes
 --------------------
 
