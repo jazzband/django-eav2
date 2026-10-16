@@ -68,7 +68,8 @@ class BaseEntityAdmin(ModelAdmin):  # type: ignore[type-arg]
         Returns:
             HttpResponse object representing the rendered change form.
         """
-        form = context["adminform"].form
+        original_adminform = context["adminform"]
+        form = original_adminform.form
 
         # Identify EAV fields based on the form instance's configuration.
         eav_fields = self._get_eav_fields(form.instance)
@@ -98,7 +99,8 @@ class BaseEntityAdmin(ModelAdmin):  # type: ignore[type-arg]
                 if self.has_change_permission(request, obj)
                 else {}
             ),
-            readonly_fields=self.readonly_fields,
+            # A view-only page makes every model field read-only; keep that.
+            readonly_fields=original_adminform.readonly_fields,
             model_admin=self,
         )
         media = mark_safe(context["media"] + adminform.media)  # noqa: S308
