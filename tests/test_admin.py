@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from django.contrib.admin import ModelAdmin, StackedInline
 from django.contrib.admin.sites import AdminSite
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.test import RequestFactory, override_settings
 from django.urls import path
 
@@ -191,3 +191,18 @@ def test_inline_with_an_attribute_named_like_a_reverse_relation(admin_client) ->
 
     assert page.status_code == 200
     assert "id_patient_set-0-encounter" in page.content.decode()
+
+
+@pytest.mark.parametrize("prefix", ["plain", "with-form"])
+@override_settings(ROOT_URLCONF=__name__)
+def test_a_view_only_user_can_open_the_change_page(client, prefix) -> None:
+    Attribute.objects.create(name="note", datatype=Attribute.TYPE_TEXT)
+    patient = Patient.objects.create(name="Ada", eav__note="read me")
+    viewer = User.objects.create_user("viewer", password="secret", is_staff=True)  # noqa: S106
+    viewer.user_permissions.add(Permission.objects.get(codename="view_patient"))
+    client.login(username="viewer", password="secret")  # noqa: S106
+
+    page = client.get(f"/{prefix}/test_project/patient/{patient.pk}/change/")
+
+    assert page.status_code == 200
+    assert "read me" in page.content.decode()

@@ -39,6 +39,7 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 - A lookup other than equality on an `object` attribute raises `FieldError`. It used to be ignored, which returned wrong rows.
 - Unregistering a model removes its generic relation, and the matching reverse relation on `Value`. It used to leave the relation behind, and every `register()` after an `unregister()` added another copy of it to the model.
 - `BaseEntityInline` works: it used to fail with `AttributeError` when the inline had no `form`, and with `FieldError` when it had a `BaseDynamicEntityForm`. The inline now defaults to `BaseDynamicEntityForm`, shows the attributes of its own model, saves them, and honors `fields`. An attribute named like a reverse relation of the inline's model no longer fails.
+- The change page of a model that uses `BaseEntityAdmin` opens for users who only have the view permission. It used to fail with `KeyError`.
 - Filtering on several EAV attributes in one `filter()` call works on UUID-keyed entities.
 - The Indonesian translation is compiled and ships with the package; its `.mo` file was missing. A test now fails if any compiled catalog differs from its `.po` source.
 
