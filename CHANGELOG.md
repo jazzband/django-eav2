@@ -4,6 +4,8 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ## Unreleased
 
+## 2.0.0 (2026-10-16)
+
 ### Breaking Changes
 
 - `EAV2_PRIMARY_KEY_FIELD` accepts only `django.db.models.BigAutoField` (the default) and `django.db.models.UUIDField`. `django.db.models.CharField`, `django.db.models.AutoField` and any other value now raise `ImproperlyConfigured` instead of being ignored. A `CharField` key never worked on its own, because nothing generates the ids; it only existed as the middle step of a conversion described in the README.
