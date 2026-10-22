@@ -4,6 +4,10 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 ## Unreleased
 
+### Bug Fixes
+
+- Allow assigning EAV attributes on `Entity` instances during type checking with mypy and pyright (#955).
+
 ## 2.0.0 (2026-10-16)
 
 ### Breaking Changes

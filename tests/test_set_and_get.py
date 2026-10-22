@@ -1,3 +1,4 @@
+import pytest
 from django.test import TestCase
 
 import eav
@@ -59,3 +60,15 @@ class RegistryTests(TestCase):
     def test_double_registering_model_is_harmless(self):
         eav.register(Patient)
         eav.register(Patient)
+
+    def test_entity_attribute_assignment_typing(self):
+        mypy_api = pytest.importorskip("mypy.api")
+
+        code = """from eav.models.entity import Entity
+
+def test(entity: Entity) -> None:
+    entity.attr1 = 'value'
+    x = entity.attr1
+"""
+        stdout, stderr, exitcode = mypy_api.run(["--config-file", "", "-c", code])
+        self.assertEqual(exitcode, 0, f"mypy error: {stdout}\n{stderr}")
