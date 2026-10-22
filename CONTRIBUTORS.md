@@ -4,6 +4,7 @@ Contributors, alphabetically:
  * daveycrockett (David McCann)
  * dgelvin (David Gelvin)
  * dorey
+ * Fire162
  * fosil (Filip Novák)
  * gingerjoos
  * IwoHerka (Iwo Herka)

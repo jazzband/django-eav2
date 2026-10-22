@@ -178,6 +178,10 @@ class Entity:
         eav_value = self._values_by_attribute().get(attribute.pk)
         return None if eav_value is None else eav_value.value
 
+    if TYPE_CHECKING:  # noqa: WPS604
+
+        def __setattr__(self, name: str, value: Any) -> None: ...  # noqa: WPS110
+
     def get_all_attributes(self) -> models.QuerySet[Attribute]:
         """Return a query set of the :class:`Attribute` objects this entity can set."""
         attributes = config_of(self.instance).get_attributes(instance=self.instance)
