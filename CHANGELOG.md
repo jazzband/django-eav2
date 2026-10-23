@@ -8,6 +8,10 @@ We follow [Semantic Versions](https://semver.org/) starting at the `0.14.0` rele
 
 - Allow assigning EAV attributes on `Entity` instances during type checking with mypy and pyright (#955).
 
+### Documentation
+
+- Document that `instance.eav.<slug>` reads, which 1.x took from the database every time, can be stale after writes outside the instance (`Value.objects.bulk_create()`, `QuerySet.update()`, raw SQL, disconnected `pre_save`/`post_save` receivers), and how `instance.eav.clear_cache()` and `cache_values = False` fix it (#956).
+
 ## 2.0.0 (2026-10-16)
 
 ### Breaking Changes

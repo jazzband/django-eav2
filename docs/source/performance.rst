@@ -41,6 +41,24 @@ Every read and save then queries the database:
 ``prefetch_related`` of the values has no effect on a model that turns the
 cache off.
 
+Upgrading from 1.x
+------------------
+
+Version 1.x queried the database on every read of ``instance.eav.<slug>``.
+Version 2.0 loads the values once and reuses them, so a read can return an old
+value when something other than the instance changed the data:
+
+* ``Value.objects.bulk_create()``, ``QuerySet.update()`` and
+  ``QuerySet.delete()``, a raw query, or another process.
+* A test suite or a block of code that disconnects the ``pre_save`` and
+  ``post_save`` receivers. Django EAV 2 clears the cache and writes the values
+  from those receivers, so with them disconnected ``save()`` does neither.
+  Call ``instance.eav.clear_cache()`` yourself.
+
+If your code relied on always-fresh reads, call ``instance.eav.clear_cache()``
+after such writes, or set ``cache_values = False`` on the models you write
+that way. See `Reading stale values`_.
+
 Listing many entities
 ---------------------
 
