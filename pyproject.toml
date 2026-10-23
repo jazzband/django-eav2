@@ -4,7 +4,7 @@ requires = [ "hatchling" ]
 
 [project]
 name = "django-eav2"
-version = "2.0.0"
+version = "2.0.1"
 description = "Entity-Attribute-Value storage for Django"
 readme = "README.md"
 keywords = [
